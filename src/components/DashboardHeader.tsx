@@ -20,7 +20,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   setShowUserDropdown,
   messageRef,
   userRef,
-  // handleLogout,
+  handleLogout,
 }) => {
   const navigate = useNavigate();
 
@@ -93,8 +93,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 Profile
               </button>
               <button
-                // onClick={handleLogout}
-                onClick={() => navigate("/login")}
+                onClick={handleLogout}
+                //onClick={() => navigate("/login")}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10">
                 Logout
               </button>

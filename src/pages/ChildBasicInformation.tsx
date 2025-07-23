@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-// import logo from '../assets/images/logo.svg';
-// import userimg from '../assets/images/user-img.png';
 import Step1ChildInfo from '../components/Step1ChildInfo';
 import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
 import DashboardHeader from "../components/DashboardHeader";
 import Footer from "../components/Footer";
+import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 const steps = [
   'Child’s Basic Information',
@@ -17,6 +16,7 @@ const steps = [
 ];
 
 const ChildBasicInformation: React.FC = () => {
+  const { logout } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [showMessageDropdown, setShowMessageDropdown] = React.useState(false);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
@@ -24,18 +24,13 @@ const ChildBasicInformation: React.FC = () => {
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
-  const navigate = useNavigate();
-
   // const goToStep = (step: number) => setCurrentStep(step);
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
   const handleLogout = () => {
-    // Clear authentication data if any
-    localStorage.removeItem('token'); // or whatever key you use
-
-    // Redirect to login page
-    navigate('/login');
+    logout();
+    toast.success("Logged out!");
   };
 
   useEffect(() => {
@@ -94,11 +89,10 @@ const ChildBasicInformation: React.FC = () => {
                   {/* Vertical line */}
                   {idx !== steps.length - 1 && (
                     <span
-                      className={`absolute left-[14px] lg:left-[24px] top-[30px] lg:top-[50px] w-0.5 h-[calc(100%-0px)] ${
-                        isCompleted
-                          ? 'bg-alice-teal'
-                          : 'bg-[#E5E5E5]'
-                      }`}
+                      className={`absolute left-[14px] lg:left-[24px] top-[30px] lg:top-[50px] w-0.5 h-[calc(100%-0px)] ${isCompleted
+                        ? 'bg-alice-teal'
+                        : 'bg-[#E5E5E5]'
+                        }`}
                       aria-hidden="true"
                     />
                   )}
@@ -106,12 +100,11 @@ const ChildBasicInformation: React.FC = () => {
                   {/* Step circle */}
                   <div
                     className={`z-10 text-[20px] w-[30px] h-[30px] lg:w-[50px] lg:h-[50px] flex items-center justify-center rounded-full border-2 font-bold transition-all
-                      ${
-                        isCompleted
-                          ? 'bg-alice-teal text-white border-alice-teal'
-                          : isCurrent
-                            ? 'bg-white text-alice-teal border-alice-teal'
-                            : 'bg-[#E9E9E9] text-alice-darkgray/25 border-[#E9E9E9]'
+                      ${isCompleted
+                        ? 'bg-alice-teal text-white border-alice-teal'
+                        : isCurrent
+                          ? 'bg-white text-alice-teal border-alice-teal'
+                          : 'bg-[#E9E9E9] text-alice-darkgray/25 border-[#E9E9E9]'
                       }
                     `}
                   >
@@ -121,12 +114,11 @@ const ChildBasicInformation: React.FC = () => {
                   {/* Step label */}
                   <span
                     className={`ml-[10px] font-semibold text-base
-                      ${
-                        isCompleted
-                          ? 'text-alice-teal'
-                          : isCurrent
-                            ? 'text-alice-black'
-                            : 'text-alice-black/50'
+                      ${isCompleted
+                        ? 'text-alice-teal'
+                        : isCurrent
+                          ? 'text-alice-black'
+                          : 'text-alice-black/50'
                       }`}
                   >
                     {step}
@@ -145,7 +137,7 @@ const ChildBasicInformation: React.FC = () => {
             {currentStep === 2 && <Step3CurrentConcerns />}
             {currentStep === 3 && <Step4ReviewSubmit />}
             {currentStep > 3 && (
-            <div className="flex-1 flex items-center justify-center text-alice-darkgray text-lg">Step {currentStep + 1} content goes here.</div>
+              <div className="flex-1 flex items-center justify-center text-alice-darkgray text-lg">Step {currentStep + 1} content goes here.</div>
             )}
           </div>
           {/* Navigation Buttons */}
