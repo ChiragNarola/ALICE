@@ -1,22 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { loginUser } from '../api/api-services';
-
-interface AuthUser {
-    id: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    roles: string[];
-    token: string;
-    tokenType: string;
-}
-
-interface AuthContextType {
-    user: AuthUser | null;
-    login: (formData: FormData) => Promise<AuthUser | null>;
-    logout: () => void;
-    isLoading: boolean;
-}
+import type { AuthContextType, AuthUser } from '../routes/models/response/Auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

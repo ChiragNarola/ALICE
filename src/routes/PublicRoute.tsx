@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 const PublicRoute = () => {
     const { user, isLoading } = useAuth();
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return;
 
     return user ? <Navigate to="/child-basic-info" replace /> : <Outlet />;
 };

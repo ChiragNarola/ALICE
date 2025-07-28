@@ -1,55 +1,54 @@
 // import React, { useState, type ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import { useForm } from 'react-hook-form';
-import { registerUser } from '../api/api-services';
+import { useForm, Controller } from 'react-hook-form';
+import { fetchCountries, registerUser } from '../api/api-services';
 import { toast } from 'react-toastify';
-
-type SignupFormInputs = {
-  email: string;
-  first_name: string;
-  last_name: string;
-  password: string;
-  location: string;
-  contact_number: string;
-  role: string[];// ['Parent', 'Staff']
-  confirmPassword: string;
-};
+import type { SignupFormInputs } from '../routes/models/request/Auth';
+import { Eye, EyeOff } from 'lucide-react';
 
 const SignupForm = () => {
+  const navigate = useNavigate();
   const [phone, setPhone] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [countries, setCountries] = useState<any[]>([]);
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors }
-  } = useForm<SignupFormInputs>({ mode: 'onChange', defaultValues: { role: [] }, });
+  } = useForm<SignupFormInputs>({ mode: 'onChange', defaultValues: { role: [], country: "" }, });
 
   const onSubmit = async (data: SignupFormInputs) => {
+    setLoading(true);
     try {
       const updatedData = {
         ...data,
         contact_number: phone,
       };
       const response = await registerUser(updatedData);
-      // console.log(response);
       if (response === "User Created!") {
+        setLoading(false);
         toast.success("Registration successful!");
         navigate("/login");
       } else {
-        toast.info(response?.message || "Registered, but please check your email.");
+        toast.info(response || "Registered, but please check your email.");
       }
     } catch (err: any) {
-      toast.error(err.message || "Registration failed");
+      // console.log(err);
+      toast.error(err.detail || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
-
 
   const handleRoleChange = (role: string) => {
     const updatedRoles = roles.includes(role)
@@ -59,6 +58,15 @@ const SignupForm = () => {
     setRoles(updatedRoles);
     setValue('role', updatedRoles, { shouldValidate: true });
   };
+
+  useEffect(() => {
+    const getCountries = async () => {
+      const countryList = await fetchCountries();
+      setCountries(countryList);
+    };
+
+    getCountries();
+  }, []);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -97,7 +105,7 @@ const SignupForm = () => {
           <span className="bg-[#FEFCF8] px-[5px]">Mobile Number</span>
         </label>
         <PhoneInput
-          country={'us'}
+          country={'gb'}
           value={phone}
           onChange={setPhone}
           inputProps={{
@@ -111,6 +119,56 @@ const SignupForm = () => {
           dropdownClass="!bg-[#FEFCF8] !text-alice-black"
         />
       </div>
+
+      <div className="mb-6 flex flex-col sm:flex-row sm:gap-6 md:gap-4 lg:gap-6">
+        {/* Country Dropdown */}
+        <div className="flex-1 mb-6 sm:mb-0">
+          <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+            <span className="bg-[#FEFCF8] px-[5px]">Country</span>
+          </label>
+          <Controller
+            name="country"
+            control={control}
+            // rules={{ required: 'Country is required' }}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] text-alice-black text-[14px] lg:text-base font-normal"
+              >
+                <option value="" disabled>Select Country</option>
+                {countries.map((country: any) => (
+                  <option key={country.name} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
+          {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
+        </div>
+
+        {/* Postal Code Input */}
+        <div className="flex-1">
+          <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+            <span className="bg-[#FEFCF8] px-[5px]">Postal Code </span>
+          </label>
+          <input
+            {...register('postalCode', {
+              // required: 'Postal Code is required',
+              pattern: {
+                value: /^[A-Za-z0-9\s\-]{3,10}$/,
+                message: 'Enter a valid postal code',
+              },
+            })}
+            type="text"
+            placeholder="Postal Code"
+            className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+          />
+          {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode.message}</p>}
+        </div>
+      </div>
+
+      {/* remove once change in API */}
       <div className="mb-6 flex-1">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
           <span className="bg-[#FEFCF8] px-[5px]">Location </span>
@@ -140,9 +198,11 @@ const SignupForm = () => {
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
       </div>
-      <div className="mb-6">
+      <div className="mb-6 relative">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Password <span className="text-red-500">*</span></span>
+          <span className="bg-[#FEFCF8] px-[5px]">
+            Password <span className="text-red-500">*</span>
+          </span>
         </label>
 
         <input
@@ -157,13 +217,25 @@ const SignupForm = () => {
               message: 'Password must include uppercase, lowercase, and special character',
             },
           })}
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="Password"
-          className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+          className="w-full pr-12 px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />
-        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(prev => !prev)}
+          className="absolute right-4 top-[35px] text-alice-darkgray"
+        >
+          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
+
+        {errors.password && (
+          <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+        )}
       </div>
-      <div className="mb-6">
+
+      <div className="mb-6 relative">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
           <span className="bg-[#FEFCF8] px-[5px]">Confirm Password <span className="text-red-500">*</span></span>
         </label>
@@ -172,10 +244,17 @@ const SignupForm = () => {
             required: 'Please confirm your password',
             validate: (value) => value === watch('password') || 'Passwords do not match'
           })}
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           placeholder="Confirm Password"
           className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />
+        <button
+          type="button"
+          onClick={() => setShowConfirmPassword(prev => !prev)}
+          className="absolute right-4 top-[35px] text-alice-darkgray"
+        >
+          {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
         {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
       </div>
       {/* <div className="parent_staff_wrapper">
@@ -218,7 +297,21 @@ const SignupForm = () => {
       {errors.role && (
         <p className="text-red-500 text-sm mt-[-12px] mb-4">{errors.role.message}</p>
       )}
-      <button type="submit" className="w-full bg-alice-teal hover:bg-teal-800 text-base text-white font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-colors ease-in-out duration-300 mb-6 2xl:mb-9 md:mt-3">Create Account</button>
+      {/* <button type="submit" className="w-full bg-alice-teal hover:bg-teal-800 text-base text-white font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-colors ease-in-out duration-300 mb-6 2xl:mb-9 md:mt-3">Create Account</button> */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full bg-alice-teal hover:bg-teal-800 text-base text-white font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-colors ease-in-out duration-300 mb-6 2xl:mb-9 md:mt-3 ${loading ? "opacity-70 cursor-not-allowed" : ""} `}>
+        {loading ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Creating...
+          </div>
+        ) : (
+          "Create Account"
+        )}
+      </button>
+
       <p className="text-center text-[14px] lg:text-base text-alice-black font-semibold">
         Already have an account? <NavLink to="/login" className="text-alice-teal font-medium hover:underline">Login</NavLink>
       </p>

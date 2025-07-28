@@ -3,10 +3,7 @@ import Step1ChildInfo from '../components/Step1ChildInfo';
 import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
-import DashboardHeader from "../components/DashboardHeader";
-import Footer from "../components/Footer";
-import { useAuth } from '../contexts/AuthContext';
-import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const steps = [
   'Child’s Basic Information',
@@ -15,24 +12,80 @@ const steps = [
   'Review & Submit',
 ];
 
+interface StepRefHandle {
+  validateAndSubmit: () => Promise<boolean>;
+  getValues: () => any;
+}
+
+
 const ChildBasicInformation: React.FC = () => {
-  const { logout } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [showMessageDropdown, setShowMessageDropdown] = React.useState(false);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
+  const [userDetails, setUserDetails] = useState<number>(0);
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
   // const goToStep = (step: number) => setCurrentStep(step);
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+  // Add this to maintain form ref/trigger
+const stepRef = useRef<StepRefHandle>(null);
+
+const [formSubmit, setFormSubmit] = useState<any>({});
+
+const nextStep = async () => {
+  const isValid = await stepRef.current?.validateAndSubmit();
+  if (isValid) {
+    const newData = stepRef.current?.getValues?.();
+    if (newData) {
+      setFormSubmit((prev: any) => {
+        const finalData = { ...prev, ...newData };
+        if (isSaveStep) {
+          console.log('Final Form Submit Data:', finalData);
+          axios
+            .post('/api/submit-form', finalData)
+            .then((response:any) => {
+              console.log(' Form successfully submitted:', response.data);
+            })
+            .catch((error:any) => {
+              console.error(' Error submitting form:', error);
+            });
+        }
+        return finalData; 
+      });
+    }
+
+    if (!isSaveStep) {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    }
+  }
+};
+
+
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out!");
-  };
+  useEffect(() => {
+    const user = localStorage.getItem("auth_user");
 
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      if (parsedUser.roles) {
+        console.log(parsedUser.roles)
+        if (parsedUser.roles.length == 2) {
+          setUserDetails(3); // has both the roles
+        }
+        else if (parsedUser.roles.length == 1 && parsedUser.roles[0] === 'parent') {
+          setUserDetails(2); // has parent as roles
+        }
+        else if (parsedUser.roles.length == 1 && parsedUser.roles[0] === 'staff') {
+          setUserDetails(1); // has staff as roles
+          setCurrentStep(3)
+        }
+      }
+
+    }
+  }, []);
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -60,17 +113,7 @@ const ChildBasicInformation: React.FC = () => {
   }, [showMessageDropdown, showUserDropdown]);
 
   return (
-    <div className="min-h-screen bg-[#FEFCF8] flex flex-col">
-      {/* Header */}
-      <DashboardHeader
-        showMessageDropdown={showMessageDropdown}
-        setShowMessageDropdown={setShowMessageDropdown}
-        showUserDropdown={showUserDropdown}
-        setShowUserDropdown={setShowUserDropdown}
-        messageRef={messageRef}
-        userRef={userRef}
-        handleLogout={handleLogout}
-      />
+    <>
       <main className="flex flex-1 flex-col lg:flex-row px-4 sm:px-6 md:px-[30px] pt-4 sm:pt-6 md:pt-[30px] pb-4 sm:pb-6 gap-4 lg:gap-6">
         {/* Sidebar Wizard Navigation */}
         <aside className="lg:max-w-[320px] xl:max-w-[447px] w-full bg-white rounded-2xl border border-alice-gray p-4 lg:p-6 flex flex-col">
@@ -80,6 +123,12 @@ const ChildBasicInformation: React.FC = () => {
           <ol className="relative">
             {steps.map((step, idx) => {
               // Step states
+              if (userDetails == 1) {
+                if (idx !== 3) return null;
+              }
+              if (userDetails == 2) {
+                if (idx == 3) return null;
+              }
               const isCompleted = idx < currentStep;
               const isCurrent = idx === currentStep;
               // const isUpcoming = idx > currentStep; // Not needed, but for clarity
@@ -87,7 +136,7 @@ const ChildBasicInformation: React.FC = () => {
               return (
                 <li key={step} className="flex items-center relative min-h-[30px] lg:min-h-[50px] mb-[24px] lg:mb-[50px] last:mb-0">
                   {/* Vertical line */}
-                  {idx !== steps.length - 1 && (
+                  {(((idx !== steps.length - 1 && userDetails !== idx)) && (userDetails !== 1)) && (
                     <span
                       className={`absolute left-[14px] lg:left-[24px] top-[30px] lg:top-[50px] w-0.5 h-[calc(100%-0px)] ${isCompleted
                         ? 'bg-alice-teal'
@@ -102,13 +151,13 @@ const ChildBasicInformation: React.FC = () => {
                     className={`z-10 text-[20px] w-[30px] h-[30px] lg:w-[50px] lg:h-[50px] flex items-center justify-center rounded-full border-2 font-bold transition-all
                       ${isCompleted
                         ? 'bg-alice-teal text-white border-alice-teal'
-                        : isCurrent
+                        : isCurrent || userDetails === 1
                           ? 'bg-white text-alice-teal border-alice-teal'
                           : 'bg-[#E9E9E9] text-alice-darkgray/25 border-[#E9E9E9]'
                       }
                     `}
                   >
-                    {idx + 1}
+                    {userDetails === 1 ? 1 : idx + 1}
                   </div>
 
                   {/* Step label */}
@@ -116,7 +165,7 @@ const ChildBasicInformation: React.FC = () => {
                     className={`ml-[10px] font-semibold text-base
                       ${isCompleted
                         ? 'text-alice-teal'
-                        : isCurrent
+                        : isCurrent || userDetails === 1
                           ? 'text-alice-black'
                           : 'text-alice-black/50'
                       }`}
@@ -132,23 +181,30 @@ const ChildBasicInformation: React.FC = () => {
         <section className="flex-1 bg-white rounded-2xl p-4 xl:p-6 border border-alice-gray">
           {/* Render step content here */}
           <div className="min-h-[200px] flex flex-col">
-            {currentStep === 0 && <Step1ChildInfo />}
-            {currentStep === 1 && <Step2GuidanceTopics />}
-            {currentStep === 2 && <Step3CurrentConcerns />}
-            {currentStep === 3 && <Step4ReviewSubmit />}
-            {currentStep > 3 && (
+            {(currentStep === 0 && userDetails !== 1) && <Step1ChildInfo ref={stepRef} />}
+            {(currentStep === 1 && userDetails !== 1) && <Step2GuidanceTopics ref={stepRef} />}
+            {(currentStep === 2 && userDetails !== 1) && <Step3CurrentConcerns  ref={stepRef} />}
+            {(currentStep === 3 && userDetails !== 2) && <Step4ReviewSubmit ref={stepRef}/>}
+            {(currentStep > 3 && userDetails !== 2) && (
               <div className="flex-1 flex items-center justify-center text-alice-darkgray text-lg">Step {currentStep + 1} content goes here.</div>
             )}
           </div>
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-4 lg:mt-6 flex-col-reverse sm:flex-row gap-4 sm:gap-0">
             <button onClick={prevStep} disabled={currentStep === 0} className="px-6 py-[12px] lg:py-[17px] rounded-xl border border-alice-black text-alice-black hover:bg-alice-black hover:text-white font-semibold disabled:opacity-50 w-full sm:max-w-[100px] lg:max-w-[180px] transition-colors ease-in-out duration-300 disabled:pointer-events-none">Cancel</button>
-            <button onClick={nextStep} disabled={currentStep === steps.length - 1} className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300">Continue to Guidance Topics</button>
+
+            <button
+              onClick={nextStep}
+              // disabled={isSaveStep || isLastStep}
+              className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300"
+            >
+              {isSaveStep ? 'Save' : 'Continue to Guidance Topics'}
+            </button>
           </div>
         </section>
       </main>
-      <Footer />
-    </div>
+    </>
+
   );
 };
 

@@ -6,11 +6,11 @@ import Chat from '../pages/ChatPage';
 import WelcomeSection from "../layout/WelcomeSection";
 import PrivateRoute from "./PrivateRoute";
 import PublicRoute from "./PublicRoute";
+import DashboardLayout from "../layout/DashboardLayout";
 
 export default function AppRouter() {
     return (
         <Routes>
-            {/* Public Routes wrapped with layout */}
             <Route element={<PublicRoute />}>
                 <Route element={<WelcomeSection />}>
                     <Route path="/" element={<Navigate to="/login" replace />} />
@@ -19,10 +19,11 @@ export default function AppRouter() {
                 </Route>
             </Route>
 
-            {/* Private/protected routes */}
             <Route element={<PrivateRoute />}>
-                <Route path="/child-basic-info" element={<ChildBasicInformation />} />
-                <Route path="/chat" element={<Chat />} />
+                <Route element={<DashboardLayout />}>
+                    <Route path="/child-basic-info" element={<ChildBasicInformation />} />
+                    <Route path="/chat" element={<Chat />} />
+                </Route>
             </Route>
         </Routes>
     );

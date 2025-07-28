@@ -1,16 +1,15 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
+import type { LoginFormInputs } from '../routes/models/request/Auth';
 
-interface LoginFormInputs {
-  username: string;
-  password: string;
-}
 
 const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -19,6 +18,7 @@ const LoginForm = () => {
   } = useForm<LoginFormInputs>({ mode: 'onChange' });
 
   const onSubmit = async (data: LoginFormInputs) => {
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append('username', data.username);
@@ -31,9 +31,12 @@ const LoginForm = () => {
       } else {
         toast.error('Login failed');
       }
+      setLoading(false);
     } catch (error: any) {
-      console.error('Login Error:', error.message);
+      // console.error('Login Error:', error.message);
       toast.error(error.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,8 +104,21 @@ const LoginForm = () => {
         <a href="#" className="text-alice-teal font-semibold text-[14px] lg:text-base hover:underline">Forgot Password?</a>
       </div>
 
-      <button type="submit" className="w-full bg-alice-teal hover:bg-teal-800 text-base text-white font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-colors ease-in-out duration-300 mb-6 2xl:mb-9">
-        Login
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full bg-alice-teal hover:bg-teal-800 text-base text-white font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-colors ease-in-out duration-300 mb-6 2xl:mb-9
+    ${loading ? "opacity-70 cursor-not-allowed" : ""}
+  `}
+      >
+        {loading ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Login...
+          </div>
+        ) : (
+          "Login"
+        )}
       </button>
 
       <p className="text-center text-[14px] lg:text-base text-alice-black font-semibold">

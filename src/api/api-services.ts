@@ -1,15 +1,5 @@
+import type { SignupFormInputs } from '../routes/models/request/Auth';
 import axiosInstance from './axios-instance-creator';
-
-interface RegisterUserInput {
-    email: string;
-    first_name: string;
-    last_name: string;
-    password: string;
-    location: string;
-    contact_number: string;
-    role: string[];
-}
-
 
 export const loginUser = async (formData: FormData) => {
     const urlEncoded = new URLSearchParams();
@@ -29,11 +19,34 @@ export const loginUser = async (formData: FormData) => {
     }
 };
 
-export const registerUser = async (data: RegisterUserInput) => {
+export const registerUser = async (data: SignupFormInputs) => {
     try {
         const response = await axiosInstance.post('/users/registration', data);
         return response.data;
     } catch (error: any) {
         throw error?.response?.data || { message: 'Registration failed' };
+    }
+};
+
+
+export const fetchCountries = async () => {
+    try {
+        const res = await axiosInstance.get("https://api.worldbank.org/v2/country?format=json");
+
+        const countryArray = res.data?.[1]; // data[1] contains the country list
+
+        if (!countryArray) throw new Error("Invalid country data structure");
+
+        const countryList = countryArray
+            .map((country: any) => ({
+                name: country.name,
+            }))
+            .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+
+        return countryList;
+    } catch (err) {
+        console.error("Failed to fetch countries:", err);
+        return [];
     }
 };
