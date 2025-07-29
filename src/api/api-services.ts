@@ -13,9 +13,9 @@ export const loginUser = async (formData: FormData) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         });
-        return response.data;
+        return response.data.Data;
     } catch (error: any) {
-        throw error?.response?.data || { message: 'Login failed' };
+        throw error?.response?.data.Data || { message: 'Login failed' };
     }
 };
 

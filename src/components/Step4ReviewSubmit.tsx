@@ -48,7 +48,7 @@ useImperativeHandle(ref, () => ({
       {/* Job Title Field */}
       <div>
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Job Title *</span>
+          <span className="bg-[#FEFCF8] px-[5px]">Job Title <span className="text-red-500">*</span></span>
         </label>
         <Controller
           name="jobTitle"

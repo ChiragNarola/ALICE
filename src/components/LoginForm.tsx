@@ -33,7 +33,7 @@ const LoginForm = () => {
       }
       setLoading(false);
     } catch (error: any) {
-      // console.error('Login Error:', error.message);
+      console.error('Login Error:', error);
       toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);

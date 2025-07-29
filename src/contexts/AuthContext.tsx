@@ -27,6 +27,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 roles: result.user.roles,
                 token: result.access_token,
                 tokenType: result.token_type,
+                isChildrenAdded: result.is_children_added,
+                isStaffDetailAdded: result.is_staff_detail_added
             };
             setUser(userData);
             localStorage.setItem('auth_user', JSON.stringify(userData));

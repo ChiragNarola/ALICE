@@ -124,7 +124,7 @@ useImperativeHandle(ref, () => ({
       {/* First Name */}
       <div className="flex-1 min-w-[180px]">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Child’s First Name *</span>
+          <span className="bg-[#FEFCF8] px-[5px]">Child’s First Name <span className="text-red-500">*</span></span>
         </label>
         <Controller
           name={`children.${idx}.firstName`}
@@ -149,7 +149,7 @@ useImperativeHandle(ref, () => ({
       {/* Middle Name */}
       <div className="flex-1 min-w-[180px]">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Child’s Middle Name *</span>
+          <span className="bg-[#FEFCF8] px-[5px]">Child’s Middle Name <span className="text-red-500">*</span></span>
         </label>
        <Controller
   name={`children.${idx}.middleName`}
@@ -175,7 +175,7 @@ useImperativeHandle(ref, () => ({
       {/* Last Name */}
       <div className="flex-1 min-w-[180px]">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Child’s Last Name *</span>
+          <span className="bg-[#FEFCF8] px-[5px]">Child’s Last Name <span className="text-red-500">*</span></span>
         </label>
         <Controller
           name={`children.${idx}.lastName`}
@@ -233,7 +233,7 @@ useImperativeHandle(ref, () => ({
     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
       <div className="flex-1 min-w-[120px]">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Date of Birth (DOB) *</span>
+          <span className="bg-[#FEFCF8] px-[5px]">Date of Birth (DOB) <span className="text-red-500">*</span></span>
         </label>
         <Controller
           name={`children.${idx}.dob`}
