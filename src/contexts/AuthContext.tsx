@@ -18,25 +18,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const login = async (formData: FormData) => {
         const result = await loginUser(formData);
-        if (result?.user && result?.access_token) {
+
+        if (!result || typeof result !== 'object') {
+            console.error('Invalid login response:', result);
+            return null;
+        }
+
+        if (result.IsSuccess) {
             const userData: AuthUser = {
-                id: result.user.id,
-                email: result.user.email,
-                firstName: result.user.first_name,
-                lastName: result.user.last_name,
-                roles: result.user.roles,
-                token: result.access_token,
-                tokenType: result.token_type,
-                isChildrenAdded: result.is_children_added,
-                isStaffDetailAdded: result.is_staff_detail_added
+                id: result.Data.user.id,
+                email: result.Data.user.email,
+                firstName: result.Data.user?.first_name,
+                lastName: result.Data.user?.last_name,
+                roles: result.Data.user.roles,
+                isChildrenAdded: result.Data.is_children_added,
+                isStaffDetailAdded: result.Data.is_staff_detail_added
             };
+
             setUser(userData);
             localStorage.setItem('auth_user', JSON.stringify(userData));
-            localStorage.setItem('auth_token', result.access_token);
-            return userData;
+            localStorage.setItem('auth_token', result.Data.access_token);
         }
-        return null;
+
+        return result;
     };
+
 
     const logout = () => {
         setUser(null);

@@ -1,7 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../../assets/images/logo.svg";
 import userimg from "../../assets/images/user-img.png";
 import { useNavigate } from "react-router-dom";
+import SlidingSideBar from "../SlidingSideBar";
+import ChatMessages from "../ChatMessages";
+import ChatInput from "../ChatInput";
+import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 
 interface DashboardHeaderProps {
   showMessageDropdown: boolean;
@@ -11,6 +15,9 @@ interface DashboardHeaderProps {
   messageRef: React.RefObject<HTMLDivElement | null>;
   userRef: React.RefObject<HTMLDivElement | null>;
   handleLogout: () => void;
+  setIsSidebarOpen: any;
+  isSidebarOpen: any;
+  handleToggle: any;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -21,8 +28,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   messageRef,
   userRef,
   handleLogout,
+  setIsSidebarOpen,
+  isSidebarOpen,
+  handleToggle
 }) => {
   const navigate = useNavigate();
+  useChatVisibility();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -43,13 +54,28 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     };
   }, [showUserDropdown, setShowUserDropdown, userRef]);
 
+
+
   return (
     <header className="bg-alice-peach px-4 sm:px-6 md:px-[30px] py-3 sm:py-4 md:py-5 flex items-center justify-between border-b border-alice-gray">
-      <div className="flex items-center gap-12">
-        <img src={logo} alt="Logo" className="h-15" />
-        <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, John Doe</span>
+      <div className="flex items-center gap-3 sm:gap-6">
+        {/* <span
+          onClick={handleToggle}
+          className="absolute z-100 top-[5px] left-4 material-symbols-outlined text-gray-700 text-2xl cursor-pointer font-bold"
+        >
+          menu_open
+        </span> */}
+
+        <button className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors" onClick={handleToggle}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip=""><path d="M11.6663 12.6686L11.801 12.6823C12.1038 12.7445 12.3313 13.0125 12.3313 13.3337C12.3311 13.6547 12.1038 13.9229 11.801 13.985L11.6663 13.9987H3.33325C2.96609 13.9987 2.66839 13.7008 2.66821 13.3337C2.66821 12.9664 2.96598 12.6686 3.33325 12.6686H11.6663ZM16.6663 6.00163L16.801 6.0153C17.1038 6.07747 17.3313 6.34546 17.3313 6.66667C17.3313 6.98788 17.1038 7.25586 16.801 7.31803L16.6663 7.33171H3.33325C2.96598 7.33171 2.66821 7.03394 2.66821 6.66667C2.66821 6.2994 2.96598 6.00163 3.33325 6.00163H16.6663Z"></path></svg>
+        </button>
+        <div className="flex items-center gap-12">
+          {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
+          <img src={logo} alt="Logo" className="h-15" />
+          <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, John Doe</span>
+        </div>
       </div>
-      <div className="flex items-center gap-4 sm:gap-6 relative">
+      <div className="flex items-center gap-3 sm:gap-6 relative">
         {/* Message Button with Badge */}
         <div className="relative" ref={messageRef}>
           <button

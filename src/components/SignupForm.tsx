@@ -17,6 +17,7 @@ const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [countries, setCountries] = useState<any[]>([]);
+  const [locationType, setLocationType] = useState<'country' | 'pincode'>('country');
 
   const {
     register,
@@ -25,7 +26,7 @@ const SignupForm = () => {
     setValue,
     control,
     formState: { errors }
-  } = useForm<SignupFormInputs>({ mode: 'onChange', defaultValues: { role: [], country: "" }, });
+  } = useForm<SignupFormInputs>({ mode: 'onChange', defaultValues: { role: [] }, });
 
   const onSubmit = async (data: SignupFormInputs) => {
     setLoading(true);
@@ -120,17 +121,42 @@ const SignupForm = () => {
         />
       </div>
 
-      <div className="mb-6 flex flex-col sm:flex-row sm:gap-6 md:gap-4 lg:gap-6">
-        {/* Country Dropdown */}
-        <div className="flex-1 mb-6 sm:mb-0">
-          <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-            <span className="bg-[#FEFCF8] px-[5px]">Country</span>
-          </label>
-          <Controller
-            name="country"
-            control={control}
-            // rules={{ required: 'Country is required' }}
-            render={({ field }) => (
+      {/* Toggle between country and pincode */}
+      <div className="mb-6 flex gap-4">
+        <label className="flex items-center gap-3 text-[14px] lg:text-base xl:text-lg font-normal text-alice-darkgray cursor-pointer select-none">
+          <input
+            type="radio"
+            value="country"
+            checked={locationType === 'country'}
+            onChange={() => setLocationType('country')}
+            className="w-6 h-6 border border-[#1B1B1B80] rounded-[4px] bg-[#FEFCF8] accent-alice-teal focus:ring-0"
+          />
+          Country
+        </label>
+        <label className="flex items-center gap-3 text-[14px] lg:text-base xl:text-lg font-normal text-alice-darkgray cursor-pointer select-none">
+          <input
+            type="radio"
+            value="pincode"
+            checked={locationType === 'pincode'}
+            onChange={() => setLocationType('pincode')}
+            className="w-6 h-6 border border-[#1B1B1B80] rounded-[4px] bg-[#FEFCF8] accent-alice-teal focus:ring-0"
+          />
+          Pincode
+        </label>
+      </div>
+
+      {/* Location input based on toggle */}
+      <div className="mb-6 flex-1">
+        <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+          <span className="bg-[#FEFCF8] px-[5px]">Location</span>
+        </label>
+
+        <Controller
+          name="location"
+          control={control}
+          rules={{ required: 'Location is required' }}
+          render={({ field }) => (
+            locationType === 'country' ? (
               <select
                 {...field}
                 className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] text-alice-black text-[14px] lg:text-base font-normal"
@@ -142,45 +168,26 @@ const SignupForm = () => {
                   </option>
                 ))}
               </select>
-            )}
-          />
-          {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
-        </div>
-
-        {/* Postal Code Input */}
-        <div className="flex-1">
-          <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-            <span className="bg-[#FEFCF8] px-[5px]">Postal Code </span>
-          </label>
-          <input
-            {...register('postalCode', {
-              // required: 'Postal Code is required',
-              pattern: {
-                value: /^[A-Za-z0-9\s\-]{3,10}$/,
-                message: 'Enter a valid postal code',
-              },
-            })}
-            type="text"
-            placeholder="Postal Code"
-            className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
-          />
-          {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode.message}</p>}
-        </div>
-      </div>
-
-      {/* remove once change in API */}
-      <div className="mb-6 flex-1">
-        <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Location </span>
-        </label>
-        <input
-          {...register('location')}
-          type="text"
-          placeholder="Example: Wales, Scotland etc"
-          className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+            ) : (
+              <input
+                {...register('location', {
+                  // required: 'Postal Code is required',
+                  pattern: {
+                    value: /^[A-Za-z0-9\s\-]{3,10}$/,
+                    message: 'Enter a valid postal code',
+                  },
+                })}
+                type="text"
+                placeholder="Postal Code"
+                className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+              />
+            )
+          )}
         />
+
         {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
       </div>
+
 
       <div className="mb-6">
         <label htmlFor="email" className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">

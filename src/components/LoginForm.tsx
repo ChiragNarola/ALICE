@@ -25,13 +25,13 @@ const LoginForm = () => {
       formData.append('password', data.password);
 
       const response = await login(formData);
-      if (response) {
+
+      if (response?.IsSuccess) {
         toast.success('Login successful');
         navigate('/child-basic-info');
       } else {
         toast.error('Login failed');
       }
-      setLoading(false);
     } catch (error: any) {
       console.error('Login Error:', error);
       toast.error(error.message || 'Login failed');
@@ -39,6 +39,7 @@ const LoginForm = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

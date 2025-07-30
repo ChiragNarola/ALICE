@@ -1,21 +1,31 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
+import type { APIResponse, LoginResponseDTO } from '../routes/models/response/Auth';
 import axiosInstance from './axios-instance-creator';
 
-export const loginUser = async (formData: FormData) => {
+export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
     const urlEncoded = new URLSearchParams();
     formData.forEach((value, key) => {
         urlEncoded.append(key, value.toString());
     });
 
     try {
-        const response = await axiosInstance.post('/users/login', urlEncoded.toString(), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        });
-        return response.data.Data;
+        const response = await axiosInstance.post<APIResponse<LoginResponseDTO>>(
+            "/users/login",
+            urlEncoded.toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
+
+        return response.data;
     } catch (error: any) {
-        throw error?.response?.data.Data || { message: 'Login failed' };
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Login failed",
+        };
     }
 };
 

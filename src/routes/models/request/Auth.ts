@@ -10,8 +10,8 @@ export interface SignupFormInputs {
     password: string;
     location?: string;
     contact_number?: string;
-    country?: string;
-    postalCode?: string;
+    // country?: string;
+    // postalCode?: string;
     role: string[];// ['Parent', 'Staff']
     confirmPassword: string;
 };
