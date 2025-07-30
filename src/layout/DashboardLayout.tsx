@@ -5,7 +5,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
 import { Outlet } from "react-router-dom";
 import { ChatVisibilityProvider } from "../contexts/ChatVisibilityContext";
-import SlidingSideBar from "../components/SlidingSideBar";
 import ChatSidebar from "../components/ChatSidebar";
 
 const DashboardLayout: React.FC = () => {

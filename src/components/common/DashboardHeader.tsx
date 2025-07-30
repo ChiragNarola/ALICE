@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import logo from "../../assets/images/logo.svg";
 import userimg from "../../assets/images/user-img.png";
 import { useNavigate } from "react-router-dom";
-import SlidingSideBar from "../SlidingSideBar";
-import ChatMessages from "../ChatMessages";
-import ChatInput from "../ChatInput";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 
 interface DashboardHeaderProps {
@@ -21,19 +18,26 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  // showMessageDropdown,
-  // setShowMessageDropdown,
   showUserDropdown,
   setShowUserDropdown,
   messageRef,
   userRef,
   handleLogout,
-  setIsSidebarOpen,
-  isSidebarOpen,
   handleToggle
 }) => {
   const navigate = useNavigate();
-  useChatVisibility();
+  const { isChatVisible }=useChatVisibility();
+
+  const [userName, setuserName] = useState<string>()
+ 
+  useEffect(()=>{
+ const user = localStorage.getItem("auth_user");
+
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      setuserName(`${parsedUser.firstName} ${parsedUser.lastName}`)
+    }
+  },[])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -66,13 +70,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           menu_open
         </span> */}
 
-        <button className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors" onClick={handleToggle}>
+    {isChatVisible && <button className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors" onClick={handleToggle}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip=""><path d="M11.6663 12.6686L11.801 12.6823C12.1038 12.7445 12.3313 13.0125 12.3313 13.3337C12.3311 13.6547 12.1038 13.9229 11.801 13.985L11.6663 13.9987H3.33325C2.96609 13.9987 2.66839 13.7008 2.66821 13.3337C2.66821 12.9664 2.96598 12.6686 3.33325 12.6686H11.6663ZM16.6663 6.00163L16.801 6.0153C17.1038 6.07747 17.3313 6.34546 17.3313 6.66667C17.3313 6.98788 17.1038 7.25586 16.801 7.31803L16.6663 7.33171H3.33325C2.96598 7.33171 2.66821 7.03394 2.66821 6.66667C2.66821 6.2994 2.96598 6.00163 3.33325 6.00163H16.6663Z"></path></svg>
-        </button>
+        </button> }
         <div className="flex items-center gap-12">
           {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
           <img src={logo} alt="Logo" className="h-15" />
-          <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, John Doe</span>
+          <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, {`${userName}`}</span>
         </div>
       </div>
       <div className="flex items-center gap-3 sm:gap-6 relative">
@@ -104,7 +108,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             className="flex items-center gap-[6px] sm:gap-[10px] focus:outline-none"
           >
             <img src={userimg} alt="User Avatar" className="w-[50px] h-[50px] lg:w-[60px] lg:h-[60px] rounded-full object-cover" />
-            <span className="hidden sm:inline-block text-[14px] sm:text-base font-semibold text-alice-black">John Doe</span>
+            <span className="hidden sm:inline-block text-[14px] sm:text-base font-semibold text-alice-black">{`${userName}`}</span>
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 1L5.00002 5L1 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -113,7 +117,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {showUserDropdown && (
             <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
               <button
-                onClick={() => navigate("/child-basic-info")}
+                onClick={() => {navigate("/child-basic-info") }}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
               >
                 Profile

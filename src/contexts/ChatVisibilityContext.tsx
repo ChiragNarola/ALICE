@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface ChatVisibilityContextType {
@@ -10,7 +10,7 @@ interface ChatVisibilityContextType {
 const ChatVisibilityContext = createContext<ChatVisibilityContextType | undefined>(undefined);
 
 export const ChatVisibilityProvider = ({ children }: { children: ReactNode }) => {
-  const [isChatVisible, setIsChatVisible] = useState(true);
+  const [isChatVisible, setIsChatVisible] = useState(false);
 
   const toggleChatVisibility = () => setIsChatVisible((prev) => !prev);
   const setChatVisible = (visible: boolean) => setIsChatVisible(visible);

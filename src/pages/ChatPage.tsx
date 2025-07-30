@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
-import SlidingSideBar from "../components/SlidingSideBar";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 
 const ChatPage: React.FC = () => {
@@ -10,7 +9,8 @@ const ChatPage: React.FC = () => {
   const handleToggle = () => {
     setIsSidebarOpen(prev => !prev);
   };
-  const { isChatVisible } = useChatVisibility();
+  const { isChatVisible,setChatVisible } = useChatVisibility();
+    setChatVisible(true);
   return (
     <>
       <main className="flex-1 flex px-2 sm:px-0 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">

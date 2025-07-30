@@ -4,6 +4,7 @@ import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
 import axios from 'axios';
+import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 
 const steps = [
   'Child’s Basic Information',
@@ -26,6 +27,9 @@ const ChildBasicInformation: React.FC = () => {
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+
+  const {setChatVisible}=useChatVisibility()
+  setChatVisible(false);
 
   // const goToStep = (step: number) => setCurrentStep(step);
   // Add this to maintain form ref/trigger

@@ -4,12 +4,14 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import type { LoginFormInputs } from '../routes/models/request/Auth';
-
+import 'react-phone-input-2/lib/style.css';
+import { Eye, EyeOff } from 'lucide-react';
 
 const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -73,25 +75,41 @@ const LoginForm = () => {
       </div>
 
       {/* Password Field */}
-      <div className="mb-6">
-        <label htmlFor="password" className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Password</span>
+         <div className="mb-6 relative">
+        <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+          <span className="bg-[#FEFCF8] px-[5px]">
+            Password <span className="text-red-500">*</span>
+          </span>
         </label>
+
         <input
-          id="password"
-          type="password"
-          autoComplete="off"
-          placeholder="Password"
           {...register('password', {
             required: 'Password is required',
             minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters'
-            }
+              value: 8,
+              message: 'Password must be at least 8 characters',
+            },
+            pattern: {
+              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/,
+              message: 'Password must include uppercase, lowercase, and special character',
+            },
           })}
-          className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+          type={showPassword ? 'text' : 'password'}
+          placeholder="Password"
+          className="w-full pr-12 px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />
-        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+
+        <button
+          type="button"
+          onClick={() => setShowPassword(prev => !prev)}
+          className="absolute right-4 top-[35px] text-alice-darkgray"
+        >
+          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
+
+        {errors.password && (
+          <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+        )}
       </div>
 
       <div className="flex items-center justify-between mb-6 2xl:mb-9 gap-3 flex-wrap">
