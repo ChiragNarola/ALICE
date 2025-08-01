@@ -65,7 +65,6 @@ const nextStep = async () => {
   }
 };
 
-
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
 

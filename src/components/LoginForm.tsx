@@ -30,18 +30,19 @@ const LoginForm = () => {
 
       if (response?.IsSuccess) {
         toast.success('Login successful');
-        navigate('/child-basic-info');
+
+        navigate('/chat');
+        // navigate('/child-basic-info');
       } else {
         toast.error('Login failed');
       }
     } catch (error: any) {
       console.error('Login Error:', error);
-      toast.error(error.message || 'Login failed');
+      toast.error(error.Message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

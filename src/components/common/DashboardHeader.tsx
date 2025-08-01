@@ -28,14 +28,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const navigate = useNavigate();
   const { isChatVisible }=useChatVisibility();
 
-  const [userName, setuserName] = useState<string>()
+  const [userName, setUserName] = useState<string>()
  
   useEffect(()=>{
  const user = localStorage.getItem("auth_user");
 
     if (user) {
       const parsedUser = JSON.parse(user);
-      setuserName(`${parsedUser.firstName} ${parsedUser.lastName}`)
+      setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`)
     }
   },[])
 
