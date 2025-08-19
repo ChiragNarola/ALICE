@@ -1,22 +1,24 @@
-import { forwardRef, useImperativeHandle } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import MultiRangeSlider from 'multi-range-slider-react';
+import { forwardRef, useImperativeHandle } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import MultiRangeSlider from "multi-range-slider-react"; // make sure you have this installed
 
+// Zod schema
 const reviewSchema = z.object({
-  jobTitle: z.string().min(1, 'Job title is required'),
-  qualification: z.string().min(1, 'Qualification is required'),
-  minAge: z.number().min(0, 'Minimum age is required'),
-  maxAge: z.number().min(1, 'Maximum age is required')
-}).refine((data) => data.maxAge > data.minAge, {
-  message: 'Maximum age must be greater than minimum age',
-  path: ['maxAge'],
+  role_in_organisation: z.string().min(1, "Role in organisation is required"),
+  qualification: z.string().min(1, "Qualification is required"),
+  age_group: z
+    .string()
+    .regex(/^\d+\-\d+$/, "Age group must be in format min-max"),
 });
 
 type ReviewFormValues = z.infer<typeof reviewSchema>;
 
-const Step4ReviewSubmit = forwardRef<{ validateAndSubmit: () => Promise<boolean>;getValues: () => ReviewFormValues }, {}>((_, ref) => {
+const Step4ReviewSubmit = forwardRef<
+  { validateAndSubmit: () => Promise<boolean>; getValues: () => ReviewFormValues },
+  {}
+>((_, ref) => {
   const {
     control,
     getValues,
@@ -24,55 +26,63 @@ const Step4ReviewSubmit = forwardRef<{ validateAndSubmit: () => Promise<boolean>
     formState: { errors },
   } = useForm<ReviewFormValues>({
     defaultValues: {
-      jobTitle: '',
-      qualification: '',
-      minAge: 1,
-      maxAge: 5,
+      role_in_organisation: "",
+      qualification: "",
+      age_group: "1-5",
     },
     resolver: zodResolver(reviewSchema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-useImperativeHandle(ref, () => ({
-  validateAndSubmit: async () => {
-    const isValid = await trigger();
-    if (isValid) {
-      const values = getValues();
-    }
-    return isValid;
-  },
-  getValues: () => getValues(),
-}));
-
+  useImperativeHandle(ref, () => ({
+    validateAndSubmit: async () => {
+      const isValid = await trigger();
+      if (isValid) {
+        const values = getValues();
+        console.log("Step 4 Values:", values);
+      }
+      return isValid;
+    },
+    getValues: () => getValues(),
+  }));
 
   return (
     <div className="flex flex-col gap-8">
       {/* Job Title Field */}
       <div>
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Job Title <span className="text-red-500">*</span></span>
+          <span className="bg-[#FEFCF8] px-[5px]">
+            Job Title <span className="text-red-500">*</span>
+          </span>
         </label>
         <Controller
-          name="jobTitle"
+          name="role_in_organisation"
           control={control}
           render={({ field }) => (
             <input
               {...field}
-              placeholder="Enter job title..."
+              placeholder="Enter your role..."
               className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${
-                errors.jobTitle ? 'border-red-500' : 'border-alice-gray'
+                errors.role_in_organisation
+                  ? "border-red-500"
+                  : "border-alice-gray"
               }`}
             />
           )}
         />
-        {errors.jobTitle && (
-          <p className="text-red-500 text-sm mt-1">{errors.jobTitle.message}</p>
+        {errors.role_in_organisation && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.role_in_organisation.message}
+          </p>
         )}
       </div>
-      
-           <div>
+
+      {/* Qualification Field */}
+      <div>
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-          <span className="bg-[#FEFCF8] px-[5px]">Qualification <span className="text-red-500">*</span></span>
+          <span className="bg-[#FEFCF8] px-[5px]">
+            Qualification <span className="text-red-500">*</span>
+          </span>
         </label>
         <Controller
           name="qualification"
@@ -80,15 +90,19 @@ useImperativeHandle(ref, () => ({
           render={({ field }) => (
             <input
               {...field}
-              placeholder="Enter job title..."
+              placeholder="Enter your qualification..."
               className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${
-                errors.qualification ? 'border-red-500' : 'border-alice-gray'
+                errors.qualification
+                  ? "border-red-500"
+                  : "border-alice-gray"
               }`}
             />
           )}
         />
         {errors.qualification && (
-          <p className="text-red-500 text-sm mt-1">{errors.qualification.message}</p>
+          <p className="text-red-500 text-sm mt-1">
+            {errors.qualification.message}
+          </p>
         )}
       </div>
 
@@ -98,44 +112,44 @@ useImperativeHandle(ref, () => ({
           Child Age Selected
         </label>
         <Controller
-          name="minAge"
+          name="age_group"
           control={control}
-          render={({ field: { value, onChange } }) => (
-            <Controller
-              name="maxAge"
-              control={control}
-              render={({ field: { value: maxValue, onChange: onMaxChange } }) => (
-                <>
-                  <MultiRangeSlider
-                    min={0}
-                    max={10}
-                    step={1}
-                    minValue={value}
-                    maxValue={maxValue}
-                    onInput={(e) => {
-                      onChange(e.minValue);
-                      onMaxChange(e.maxValue);
-                    }}
-                    ruler={false}
-                    label={true}
-                    style={{ border: 'none', boxShadow: 'none', padding: '15px 8px' }}
-                    barInnerColor="#008080"
-                    thumbLeftColor="#008080"
-                    thumbRightColor="#008080"
-                  />
-                  <div className="flex justify-between text-sm text-alice-darkgray mt-2">
-                    <span>Min: {value}</span>
-                    <span>Max: {maxValue}</span>
-                  </div>
-                  {(errors.minAge || errors.maxAge) && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.maxAge?.message || errors.minAge?.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
-          )}
+          render={({ field: { value, onChange } }) => {
+            const [min, max] = value.split("-").map(Number);
+            return (
+              <>
+                <MultiRangeSlider
+                  min={0}
+                  max={10}
+                  step={1}
+                  minValue={min}
+                  maxValue={max}
+                  onInput={(e) => {
+                    onChange(`${e.minValue}-${e.maxValue}`);
+                  }}
+                  ruler={false}
+                  label={true}
+                  style={{
+                    border: "none",
+                    boxShadow: "none",
+                    padding: "15px 8px",
+                  }}
+                  barInnerColor="#008080"
+                  thumbLeftColor="#008080"
+                  thumbRightColor="#008080"
+                />
+                <div className="flex justify-between text-sm text-alice-darkgray mt-2">
+                  <span>Min: {min}</span>
+                  <span>Max: {max}</span>
+                </div>
+                {errors.age_group && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.age_group.message}
+                  </p>
+                )}
+              </>
+            );
+          }}
         />
       </div>
     </div>

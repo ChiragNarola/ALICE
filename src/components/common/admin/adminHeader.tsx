@@ -19,7 +19,7 @@ const [UserName, setUserName] = useState<string>()
   },[])
 
   return (
-    <header className="h-16 border-b border-alice-gray bg-alice-peach backdrop-blur supports-[backdrop-filter]:bg-[#fff9e6]/60">
+    <header className="h-16 border-b border-alice-gray bg-alice-peach">
       <div className="flex items-center justify-between h-full px-4">
      {/* <div>
         <div className="font-bold text-xl sm:text-2xl text-emerald-950">A.L.I.C.E.</div>

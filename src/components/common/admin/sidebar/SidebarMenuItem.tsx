@@ -47,7 +47,7 @@ export function SidebarMenuItem({
           flex w-full items-center gap-2 rounded-md px-2 py-3 text-sm font-semibold
           transition-colors duration-200
           ${isActive 
-            ? "bg-[#ffecc2]  text-[#008080]"  
+            ? "bg-[#dbfff3b7]  text-[#008080]"  
             : "text-[#333333] hover:bg-teal-100"}             
           ${collapsed ? "justify-center" : ""}
         `}

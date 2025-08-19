@@ -1,17 +1,7 @@
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState,useEffect } from 'react';
 import topic_img from '../assets/images/topic-icon.svg';
 import { useChildren } from '../contexts/ChildrenContext';
-
-const TOPICS = [
-  'Sleep Training',
-  'Feeding & Nutrition',
-  'Behavior Management',
-  'Developmental Milestones',
-  'Potty Training',
-  'Education & Learning',
-  'Social Skills',
-  'Health & Safety',
-];
+import {area_of_interests} from '../api/api-services';
 
 export interface StepRefType {
   validateAndSubmit: () => Promise<boolean>;
@@ -21,7 +11,8 @@ export interface StepRefType {
 
 const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
   const { children, updateChild, deleteChild } = useChildren();
-  const [errors, setErrors] = useState<boolean[]>([]); // array of booleans for each child
+  const [errors, setErrors] = useState<boolean[]>([]); 
+  const [TOPICS, setTOPICS] = useState<string[]>([]); 
 
   // Validation Function
   const validateAndSubmit = async (): Promise<boolean> => {
@@ -31,6 +22,16 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
     const hasError = newErrors.includes(true);
     return !hasError;
   };
+
+//Dynamic Area Of interest 
+  useEffect(() => {
+    const areaOfInterests = async () => {
+      const interestList = await area_of_interests();
+      setTOPICS(interestList);
+    };
+    areaOfInterests();
+  }, []);
+
 
   useImperativeHandle(ref, () => ({
     validateAndSubmit,
@@ -79,7 +80,6 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
               hasError ? 'border-red-500' : 'border-alice-gray'
             }`}
           >
-
             <div className="absolute top-4 right-4">
               {idx!==0 &&     <button
                 type="button"

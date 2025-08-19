@@ -13,8 +13,8 @@ import PublicAdminPanelRoute from "./PublicAdminPanelRoute";
 import DashboardLayout from "../layout/DashboardLayout";
 import AdminDashboard from "../pages/admin/dashboard";
 import AdminLogin from "../pages/admin/AdminLogin";
-import AdminForgotPassword from "../pages/admin/AdminForgotPassword";
-import AdminResetPassword from "../pages/admin/AdminResetPassword";
+// import AdminForgotPassword from "../pages/admin/AdminForgotPassword";
+// import AdminResetPassword from "../pages/admin/AdminResetPassword";
 // import AdminChild from "../pages/admin/child";
 // import AdminDeveloper from "../pages/admin/developer";
 // import AdminParent from "../pages/admin/parent";
@@ -46,8 +46,8 @@ export default function AppRouter() {
                 <Route element={<AdminWelcomeSection />}>
                     <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
                     <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
-                    <Route path="/admin/reset-password" element={<AdminResetPassword />} />
+                    {/* <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
+                    <Route path="/admin/reset-password" element={<AdminResetPassword />} /> */}
                 </Route>
             </Route>
 

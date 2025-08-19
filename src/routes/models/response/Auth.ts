@@ -12,6 +12,11 @@ export interface AuthUser {
   last_name?: string;
 }
 
+export interface StaffDetails {
+    age_group: string;
+    role_in_organisation: string;
+    qualification: string;
+}
 
 export interface AuthContextType {
   user: AuthUser | null;

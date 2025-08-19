@@ -1,5 +1,5 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
-import type { APIResponse, LoginResponseDTO } from '../routes/models/response/Auth';
+import type { APIResponse, LoginResponseDTO,StaffDetails } from '../routes/models/response/Auth';
 import axiosInstance from './axios-instance-creator';
 
 export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
@@ -58,5 +58,66 @@ export const fetchCountries = async () => {
     } catch (err) {
         console.error("Failed to fetch countries:", err);
         return [];
+    }
+};
+
+export const area_of_interests = async () => {
+    try {
+        const res = await axiosInstance.get("admin/area_of_interests");
+        const interestData = res.data.Data;
+        if (!interestData) throw new Error("Invalid interestData data structure");
+        const interestDataList: string[] = [];
+        interestData.forEach((data: any) => {
+            interestDataList.push(data.interest);
+        });
+        return interestDataList;
+    } catch (err) {
+        console.error("Failed to fetch area of interests:", err);
+        return [];
+    }
+};
+
+export const area_of_concerns = async () => {
+    try {
+        const res = await axiosInstance.get("admin/concern");
+        const concernData = res.data.Data;
+        if (!concernData) throw new Error("Invalid concernData data structure");
+        const concernDataList: string[] = [];
+        concernData.forEach((data: any) => {
+            concernDataList.push(data.concern);
+        });
+        return concernDataList;
+    } catch (err) {
+        console.error("Failed to fetch area of concerns:", err);
+        return [];
+    }
+};
+
+export const submitStaffDetails = async (
+    formData: FormData
+): Promise<APIResponse<StaffDetails>> => {
+    try {
+        const urlEncoded = new URLSearchParams();
+        formData.forEach((value, key) => {
+            urlEncoded.append(key, value.toString());
+        });
+
+        const response = await axiosInstance.post<APIResponse<StaffDetails>>(
+            "/users/staff_details",
+            urlEncoded.toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Staff details submission failed",
+        };
     }
 };

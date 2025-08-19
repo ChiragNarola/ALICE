@@ -6,7 +6,7 @@ const PrivateAdminPanelRoute = () => {
 
     if (isLoading) return;
 
-    return user ? <Outlet /> : <Navigate to="/login" replace />;
+    return user ? <Outlet /> : <Navigate to="/admin/login" replace />;
 };
 
 export default PrivateAdminPanelRoute;

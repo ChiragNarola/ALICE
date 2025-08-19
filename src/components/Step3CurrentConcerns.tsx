@@ -1,17 +1,7 @@
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState ,useEffect } from 'react';
 import concerns_img from '../assets/images/concerns-icon.svg';
 import { useChildren } from '../contexts/ChildrenContext';
-
-const CONCERNS = [
-  'Teething Issues',
-  'Sleep Difficulties',
-  'Feeding Problems',
-  'Behavioral Challenges',
-  'Developmental Concerns',
-  'Toilet Training Issue',
-  'Social Interaction',
-  'Other',
-];
+import {area_of_concerns} from '../api/api-services';
 
 export interface StepRefType {
   validateAndSubmit: () => Promise<boolean>;
@@ -21,6 +11,7 @@ export interface StepRefType {
 const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
   const { children, updateChild, deleteChild } = useChildren();
   const [errors, setErrors] = useState<boolean[]>([]); // array of booleans for each child
+    const [CONCERNS, setCONCERNS] = useState<string[]>([]); 
 
   const validateAndSubmit = async (): Promise<boolean> => {
     const newErrors = children.map((child) => !child.concerns || child.concerns.length === 0);
@@ -34,6 +25,15 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
       concerns: children.map((child) => child.concerns || []),
     }),
   }));
+
+  //Dynamic Area Of Concern 
+    useEffect(() => {
+      const areaOfConcerns = async () => {
+        const concernList = await area_of_concerns();
+        setCONCERNS(concernList);
+      };
+      areaOfConcerns();
+    }, []);
 
   const handleConcernToggle = (idx: number, concern: string) => {
     const currentConcerns = children[idx].concerns || [];

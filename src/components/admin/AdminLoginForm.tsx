@@ -107,7 +107,7 @@ const AdminLoginForm = () => {
       <input type="checkbox" className="w-4 h-4 text-alice-teal border-gray-300 focus:ring-alice-teal" />
       Keep me logged in
     </label>
-    <NavLink to="/admin/forgot-password" className="text-alice-teal hover:underline font-medium">Forgot password?</NavLink>
+    {/* <NavLink to="/admin/forgot-password" className="text-alice-teal hover:underline font-medium">Forgot password?</NavLink> */}
   </div>
 
   {/* Submit Button */}

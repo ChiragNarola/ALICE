@@ -3,8 +3,10 @@ import Step1ChildInfo from '../components/Step1ChildInfo';
 import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
-import axios from 'axios';
+import { submitStaffDetails } from '../api/api-services';
+import type { StaffDetails } from '../routes/models/response/Auth'
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
+import { toast } from 'react-toastify';
 
 const steps = [
   'Child’s Basic Information',
@@ -28,42 +30,48 @@ const ChildBasicInformation: React.FC = () => {
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
-  const {setChatVisible}=useChatVisibility()
+  const { setChatVisible } = useChatVisibility()
   setChatVisible(false);
 
   // const goToStep = (step: number) => setCurrentStep(step);
   // Add this to maintain form ref/trigger
-const stepRef = useRef<StepRefHandle>(null);
+  const stepRef = useRef<StepRefHandle>(null);
 
-const [formSubmit, setFormSubmit] = useState<any>({});
+  const [formSubmit, setFormSubmit] = useState<any>({});
 
-const nextStep = async () => {
-  const isValid = await stepRef.current?.validateAndSubmit();
-  if (isValid) {
-    const newData = stepRef.current?.getValues?.();
-    if (newData) {
-      setFormSubmit((prev: any) => {
-        const finalData = { ...prev, ...newData };
-        if (isSaveStep) {
-          console.log('Final Form Submit Data:', finalData);
-          axios
-            .post('/api/submit-form', finalData)
-            .then((response:any) => {
-              console.log(' Form successfully submitted:', response.data);
-            })
-            .catch((error:any) => {
-              console.error(' Error submitting form:', error);
-            });
-        }
-        return finalData; 
-      });
+  const nextStep = async () => {
+    const isValid = await stepRef.current?.validateAndSubmit();
+    if (isValid) {
+      const newData = stepRef.current?.getValues?.();
+      if (newData) {
+        setFormSubmit(async (prev: any) => {
+          const finalData = { ...prev, ...newData };
+          if (isSaveStep) {
+            console.log('Final Form Submit Data:', finalData);
+            if (currentStep == 3) {
+              const formData = new FormData();
+              formData.append("age_group", finalData.age_group);
+              formData.append("role_in_organisation", finalData.role_in_organisation);
+              formData.append("qualification", finalData.qualification);
+
+              const response = await submitStaffDetails(formData);
+              if (response.IsSuccess) {
+                toast.success('Staff details submitted successfully');
+              } else {
+                toast.success(response.Message);
+              }
+
+            }
+          }
+          return finalData;
+        });
+      }
+
+      if (!isSaveStep) {
+        setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+      }
     }
-
-    if (!isSaveStep) {
-      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-    }
-  }
-};
+  };
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
@@ -186,15 +194,15 @@ const nextStep = async () => {
           <div className="min-h-[200px] flex flex-col">
             {(currentStep === 0 && userDetails !== 1) && <Step1ChildInfo ref={stepRef} />}
             {(currentStep === 1 && userDetails !== 1) && <Step2GuidanceTopics ref={stepRef} />}
-            {(currentStep === 2 && userDetails !== 1) && <Step3CurrentConcerns  ref={stepRef} />}
-            {(currentStep === 3 && userDetails !== 2) && <Step4ReviewSubmit ref={stepRef}/>}
+            {(currentStep === 2 && userDetails !== 1) && <Step3CurrentConcerns ref={stepRef} />}
+            {(currentStep === 3 && userDetails !== 2) && <Step4ReviewSubmit ref={stepRef} />}
             {(currentStep > 3 && userDetails !== 2) && (
               <div className="flex-1 flex items-center justify-center text-alice-darkgray text-lg">Step {currentStep + 1} content goes here.</div>
             )}
           </div>
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-4 lg:mt-6 flex-col-reverse sm:flex-row gap-4 sm:gap-0">
-            <button onClick={prevStep} disabled={currentStep === 0 || userDetails===1} className="px-6 py-[12px] lg:py-[17px] rounded-xl border border-alice-black text-alice-black hover:bg-alice-black hover:text-white font-semibold disabled:opacity-50 w-full sm:max-w-[100px] lg:max-w-[180px] transition-colors ease-in-out duration-300 disabled:pointer-events-none">Cancel</button>
+            <button onClick={prevStep} disabled={currentStep === 0 || userDetails === 1} className="px-6 py-[12px] lg:py-[17px] rounded-xl border border-alice-black text-alice-black hover:bg-alice-black hover:text-white font-semibold disabled:opacity-50 w-full sm:max-w-[100px] lg:max-w-[180px] transition-colors ease-in-out duration-300 disabled:pointer-events-none">Cancel</button>
 
             <button
               onClick={nextStep}
