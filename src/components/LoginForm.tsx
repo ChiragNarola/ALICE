@@ -8,10 +8,10 @@ import 'react-phone-input-2/lib/style.css';
 import { Eye, EyeOff } from 'lucide-react';
 
 const LoginForm = () => {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -23,26 +23,33 @@ const LoginForm = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('username', data.username);
-      formData.append('password', data.password);
+      formData.append("username", data.username);
+      formData.append("password", data.password);
 
       const response = await login(formData);
 
       if (response?.IsSuccess) {
-        toast.success('Login successful');
+        const roles = response.Data?.user?.roles ?? [];
+        const role = roles[0]; // assuming single role per user
 
-        navigate('/chat');
-        // navigate('/child-basic-info');
+        if (role === "staff" || role === "parent") {
+          toast.success("Login successful");
+          navigate("/");
+        } else {
+          toast.error("Access denied. Only staff or parent can login.");
+          logout();
+        }
       } else {
-        toast.error('Login failed');
+        toast.error("Login failed");
       }
     } catch (error: any) {
-      console.error('Login Error:', error);
-      toast.error(error.Message || 'Login failed');
+      console.error("Login Error:", error);
+      toast.error(error.Message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -76,7 +83,7 @@ const LoginForm = () => {
       </div>
 
       {/* Password Field */}
-         <div className="mb-6 relative">
+      <div className="mb-6 relative">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
           <span className="bg-[#FEFCF8] px-[5px]">
             Password <span className="text-red-500">*</span>
@@ -90,10 +97,10 @@ const LoginForm = () => {
               value: 8,
               message: 'Password must be at least 8 characters',
             },
-            pattern: {
-              value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/,
-              message: 'Password must include uppercase, lowercase, and special character',
-            },
+            // pattern: {
+            //   value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/,
+            //   message: 'Password must include uppercase, lowercase, and special character',
+            // },
           })}
           type={showPassword ? 'text' : 'password'}
           placeholder="Password"

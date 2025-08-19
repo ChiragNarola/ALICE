@@ -32,7 +32,7 @@ export function Sidebar({ className }: SidebarProps) {
 
                 {!collapsed && (
                     <Link
-                        to="/admin-dashboard"
+                        to="/admin/dashboard"
                         className="font-bold text-lg text-primary transition-opacity duration-300 text-center w-full">
                         <>
                             <div className="h-11 w-auto flex items-center">

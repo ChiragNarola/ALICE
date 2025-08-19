@@ -9,9 +9,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('auth_user');
+        const storedUser = localStorage.getItem("auth_user");
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            try {
+                const parsedUser: AuthUser = JSON.parse(storedUser);
+                // console.log("Restored user from localStorage:", parsedUser);
+                setUser(parsedUser);
+            } catch (error) {
+                // console.error("Failed to parse stored user:", error);
+                localStorage.removeItem("auth_user");
+            }
         }
         setIsLoading(false);
     }, []);
@@ -19,12 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = async (formData: FormData) => {
         const result = await loginUser(formData);
 
-        if (!result || typeof result !== 'object') {
-            console.error('Invalid login response:', result);
-            return null;
-        }
-
-        if (result.IsSuccess) {
+        if (result?.IsSuccess) {
             const userData: AuthUser = {
                 id: result.Data.user.id,
                 email: result.Data.user.email,
@@ -32,7 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 lastName: result.Data.user?.last_name,
                 roles: result.Data.user.roles,
                 isChildrenAdded: result.Data.is_children_added,
-                isStaffDetailAdded: result.Data.is_staff_detail_added
+                isStaffDetailAdded: result.Data.is_staff_detail_added,
             };
 
             setUser(userData);
@@ -42,7 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return result;
     };
-
 
     const logout = () => {
         setUser(null);

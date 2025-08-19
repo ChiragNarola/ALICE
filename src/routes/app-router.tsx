@@ -2,69 +2,56 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/login";
 import Signup from "../pages/signup";
 import ChildBasicInformation from "../pages/ChildBasicInformation";
-import Chat from '../pages/ChatPage';
+import Chat from "../pages/ChatPage";
 import WelcomeSection from "../layout/WelcomeSection";
 import AdminWelcomeSection from "../layout/AdminWelcomeSection";
 import AdminLayout from "../layout/AdminLayout";
-import PrivateRoute from "./PrivateRoute";
-import PublicRoute from "./PublicRoute";
-import PrivateAdminPanelRoute from "./PrivateAdminPanelRoute";
-import PublicAdminPanelRoute from "./PublicAdminPanelRoute";
 import DashboardLayout from "../layout/DashboardLayout";
 import AdminDashboard from "../pages/admin/dashboard";
 import AdminLogin from "../pages/admin/AdminLogin";
-// import AdminForgotPassword from "../pages/admin/AdminForgotPassword";
-// import AdminResetPassword from "../pages/admin/AdminResetPassword";
-// import AdminChild from "../pages/admin/child";
-// import AdminDeveloper from "../pages/admin/developer";
-// import AdminParent from "../pages/admin/parent";
-// import AdminQualification from "../pages/admin/qualification";
-// import AdminStaff from "../pages/admin/staff";
-// import AdminTimeTable from "../pages/admin/timeTable";
-// import AdminSettings from "../pages/admin/settings";
-
+import DefaultRoute from "./DefaultRoute";
+import RoleBasedRoute from "./RoleBasedRoute";
+import UserList from "../components/admin/users/UserList";
+import StaffList from "../components/admin/users/StaffList";
+import ConcernList from "../components/admin/concern/ConcernList";
+import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInterestList";
 
 export default function AppRouter() {
     return (
         <Routes>
-            <Route element={<PublicRoute />}>
-                <Route element={<WelcomeSection />}>
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                </Route>
+            <Route path="/" element={<DefaultRoute />} />
+
+            <Route element={<WelcomeSection />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
             </Route>
 
-            <Route element={<PrivateRoute />}>
+            {/* Parent & Staff routes */}
+            <Route element={<RoleBasedRoute allowedRoles={["parent", "staff"]} />}>
                 <Route element={<DashboardLayout />}>
                     <Route path="/child-basic-info" element={<ChildBasicInformation />} />
                     <Route path="/chat" element={<Chat />} />
                 </Route>
             </Route>
 
-            <Route element={<PublicAdminPanelRoute />}>
-                <Route element={<AdminWelcomeSection />}>
-                    <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-                    <Route path="/admin/login" element={<AdminLogin />} />
-                    {/* <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
-                    <Route path="/admin/reset-password" element={<AdminResetPassword />} /> */}
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminWelcomeSection />}>
+                <Route index element={<Navigate to="login" replace />} />
+                <Route path="login" element={<AdminLogin />} />
+            </Route>
+
+            <Route element={<RoleBasedRoute allowedRoles={["admin"]} />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="user" element={<UserList />} />
+                    <Route path="staff" element={<StaffList />} />
+                    <Route path="concerns" element={<ConcernList />} />
+                    <Route path="area-of-interest" element={<AreaofinterestList />} />
                 </Route>
             </Route>
 
-
-            <Route element={<PrivateAdminPanelRoute />}>
-                <Route element={<AdminLayout />}>
-                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                    {/* <Route path="/admin-child" element={<AdminChild />}/>
-                    <Route path="/admin-developer" element={<AdminDeveloper />}/>
-                    <Route path="/admin-parent" element={<AdminParent />}/>
-                    <Route path="/admin-qualification" element={<AdminQualification />}/>
-                    <Route path="/admin-staff" element={<AdminStaff />}/>
-                    <Route path="/admin-timeTable" element={<AdminTimeTable />}/>
-                    <Route path="/admin-settings" element={<AdminSettings />}/> */}
-                    {/* <Route path="/chat" element={<Chat />} /> */}
-                </Route>
-            </Route>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

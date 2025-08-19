@@ -13,9 +13,9 @@ export interface AuthUser {
 }
 
 export interface StaffDetails {
-    age_group: string;
-    role_in_organisation: string;
-    qualification: string;
+  age_group: string;
+  role_in_organisation: string;
+  qualification: string;
 }
 
 export interface AuthContextType {
@@ -28,7 +28,7 @@ export interface AuthContextType {
 export interface APIResponse<T> {
   IsSuccess: boolean;
   Data: T;
-  Message: string | null;
+  Message?: string | null;
 }
 
 export interface LoginResponseDTO {

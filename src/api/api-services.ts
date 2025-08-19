@@ -1,5 +1,6 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
-import type { APIResponse, LoginResponseDTO,StaffDetails } from '../routes/models/response/Auth';
+import type { APIResponse, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
+import type { AreaOfInterestDTO, ConcernDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 
 export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
@@ -118,6 +119,142 @@ export const submitStaffDetails = async (
             IsSuccess: false,
             Data: null,
             Message: "Staff details submission failed",
+        };
+    }
+};
+
+export const getUserList = async (
+    formData: FormData
+): Promise<APIResponse<UserDTO[]>> => {
+    try {
+        const urlEncoded = new URLSearchParams();
+        formData.forEach((value, key) => {
+            urlEncoded.append(key, value.toString());
+        });
+
+        const res = await axiosInstance.get("users/list");
+
+        // console.log(res);
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching user list failed",
+            }
+        );
+    }
+};
+
+export const getConcernsList = async (
+    formData: FormData
+): Promise<APIResponse<ConcernDTO[]>> => {
+    try {
+        const urlEncoded = new URLSearchParams();
+        formData.forEach((value, key) => {
+            urlEncoded.append(key, value.toString());
+        });
+        const res = await axiosInstance.get("admin/concern");
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching user list failed",
+            }
+        );
+    }
+};
+
+export const deleteConcern = async (id: number): Promise<APIResponse<any>> => {
+    try {
+        const response = await axiosInstance.delete(`/admin/concern/${id}`);
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data || { message: 'Delete failed' };
+    }
+};
+
+export const createConcern = async (formData: FormData): Promise<APIResponse<any>> => {
+    const urlEncoded = new URLSearchParams();
+    formData.forEach((value, key) => {
+        urlEncoded.append(key, value.toString());
+    });
+    try {
+        const response = await axiosInstance.post<APIResponse<LoginResponseDTO>>(
+            "/admin/concern",
+            urlEncoded.toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to create concern",
+        };
+    }
+};
+
+export const getAreasOfInterestList = async (
+    formData: FormData
+): Promise<APIResponse<AreaOfInterestDTO[]>> => {
+    try {
+        const urlEncoded = new URLSearchParams();
+        formData.forEach((value, key) => {
+            urlEncoded.append(key, value.toString());
+        });
+        const res = await axiosInstance.get("admin/area_of_interests");
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching area_of_interest list failed",
+            }
+        );
+    }
+};
+
+export const deleteAreaOfInterest = async (id: number): Promise<APIResponse<any>> => {
+    try {
+        const response = await axiosInstance.delete(`/admin/area_of_interest/${id}`);
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data || { message: 'Delete failed' };
+    }
+};
+
+export const createAreaOfInterest = async (formData: FormData): Promise<APIResponse<any>> => {
+    const urlEncoded = new URLSearchParams();
+    formData.forEach((value, key) => {
+        urlEncoded.append(key, value.toString());
+    });
+    try {
+        const response = await axiosInstance.post<APIResponse<LoginResponseDTO>>(
+            "/admin/area_of_interest",
+            urlEncoded.toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to create concern",
         };
     }
 };
