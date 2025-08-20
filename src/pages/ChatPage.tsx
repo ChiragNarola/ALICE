@@ -7,6 +7,7 @@ import { chatAPI } from '../api/api-services';
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import type { ChatInputProps } from "../routes/models/request/Chat";
+import { useChat } from "../contexts/ChatContext";
 
 type Message = {
   from: "alice" | "user";
@@ -15,28 +16,13 @@ type Message = {
 };
 
 const ChatPage: React.FC = () => {
+  const { messages } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
-
-  const handleGenerate = () => {
-    const uniqueId = uuidv4();
-    setChatboardUniqueId(uniqueId);
-    console.log("Generated UUID:", uniqueId);
-  };
-  useEffect(() => {
-    handleGenerate();
-  }, []);
-
-  const handleToggle = () => {
-    setIsSidebarOpen(prev => !prev);
-  };
-  const { isChatVisible, setChatVisible } = useChatVisibility();
-  setChatVisible(true);
-
-  const [messages, setMessages] = useState<Message[]>([
+  const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       from: "alice",
       text: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
@@ -44,21 +30,42 @@ const ChatPage: React.FC = () => {
     },
   ]);
 
+  const handleGenerate = () => {
+    const uniqueId = uuidv4();
+    setChatboardUniqueId(uniqueId);
+    // console.log("Generated UUID:", uniqueId);
+  };
+
+  useEffect(() => {
+    handleGenerate();
+  }, []);
+
+  useEffect(() => {
+    if (!messages || messages.length === 0) return;
+    setChatMessages(messages);
+  }, [messages]);
+
+
+  const handleToggle = () => {
+    setIsSidebarOpen(prev => !prev);
+  };
+  const { isChatVisible, setChatVisible } = useChatVisibility();
+  setChatVisible(true);
+
   const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault(); // prevent page reload
+    e.preventDefault();
     IsSearching(true);
-    if (!message.trim()) return; // avoid sending empty messages
+    if (!message.trim()) return;
 
     try {
       const request_data: ChatInputProps = {
         "query": message,
-        // "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
         "conversation_id": chatBordUniqueId,
         "user_id": user?.id
       };
       const response = await chatAPI(request_data);
       if (response) {
-        setMessages((prev) => [
+        setChatMessages((prev) => [
           ...prev,
           {
             from: "user",
@@ -93,7 +100,7 @@ const ChatPage: React.FC = () => {
         </section> */}
         <section className="mx-auto right pe-5">
           {isChatVisible && <>
-            <ChatMessages messages={messages} />
+            <ChatMessages messages={chatMessages} />
             <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} />
           </>}
         </section>

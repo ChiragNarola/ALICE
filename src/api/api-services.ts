@@ -1,10 +1,12 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
-import type { ChatInputProps } from '../routes/models/request/Chat';
-import type { APIResponse, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
+import type { ChatInputProps, ConversationDTO } from '../routes/models/request/Chat';
+import type { ChatInputRM } from '../routes/models/request/Child';
+import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
 import type { AreaOfInterestDTO, ConcernDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import axios from 'axios';
 
+//Auth
 export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
     const urlEncoded = new URLSearchParams();
     formData.forEach((value, key) => {
@@ -32,16 +34,33 @@ export const loginUser = async (formData: FormData): Promise<APIResponse<LoginRe
     }
 };
 
-export const registerUser = async (data: SignupFormInputs) => {
+export const registerUser = async (
+    data: SignupFormInputs
+): Promise<APIResponse<AuthUser>> => {
     try {
-        const response = await axiosInstance.post('/users/registration', data);
+        const response = await axiosInstance.post<APIResponse<AuthUser>>(
+            "/users/registration",
+            data,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     } catch (error: any) {
-        throw error?.response?.data || { message: 'Registration failed' };
+        const apiError: APIResponse<AuthUser> = error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Registration failed",
+        };
+
+        console.error("Registration error:", apiError);
+        return apiError;
     }
 };
 
-
+//Master
 export const fetchCountries = async () => {
     try {
         const res = await axiosInstance.get("https://api.worldbank.org/v2/country?format=json");
@@ -60,42 +79,13 @@ export const fetchCountries = async () => {
         return countryList;
     } catch (err) {
         console.error("Failed to fetch countries:", err);
+
         return [];
     }
 };
 
-export const area_of_interests = async () => {
-    try {
-        const res = await axiosInstance.get("admin/area_of_interests");
-        const interestData = res.data.Data;
-        if (!interestData) throw new Error("Invalid interestData data structure");
-        const interestDataList: string[] = [];
-        interestData.forEach((data: any) => {
-            interestDataList.push(data.interest);
-        });
-        return interestDataList;
-    } catch (err) {
-        console.error("Failed to fetch area of interests:", err);
-        return [];
-    }
-};
 
-export const area_of_concerns = async () => {
-    try {
-        const res = await axiosInstance.get("admin/concern");
-        const concernData = res.data.Data;
-        if (!concernData) throw new Error("Invalid concernData data structure");
-        const concernDataList: string[] = [];
-        concernData.forEach((data: any) => {
-            concernDataList.push(data.concern);
-        });
-        return concernDataList;
-    } catch (err) {
-        console.error("Failed to fetch area of concerns:", err);
-        return [];
-    }
-};
-
+//Staff details APIs
 export const submitStaffDetails = async (
     formData: FormData
 ): Promise<APIResponse<StaffDetails>> => {
@@ -125,6 +115,49 @@ export const submitStaffDetails = async (
     }
 };
 
+//Child APIs
+export const submitChildDetails = async (
+    formData: ChatInputRM[]
+): Promise<APIResponse<ChatInputRM>> => {
+    try {
+        const response = await axiosInstance.post<APIResponse<ChatInputRM>>(
+            "/children/create",
+            formData, // send as JSON
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Children details submission failed",
+        };
+    }
+};
+
+export const getChildDetailsByID = async (
+    id: number
+): Promise<APIResponse<any[]>> => {
+    try {
+        const res = await axiosInstance.get(`children/${id}`);
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching children details failed",
+            }
+        );
+    }
+};
+
+//Get User API 
 export const getUserList = async (
     formData: FormData
 ): Promise<APIResponse<UserDTO[]>> => {
@@ -149,6 +182,7 @@ export const getUserList = async (
     }
 };
 
+//Concerns API
 export const getConcernsList = async (
     formData: FormData
 ): Promise<APIResponse<ConcernDTO[]>> => {
@@ -205,6 +239,29 @@ export const createConcern = async (formData: FormData): Promise<APIResponse<any
     }
 };
 
+export const area_of_concerns = async (): Promise<APIResponse<ConcernDTO[]>> => {
+    try {
+        const res = await axiosInstance.get<APIResponse<ConcernDTO[]>>("admin/concern");
+
+        // Validate
+        if (!res.data?.Data) {
+            throw new Error("Invalid concernData data structure");
+        }
+
+        return res.data;
+    } catch (err) {
+        console.error("Failed to fetch area of concerns:", err);
+
+        // Return fallback response in consistent shape
+        return {
+            IsSuccess: false,
+            Data: [],
+            Message: "Failed to fetch area of concerns",
+        };
+    }
+};
+
+//AreasOfInterest
 export const getAreasOfInterestList = async (
     formData: FormData
 ): Promise<APIResponse<AreaOfInterestDTO[]>> => {
@@ -261,10 +318,33 @@ export const createAreaOfInterest = async (formData: FormData): Promise<APIRespo
     }
 };
 
+export const area_of_interests = async (): Promise<APIResponse<AreaOfInterestDTO[]>> => {
+    try {
+        const res = await axiosInstance.get<APIResponse<AreaOfInterestDTO[]>>("admin/area_of_interests");
+
+        // Validate
+        if (!res.data?.Data) {
+            throw new Error("Invalid area_of_interests response structure");
+        }
+
+        return res.data;
+    } catch (err) {
+        console.error("Failed to fetch area of interests:", err);
+
+        // Return fallback response in consistent shape
+        return {
+            IsSuccess: false,
+            Data: [],
+            Message: "Failed to fetch area of interests",
+        };
+    }
+};
+
+//Chat API
 export const chatAPI = async (requestdata: ChatInputProps): Promise<any> => {
     try {
         const response = await axios.post(
-            "https://bc3a4ccbc64c.ngrok-free.app/chat",
+            import.meta.env.VITE_API_CHAT_API_URL,
             requestdata,
             {
                 headers: {
@@ -282,3 +362,35 @@ export const chatAPI = async (requestdata: ChatInputProps): Promise<any> => {
         };
     }
 };
+
+//Conversation APIs
+export const getConversationList = async (): Promise<APIResponse<ConversationDTO[]>> => {
+    try {
+        const res = await axiosInstance.get("conversation/getConversationList");
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching Conversation list failed",
+            }
+        );
+    }
+};
+
+export const getConversationMessageById = async (id: number): Promise<APIResponse<ConversationDTO[]>> => {
+    try {
+        const res = await axiosInstance.get(`conversation/getConversation/${id}`);
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching Conversation failed",
+            }
+        );
+    }
+};
+

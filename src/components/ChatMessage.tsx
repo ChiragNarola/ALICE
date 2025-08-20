@@ -20,7 +20,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg 
                 <img src={userimg} alt="User" className="w-[30px] h-[30px] sm:w-[40px] sm:h-[40px] lg:w-[50px] lg:h-[50px] rounded-full object-cover" />
             )}
             {/* Message bubble */}
-            <div className={`max-w-[80vw] sm:max-w-[1039px] rounded-2xl p-3 sm:p-4 lg:p-6 ${isAlice ? "bg-[#0080800D] text-alice-black rounded-bl-none" : "bg-[#1B1B1B0D] text-alice-black rounded-br-none"}`}>
+            <div className={`max-w-[80vw] w-full sm:max-w-[1039px] rounded-2xl p-3 sm:p-4 lg:p-6 ${isAlice ? "bg-[#0080800D] text-alice-black rounded-bl-none" : "bg-[#1B1B1B0D] text-alice-black rounded-br-none"}`}>
                 <div className="whitespace-pre-line text-sm sm:text-base lg:text-lg text-alice-black font-normal mb-3">{text}</div>
                 {actions && (
                     <div className="flex gap-6 mt-2 text-alice-teal text-sm font-medium justify-end">

@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './contexts/AuthContext';
 import { ChildrenProvider } from '../src/contexts/ChildrenContext';
+import { ChatProvider } from './contexts/ChatContext';
 
 function App() {
   return (
@@ -12,7 +13,9 @@ function App() {
       <ToastContainer position="top-right" autoClose={3000} />
       <AuthProvider>
         <ChildrenProvider>
-          <AppRouter />
+          <ChatProvider>
+            <AppRouter />
+          </ChatProvider>
         </ChildrenProvider>
       </AuthProvider>
     </Router>

@@ -59,7 +59,7 @@ export default function ConcernList() {
 
         try {
             const response = await deleteConcern(id);
-            console.log(response);
+            // console.log(response);
             if (response.IsSuccess) {
                 setConcerns((prev) => prev.filter((c) => c.id !== id));
                 toast.success("Concern deleted successfully!");

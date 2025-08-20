@@ -36,15 +36,14 @@ const SignupForm = () => {
         contact_number: phone,
       };
       const response = await registerUser(updatedData);
-      if (response === "User Created!") {
+      if (response.IsSuccess) {
         setLoading(false);
         toast.success("Registration successful!");
         navigate("/login");
       } else {
-        toast.info(response || "Registered, but please check your email.");
+        toast.error(response.Message || "Registered, but please check your email.");
       }
     } catch (err: any) {
-      // console.log(err);
       toast.error(err.detail || "Registration failed");
     } finally {
       setLoading(false);

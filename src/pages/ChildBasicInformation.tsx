@@ -3,10 +3,11 @@ import Step1ChildInfo from '../components/Step1ChildInfo';
 import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
-import { submitStaffDetails } from '../api/api-services';
-import type { StaffDetails } from '../routes/models/response/Auth'
+import { submitStaffDetails, submitChildDetails } from '../api/api-services';
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { toast } from 'react-toastify';
+import type { ChatInputRM } from '../routes/models/request/Child';
+import { useAuth } from '../contexts/AuthContext';
 
 const steps = [
   'Child’s Basic Information',
@@ -26,6 +27,7 @@ const ChildBasicInformation: React.FC = () => {
   const [showMessageDropdown, setShowMessageDropdown] = React.useState(false);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [userDetails, setUserDetails] = useState<number>(0);
+  const { user } = useAuth();
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -47,26 +49,6 @@ const ChildBasicInformation: React.FC = () => {
         // Merge new data into state
         setFormSubmit((prev: any) => {
           const finalData = { ...prev, ...newData };
-
-          if (isSaveStep) {
-            if (currentStep === 3) {
-              const formData = new FormData();
-              formData.append("age_group", finalData.age_group);
-              formData.append("role_in_organisation", finalData.role_in_organisation);
-              formData.append("qualification", finalData.qualification);
-
-              submitStaffDetails(formData).then((response) => {
-                if (response.IsSuccess) {
-                  toast.success("Staff details submitted successfully");
-                } else {
-                  toast.error(response.Message);
-                }
-              });
-            } else {
-              handleSubmit();
-            }
-          }
-
           return finalData;
         });
       }
@@ -78,35 +60,96 @@ const ChildBasicInformation: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting final form data:", formSubmit);
+    const isValid = await stepRef.current?.validateAndSubmit();
+    if (!isValid) return;
+
+    const newData = stepRef.current?.getValues?.();
+    const finalData = { ...formSubmit, ...newData };
+
+    // console.log("Submitting final form data:", finalData);
 
     try {
-      const formData = new FormData();
+      if (!user) return;
 
-      // Append fields from formSubmit (example fields, adjust as needed)
-      if (formSubmit.age_group) {
-        formData.append("age_group", formSubmit.age_group);
-      }
-      if (formSubmit.role_in_organisation) {
-        formData.append("role_in_organisation", formSubmit.role_in_organisation);
-      }
-      if (formSubmit.qualification) {
-        formData.append("qualification", formSubmit.qualification);
+      const isParent = user.roles?.includes("parent");
+      const isStaff = user.roles?.includes("staff");
+
+      // Helper to build child payload
+      const buildChildPayload = (): ChatInputRM[] =>
+        finalData.children.map((child: any, index: number) => ({
+          id: child.id ?? 0,
+          name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+          date_of_birth: child.dob || "",
+          gender: child.gender || "",
+          things_to_keep_in_mind: child.thingsToKeepInMind || "",
+          area_of_interest: finalData.topics?.[index] || [],
+          concerns: finalData.concerns?.[index] || [],
+        }));
+
+      //Helper to build staff FormData
+      const buildStaffForm = (): FormData => {
+        const formData = new FormData();
+        formData.append("age_group", finalData.age_group);
+        formData.append("role_in_organisation", finalData.role_in_organisation);
+        formData.append("qualification", finalData.qualification);
+        return formData;
+      };
+
+      // Parent + Staff → submit BOTH
+      if (isParent && isStaff) {
+        // 1. Child details
+        const childPayload = buildChildPayload();
+        // console.log("Child Payload:", childPayload);
+        const childRes = await submitChildDetails(childPayload);
+        if (childRes.IsSuccess) {
+          toast.success("Children details submitted successfully");
+        } else {
+          toast.error(childRes.Message || "Something went wrong with children details");
+        }
+
+        // 2. Staff details
+        const staffForm = buildStaffForm();
+        const staffRes = await submitStaffDetails(staffForm);
+        if (staffRes.IsSuccess) {
+          toast.success("Staff details submitted successfully");
+        } else {
+          toast.error(staffRes.Message || "Something went wrong with staff details");
+        }
       }
 
-      // Call API
-      const response = await submitStaffDetails(formData);
+      // Staff only
+      else if (isStaff) {
+        const staffForm = buildStaffForm();
+        const staffRes = await submitStaffDetails(staffForm);
+        if (staffRes.IsSuccess) {
+          toast.success("Staff details submitted successfully");
+        } else {
+          toast.error(staffRes.Message);
+        }
+      }
 
-      if (response.IsSuccess) {
-        toast.success("Staff details submitted successfully");
-      } else {
-        toast.error(response.Message || "Something went wrong");
+      // Parent only
+      else if (isParent) {
+        const childPayload = buildChildPayload();
+        // console.log("Child Payload:", childPayload);
+        const childRes = await submitChildDetails(childPayload);
+        if (childRes.IsSuccess) {
+          toast.success("Children details submitted successfully");
+        } else {
+          toast.error(childRes.Message || "Something went wrong");
+        }
+      }
+
+      //No role found
+      else {
+        toast.error("User has no matching roles");
       }
     } catch (error) {
       console.error("Form submit error:", error);
       toast.error("Failed to submit form. Please try again.");
     }
   };
+
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
@@ -117,7 +160,6 @@ const ChildBasicInformation: React.FC = () => {
     if (user) {
       const parsedUser = JSON.parse(user);
       if (parsedUser.roles) {
-        console.log(parsedUser.roles)
         if (parsedUser.roles.length == 2) {
           setUserDetails(3); // has both the roles
         }
@@ -240,7 +282,7 @@ const ChildBasicInformation: React.FC = () => {
             <button onClick={prevStep} disabled={currentStep === 0 || userDetails === 1} className="px-6 py-[12px] lg:py-[17px] rounded-xl border border-alice-black text-alice-black hover:bg-alice-black hover:text-white font-semibold disabled:opacity-50 w-full sm:max-w-[100px] lg:max-w-[180px] transition-colors ease-in-out duration-300 disabled:pointer-events-none">Cancel</button>
 
             <button
-              onClick={nextStep}
+              onClick={isSaveStep ? handleSubmit : nextStep}
               // disabled={isSaveStep || isLastStep}
               className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300"
             >

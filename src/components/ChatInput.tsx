@@ -24,16 +24,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                     <div className="flex gap-6 text-alice-teal text-sm font-medium pl-2">
                         <button type="button" className="flex items-center gap-3 hover:underline text-sm sm:text-base font-normal">
                             <svg width="12" height="17" viewBox="0 0 12 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.25778 5.88667V10.7733C4.25778 11.673 4.98703 12.4022 5.88667 12.4022C6.7863 12.4022 7.51556 11.673 7.51556 10.7733V4.25778C7.51556 2.45856 6.05697 1 4.25778 1C2.45856 1 1 2.45856 1 4.25778V10.7733C1 13.4722 3.18783 15.66 5.88667 15.66C8.58549 15.66 10.7733 13.4722 10.7733 10.7733V5.07222" stroke="#008080" stroke-width="1.5" />
+                                <path d="M4.25778 5.88667V10.7733C4.25778 11.673 4.98703 12.4022 5.88667 12.4022C6.7863 12.4022 7.51556 11.673 7.51556 10.7733V4.25778C7.51556 2.45856 6.05697 1 4.25778 1C2.45856 1 1 2.45856 1 4.25778V10.7733C1 13.4722 3.18783 15.66 5.88667 15.66C8.58549 15.66 10.7733 13.4722 10.7733 10.7733V5.07222" stroke="#008080" strokeWidth="1.5" />
                             </svg>
                             Attach
                         </button>
                         <button type="button" className="flex items-center gap-[10px] hover:underline text-sm sm:text-base font-normal">
                             <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="4" y="1" width="6" height="10" rx="3" stroke="#008080" stroke-width="1.5" />
+                                <rect x="4" y="1" width="6" height="10" rx="3" stroke="#008080" strokeWidth="1.5" />
                                 <rect x="6" y="14" width="2" height="3" fill="#008080" />
                                 <rect x="4" y="16" width="6" height="1" fill="#008080" />
-                                <path d="M1 9V9C1 11.7614 3.23858 14 6 14H8C10.7614 14 13 11.7614 13 9V9" stroke="#008080" stroke-width="1.5" />
+                                <path d="M1 9V9C1 11.7614 3.23858 14 6 14H8C10.7614 14 13 11.7614 13 9V9" stroke="#008080" strokeWidth="1.5" />
                             </svg>
                             Voice Message
                         </button>

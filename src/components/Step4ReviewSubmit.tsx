@@ -39,7 +39,7 @@ const Step4ReviewSubmit = forwardRef<
       const isValid = await trigger();
       if (isValid) {
         const values = getValues();
-        console.log("Step 4 Values:", values);
+        //console.log("Step 4 Values:", values);
       }
       return isValid;
     },
@@ -62,11 +62,10 @@ const Step4ReviewSubmit = forwardRef<
             <input
               {...field}
               placeholder="Enter your role..."
-              className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${
-                errors.role_in_organisation
+              className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${errors.role_in_organisation
                   ? "border-red-500"
                   : "border-alice-gray"
-              }`}
+                }`}
             />
           )}
         />
@@ -91,11 +90,10 @@ const Step4ReviewSubmit = forwardRef<
             <input
               {...field}
               placeholder="Enter your qualification..."
-              className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${
-                errors.qualification
+              className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${errors.qualification
                   ? "border-red-500"
                   : "border-alice-gray"
-              }`}
+                }`}
             />
           )}
         />
