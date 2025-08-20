@@ -128,6 +128,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               >
                 Chat
               </button>
+              <hr />
               <button
                 onClick={handleLogout}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10">

@@ -23,7 +23,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                             className="w-full flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-base md:text-lg px-2 font-normal"
                         />
                     </div>
-                    <hr className="my-4 md:my-6 border-alice-gray" />
+                    {/* <hr className="my-4 md:my-6 border-alice-gray" />
                     <div className="flex gap-6 text-alice-teal text-sm font-medium pl-2">
                         <button type="button" className="flex items-center gap-3 hover:underline text-sm sm:text-base font-normal">
                             <svg width="12" height="17" viewBox="0 0 12 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +40,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                             </svg>
                             Voice Message
                         </button>
-                    </div>
+                    </div> */}
                 </div>
                 <button
                     type="submit"
