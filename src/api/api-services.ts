@@ -1,7 +1,9 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
+import type { ChatInputProps } from '../routes/models/request/Chat';
 import type { APIResponse, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
 import type { AreaOfInterestDTO, ConcernDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
+import axios from 'axios';
 
 export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
     const urlEncoded = new URLSearchParams();
@@ -255,6 +257,28 @@ export const createAreaOfInterest = async (formData: FormData): Promise<APIRespo
             IsSuccess: false,
             Data: null,
             Message: "Failed to create concern",
+        };
+    }
+};
+
+export const chatAPI = async (requestdata: ChatInputProps): Promise<any> => {
+    try {
+        const response = await axios.post(
+            "https://bc3a4ccbc64c.ngrok-free.app/chat",
+            requestdata,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to get chat result",
         };
     }
 };

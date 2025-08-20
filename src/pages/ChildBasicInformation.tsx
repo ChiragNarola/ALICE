@@ -44,25 +44,29 @@ const ChildBasicInformation: React.FC = () => {
     if (isValid) {
       const newData = stepRef.current?.getValues?.();
       if (newData) {
-        setFormSubmit(async (prev: any) => {
+        // Merge new data into state
+        setFormSubmit((prev: any) => {
           const finalData = { ...prev, ...newData };
+
           if (isSaveStep) {
-            console.log('Final Form Submit Data:', finalData);
-            if (currentStep == 3) {
+            if (currentStep === 3) {
               const formData = new FormData();
               formData.append("age_group", finalData.age_group);
               formData.append("role_in_organisation", finalData.role_in_organisation);
               formData.append("qualification", finalData.qualification);
 
-              const response = await submitStaffDetails(formData);
-              if (response.IsSuccess) {
-                toast.success('Staff details submitted successfully');
-              } else {
-                toast.success(response.Message);
-              }
-
+              submitStaffDetails(formData).then((response) => {
+                if (response.IsSuccess) {
+                  toast.success("Staff details submitted successfully");
+                } else {
+                  toast.error(response.Message);
+                }
+              });
+            } else {
+              handleSubmit();
             }
           }
+
           return finalData;
         });
       }
@@ -70,6 +74,37 @@ const ChildBasicInformation: React.FC = () => {
       if (!isSaveStep) {
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       }
+    }
+  };
+
+  const handleSubmit = async () => {
+    console.log("Submitting final form data:", formSubmit);
+
+    try {
+      const formData = new FormData();
+
+      // Append fields from formSubmit (example fields, adjust as needed)
+      if (formSubmit.age_group) {
+        formData.append("age_group", formSubmit.age_group);
+      }
+      if (formSubmit.role_in_organisation) {
+        formData.append("role_in_organisation", formSubmit.role_in_organisation);
+      }
+      if (formSubmit.qualification) {
+        formData.append("qualification", formSubmit.qualification);
+      }
+
+      // Call API
+      const response = await submitStaffDetails(formData);
+
+      if (response.IsSuccess) {
+        toast.success("Staff details submitted successfully");
+      } else {
+        toast.error(response.Message || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Form submit error:", error);
+      toast.error("Failed to submit form. Please try again.");
     }
   };
 
@@ -211,6 +246,7 @@ const ChildBasicInformation: React.FC = () => {
             >
               {isSaveStep ? 'Save' : 'Continue to Guidance Topics'}
             </button>
+
           </div>
         </section>
       </main>
