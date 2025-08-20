@@ -101,7 +101,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
   return (
     <aside
       className={`
-        w-64 bg-white border-r border-gray-200 p-4 h-screen fixed top-0 left-0 z-40
+        w-64 bg-white border-r border-gray-200 p-4 h-screen fixed top-0 left-0 z-100
         transform transition-transform duration-300
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
