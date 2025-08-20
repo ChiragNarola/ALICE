@@ -17,7 +17,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Send A Message..."
-                            className="flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-base md:text-lg px-2 font-normal"
+                            className="w-full flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-base md:text-lg px-2 font-normal"
                         />
                     </div>
                     <hr className="my-4 md:my-6 border-alice-gray" />
