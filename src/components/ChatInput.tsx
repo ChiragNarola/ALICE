@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuth } from "../contexts/AuthContext";
 interface ChatInputProps {
     onSend: any;
     message: string;
@@ -7,6 +8,8 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, searching }) => {
+    const { user } = useAuth();
+
     return (
         <form onSubmit={onSend} className="w-full bg-white rounded-2xl border border-alice-gray p-3 sm:p-4 md:p-6 flex flex-col gap-2 my-4 lg:my-6">
             <div className="flex gap-4 sm:gap-6 items-center">
@@ -16,7 +19,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                             type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Send A Message..."
+                            placeholder={`Hello ${user?.firstName}, What would you like to know? Please type your question here…`}
                             className="w-full flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-base md:text-lg px-2 font-normal"
                         />
                     </div>

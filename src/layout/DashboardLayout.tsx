@@ -58,7 +58,7 @@ const DashboardLayout: React.FC = () => {
                         aria-label="Close sidebar overlay"
                     />
                 )}
-                <ChatSidebar chats={chatList} isOpen={isSidebarOpen} onClose={handleToggle} />
+                <ChatSidebar chats={chatList} isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onClose={handleToggle} />
                 <DashboardHeader
                     showMessageDropdown={showMessageDropdown}
                     setShowMessageDropdown={setShowMessageDropdown}

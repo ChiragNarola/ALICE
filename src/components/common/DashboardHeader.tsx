@@ -26,18 +26,18 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   handleToggle
 }) => {
   const navigate = useNavigate();
-  const { isChatVisible }=useChatVisibility();
+  const { isChatVisible } = useChatVisibility();
 
   const [userName, setUserName] = useState<string>()
- 
-  useEffect(()=>{
- const user = localStorage.getItem("auth_user");
+
+  useEffect(() => {
+    const user = localStorage.getItem("auth_user");
 
     if (user) {
       const parsedUser = JSON.parse(user);
       setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`)
     }
-  },[])
+  }, [])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -61,7 +61,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
 
   return (
-    <header className="bg-alice-peach px-4 sm:px-6 md:px-[30px] py-3 sm:py-4 md:py-5 flex items-center justify-between border-b border-alice-gray">
+    <header className="sticky top-0 z-50 bg-alice-peach px-4 sm:px-6 md:px-[30px] py-3 sm:py-4 md:py-5 flex items-center justify-between border-b border-alice-gray">
       <div className="flex items-center gap-3 sm:gap-6">
         {/* <span
           onClick={handleToggle}
@@ -70,9 +70,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           menu_open
         </span> */}
 
-    {isChatVisible && <button className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors" onClick={handleToggle}>
+        {isChatVisible && <button className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors" onClick={handleToggle}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip=""><path d="M11.6663 12.6686L11.801 12.6823C12.1038 12.7445 12.3313 13.0125 12.3313 13.3337C12.3311 13.6547 12.1038 13.9229 11.801 13.985L11.6663 13.9987H3.33325C2.96609 13.9987 2.66839 13.7008 2.66821 13.3337C2.66821 12.9664 2.96598 12.6686 3.33325 12.6686H11.6663ZM16.6663 6.00163L16.801 6.0153C17.1038 6.07747 17.3313 6.34546 17.3313 6.66667C17.3313 6.98788 17.1038 7.25586 16.801 7.31803L16.6663 7.33171H3.33325C2.96598 7.33171 2.66821 7.03394 2.66821 6.66667C2.66821 6.2994 2.96598 6.00163 3.33325 6.00163H16.6663Z"></path></svg>
-        </button> }
+        </button>}
         <div className="flex items-center gap-12">
           {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
           <img src={logo} alt="Logo" className="h-15" />
@@ -81,8 +81,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </div>
       <div className="flex items-center gap-3 sm:gap-6 relative">
         {/* Message Button with Badge */}
-        <div className="relative" ref={messageRef}>
-          <button
+        {/* <div className="relative" ref={messageRef}> */}
+        {/* <button
             onClick={() => navigate("/chat")}
             className="w-[50px] h-[50px] rounded-full bg-[#D9D9D9] flex items-center justify-center focus:outline-none"
           >
@@ -92,14 +92,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <path d="M8.8335 16.4722H18.5557" stroke="#1B1B1B" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <span className="absolute top-2 right-2 bg-[#E94F4F] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full ">2</span>
-          </button>
-          {/* Message Dropdown */}
-          {/* {showMessageDropdown && (
+          </button> */}
+        {/* Message Dropdown */}
+        {/* {showMessageDropdown && (
             <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg p-4 z-10 animate-dropdown">
               <div className="text-sm text-gray-700">No new messages</div>
             </div>
           )} */}
-        </div>
+        {/* </div> */}
 
         {/* User Avatar and Dropdown */}
         <div className="relative" ref={userRef}>
@@ -117,14 +117,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {showUserDropdown && (
             <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
               <button
-                onClick={() => {navigate("/child-basic-info") }}
+                onClick={() => { navigate("/child-basic-info") }}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
               >
                 Profile
               </button>
               <button
+                onClick={() => { navigate("/chat") }}
+                className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+              >
+                Chat
+              </button>
+              <button
                 onClick={handleLogout}
-                //onClick={() => navigate("/login")}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10">
                 Logout
               </button>

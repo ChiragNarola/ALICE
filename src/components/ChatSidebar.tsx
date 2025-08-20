@@ -5,41 +5,40 @@ import { useAuth } from "../contexts/AuthContext";
 
 interface ChatSidebarProps {
   chats: { id: number; title: string }[];
+  setIsSidebarOpen?: any,
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 const DropdownMenu = ({ onClose, onShare, onRename, onArchive, onDelete }: any) => (
   <div className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-lg py-2 z-50 animate-fade-in">
-    <button onClick={onShare} className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
+    {/* <button onClick={onShare} className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
       <span className="mr-2">
-        {/* Upload icon */}
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 16V4M12 4L7 9M12 4l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
       </span>Share
-    </button>
+    </button> */}
     <button onClick={onRename} className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
       <span className="mr-2">
         {/* Edit icon */}
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M16.475 5.408l2.117 2.117a2 2 0 0 1 0 2.828l-8.485 8.485a2 2 0 0 1-1.414.586H6v-2.693a2 2 0 0 1 .586-1.414l8.485-8.485a2 2 0 0 1 2.828 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
       </span>Rename
     </button>
-    <div className="border-t my-1" />
+    {/* <div className="border-t my-1" /> */}
     <button onClick={onArchive} className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
       <span className="mr-2">
         {/* Archive icon */}
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" /><path d="M16 3v4M8 3v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
       </span>Archive
     </button>
-    <button onClick={onDelete} className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50">
+    {/* <button onClick={onDelete} className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50">
       <span className="mr-2 text-red-600">
-        {/* Delete icon */}
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M6 7h12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7h12z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
       </span>Delete
-    </button>
+    </button> */}
   </div>
 );
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, onClose }) => {
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSidebarOpen, onClose }) => {
   const {
     replaceMessages,
     ensureAliceIntro,
@@ -89,6 +88,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, onClose
 
           replaceMessages(ui);
           ensureAliceIntro();
+          setIsSidebarOpen(false);
         }
       } catch (e) {
         console.error("Failed to load messages", e);

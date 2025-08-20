@@ -44,7 +44,7 @@ export const ChatProvider = ({ children }: { children: any }) => {
                 from: m.user_id === currentUserId ? "user" : "alice",
                 text: m.message,
                 ts: m.created_at,
-                actions: false,
+                actions: true,
             }));
     };
 
