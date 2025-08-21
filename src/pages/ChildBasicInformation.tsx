@@ -3,11 +3,12 @@ import Step1ChildInfo from '../components/Step1ChildInfo';
 import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
-import { submitStaffDetails, submitChildDetails } from '../api/api-services';
+import { submitStaffDetails, submitChildDetails, getChildDetailsForLoginUser, getStaffDetailsForLoginUser } from '../api/api-services';
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { toast } from 'react-toastify';
 import type { ChatInputRM } from '../routes/models/request/Child';
 import { useAuth } from '../contexts/AuthContext';
+import { useChildren } from '../contexts/ChildrenContext';
 
 const steps = [
   'Child’s Basic Information',
@@ -19,6 +20,7 @@ const steps = [
 interface StepRefHandle {
   validateAndSubmit: () => Promise<boolean>;
   getValues: () => any;
+  setFormValues: (data: any) => void;
 }
 
 
@@ -28,6 +30,7 @@ const ChildBasicInformation: React.FC = () => {
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [userDetails, setUserDetails] = useState<number>(0);
   const { user } = useAuth();
+  const { addChilddata } = useChildren();
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -66,114 +69,177 @@ const ChildBasicInformation: React.FC = () => {
     const newData = stepRef.current?.getValues?.();
     const finalData = { ...formSubmit, ...newData };
 
-    // console.log("Submitting final form data:", finalData);
+    console.log("Submitting final form data:", finalData);
 
-    try {
-      if (!user) return;
+    // try {
+    //   if (!user) return;
 
-      const isParent = user.roles?.includes("parent");
-      const isStaff = user.roles?.includes("staff");
+    //   const isParent = user.roles?.includes("parent");
+    //   const isStaff = user.roles?.includes("staff");
 
-      // Helper to build child payload
-      const buildChildPayload = (): ChatInputRM[] =>
-        finalData.children.map((child: any, index: number) => ({
-          id: child.id ?? 0,
-          name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
-          date_of_birth: child.dob || "",
-          gender: child.gender || "",
-          things_to_keep_in_mind: child.thingsToKeepInMind || "",
-          area_of_interest: finalData.topics?.[index] || [],
-          concerns: finalData.concerns?.[index] || [],
-        }));
+    //   // Helper to build child payload
+    //   const buildChildPayload = (): ChatInputRM[] =>
+    //     finalData.children.map((child: any, index: number) => ({
+    //       id: child.id ?? 0,
+    //       name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+    //       date_of_birth: child.dob || "",
+    //       gender: child.gender || "",
+    //       things_to_keep_in_mind: child.thingsToKeepInMind || "",
+    //       area_of_interest: finalData.topics?.[index] || [],
+    //       concerns: finalData.concerns?.[index] || [],
+    //     }));
 
-      //Helper to build staff FormData
-      const buildStaffForm = (): FormData => {
-        const formData = new FormData();
-        formData.append("age_group", finalData.age_group);
-        formData.append("role_in_organisation", finalData.role_in_organisation);
-        formData.append("qualification", finalData.qualification);
-        return formData;
-      };
+    //   //Helper to build staff FormData
+    //   const buildStaffForm = (): FormData => {
+    //     const formData = new FormData();
+    //     formData.append("age_group", finalData.age_group);
+    //     formData.append("role_in_organisation", finalData.role_in_organisation);
+    //     formData.append("qualification", finalData.qualification);
+    //     return formData;
+    //   };
 
-      // Parent + Staff → submit BOTH
-      if (isParent && isStaff) {
-        // 1. Child details
-        const childPayload = buildChildPayload();
-        // console.log("Child Payload:", childPayload);
-        const childRes = await submitChildDetails(childPayload);
-        if (childRes.IsSuccess) {
-          toast.success("Children details submitted successfully");
-        } else {
-          toast.error(childRes.Message || "Something went wrong with children details");
-        }
+    //   // Parent + Staff → submit BOTH
+    //   if (isParent && isStaff) {
+    //     // 1. Child details
+    //     const childPayload = buildChildPayload();
+    //     // console.log("Child Payload:", childPayload);
+    //     const childRes = await submitChildDetails(childPayload);
+    //     if (childRes.IsSuccess) {
+    //       toast.success("Children details submitted successfully");
+    //     } else {
+    //       toast.error(childRes.Message || "Something went wrong with children details");
+    //     }
 
-        // 2. Staff details
-        const staffForm = buildStaffForm();
-        const staffRes = await submitStaffDetails(staffForm);
-        if (staffRes.IsSuccess) {
-          toast.success("Staff details submitted successfully");
-        } else {
-          toast.error(staffRes.Message || "Something went wrong with staff details");
-        }
-      }
+    //     // 2. Staff details
+    //     const staffForm = buildStaffForm();
+    //     const staffRes = await submitStaffDetails(staffForm);
+    //     if (staffRes.IsSuccess) {
+    //       toast.success("Staff details submitted successfully");
+    //     } else {
+    //       toast.error(staffRes.Message || "Something went wrong with staff details");
+    //     }
+    //   }
 
-      // Staff only
-      else if (isStaff) {
-        const staffForm = buildStaffForm();
-        const staffRes = await submitStaffDetails(staffForm);
-        if (staffRes.IsSuccess) {
-          toast.success("Staff details submitted successfully");
-        } else {
-          toast.error(staffRes.Message);
-        }
-      }
+    //   // Staff only
+    //   else if (isStaff) {
+    //     const staffForm = buildStaffForm();
+    //     const staffRes = await submitStaffDetails(staffForm);
+    //     if (staffRes.IsSuccess) {
+    //       toast.success("Staff details submitted successfully");
+    //     } else {
+    //       toast.error(staffRes.Message);
+    //     }
+    //   }
 
-      // Parent only
-      else if (isParent) {
-        const childPayload = buildChildPayload();
-        // console.log("Child Payload:", childPayload);
-        const childRes = await submitChildDetails(childPayload);
-        if (childRes.IsSuccess) {
-          toast.success("Children details submitted successfully");
-        } else {
-          toast.error(childRes.Message || "Something went wrong");
-        }
-      }
+    //   // Parent only
+    //   else if (isParent) {
+    //     const childPayload = buildChildPayload();
+    //     // console.log("Child Payload:", childPayload);
+    //     const childRes = await submitChildDetails(childPayload);
+    //     if (childRes.IsSuccess) {
+    //       toast.success("Children details submitted successfully");
+    //     } else {
+    //       toast.error(childRes.Message || "Something went wrong");
+    //     }
+    //   }
 
-      //No role found
-      else {
-        toast.error("User has no matching roles");
-      }
-    } catch (error) {
-      console.error("Form submit error:", error);
-      toast.error("Failed to submit form. Please try again.");
-    }
+    //   //No role found
+    //   else {
+    //     toast.error("User has no matching roles");
+    //   }
+    // } catch (error) {
+    //   console.error("Form submit error:", error);
+    //   toast.error("Failed to submit form. Please try again.");
+    // }
   };
-
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
 
   useEffect(() => {
-    const user = localStorage.getItem("auth_user");
-
     if (user) {
-      const parsedUser = JSON.parse(user);
+      const parsedUser = user;
+
       if (parsedUser.roles) {
-        if (parsedUser.roles.length == 2) {
+        if (parsedUser.roles.length === 2) {
           setUserDetails(3); // has both the roles
         }
-        else if (parsedUser.roles.length == 1 && parsedUser.roles[0] === 'parent') {
-          setUserDetails(2); // has parent as roles
+        else if (
+          parsedUser.roles.length === 1 &&
+          parsedUser.roles[0] === "parent"
+        ) {
+          setUserDetails(2); // parent role
         }
-        else if (parsedUser.roles.length == 1 && parsedUser.roles[0] === 'staff') {
-          setUserDetails(1); // has staff as roles
-          setCurrentStep(3)
+        else if (
+          parsedUser.roles.length === 1 &&
+          parsedUser.roles[0] === "staff"
+        ) {
+          setUserDetails(1); // staff role
+          setCurrentStep(3);
         }
       }
-
     }
   }, []);
+
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        if (!user) return;
+        const isParent = user.roles?.includes("parent");
+        const isStaff = user.roles?.includes("staff");
+
+        const mapChildDetails = (children: any[]) =>
+          children
+            .filter(child => !child.is_deleted)
+            .map(child => {
+              const nameParts = (child.name || "").trim().split(" ");
+
+              const childData = {
+                id: child.id,
+                firstName: nameParts[0] || "",
+                middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : nameParts[1] || "",
+                lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
+                gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
+                dob: child.date_of_birth,
+                topics: (child.area_of_interest || []).map((a: any) => a.id),
+                concerns: (child.concerns || []).map((a: any) => a.id),
+              };
+
+              addChilddata(childData);
+
+              const { id, ...rest } = childData;
+              return rest;
+            });
+
+
+        if (isParent) {
+          const response = await getChildDetailsForLoginUser();
+          if (response.IsSuccess && Array.isArray(response.Data)) {
+            const apiChildren = mapChildDetails(response.Data);
+            stepRef.current?.setFormValues({ children: apiChildren });
+          }
+        }
+
+        if (isStaff) {
+          const staff_response = await getStaffDetailsForLoginUser();
+          if (staff_response.IsSuccess) {
+            stepRef.current?.setFormValues({
+              role_in_organisation: staff_response.Data.role_in_organisation || "",
+              qualification: staff_response.Data.qualification || "",
+              age_group: staff_response.Data.age_group || "1-5",
+            });
+          }
+        }
+
+      } catch (error) {
+        console.error("Error fetching child/staff details:", error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [currentStep, user]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (

@@ -16,13 +16,14 @@ const reviewSchema = z.object({
 type ReviewFormValues = z.infer<typeof reviewSchema>;
 
 const Step4ReviewSubmit = forwardRef<
-  { validateAndSubmit: () => Promise<boolean>; getValues: () => ReviewFormValues },
+  { validateAndSubmit: () => Promise<boolean>; getValues: () => ReviewFormValues; setFormValues: (data: ReviewFormValues) => void; },
   {}
 >((_, ref) => {
   const {
     control,
     getValues,
     trigger,
+    reset,
     formState: { errors },
   } = useForm<ReviewFormValues>({
     defaultValues: {
@@ -44,6 +45,10 @@ const Step4ReviewSubmit = forwardRef<
       return isValid;
     },
     getValues: () => getValues(),
+    setFormValues: (data) => {
+      // console.log("Step4 setFormValues called with:", data);
+      reset(data);
+    },
   }));
 
   return (
@@ -63,8 +68,8 @@ const Step4ReviewSubmit = forwardRef<
               {...field}
               placeholder="Enter your role..."
               className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${errors.role_in_organisation
-                  ? "border-red-500"
-                  : "border-alice-gray"
+                ? "border-red-500"
+                : "border-alice-gray"
                 }`}
             />
           )}
@@ -91,8 +96,8 @@ const Step4ReviewSubmit = forwardRef<
               {...field}
               placeholder="Enter your qualification..."
               className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${errors.qualification
-                  ? "border-red-500"
-                  : "border-alice-gray"
+                ? "border-red-500"
+                : "border-alice-gray"
                 }`}
             />
           )}

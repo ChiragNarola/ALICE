@@ -1,4 +1,5 @@
 export interface ChildInfo {
+  id?: number,
   topics: number[];
   concerns: number[];
   firstName: string;

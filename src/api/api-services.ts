@@ -2,7 +2,7 @@ import type { SignupFormInputs } from '../routes/models/request/Auth';
 import type { ChatInputProps, ConversationDTO } from '../routes/models/request/Chat';
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ConcernDTO, UserDTO } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import axios from 'axios';
 
@@ -115,6 +115,21 @@ export const submitStaffDetails = async (
     }
 };
 
+export const getStaffDetailsForLoginUser = async (): Promise<APIResponse<staffDTO>> => {
+    try {
+        const res = await axiosInstance.get(`users/staff_details`);
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching staff details failed",
+            }
+        );
+    }
+};
+
 //Child APIs
 export const submitChildDetails = async (
     formData: ChatInputRM[]
@@ -140,11 +155,9 @@ export const submitChildDetails = async (
     }
 };
 
-export const getChildDetailsByID = async (
-    id: number
-): Promise<APIResponse<any[]>> => {
+export const getChildDetailsForLoginUser = async (): Promise<APIResponse<ChildInputDTO[]>> => {
     try {
-        const res = await axiosInstance.get(`children/${id}`);
+        const res = await axiosInstance.get(`children/getChild`);
         return res.data;
     } catch (error: any) {
         throw (
