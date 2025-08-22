@@ -25,7 +25,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   messageRef,
   userRef,
   handleLogout,
-  handleToggle
+  handleToggle,
+  setIsSidebarOpen
 }) => {
   const navigate = useNavigate();
   const { clearMessages, ensureAliceIntro, setSelectedConversationId } = useChat();
@@ -66,6 +67,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     ensureAliceIntro();
     setSelectedConversationId(null);
     navigate("/chat");
+    setIsSidebarOpen(false);
   };
 
   return (
@@ -125,7 +127,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {showUserDropdown && (
             <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
               <button
-                onClick={() => { navigate("/child-basic-info") }}
+                onClick={() => { navigate("/child-basic-info"); setIsSidebarOpen(false); }}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
               >
                 Profile
