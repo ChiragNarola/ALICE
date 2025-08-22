@@ -23,7 +23,7 @@ const DashboardLayout: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const handleToggle = () => setIsSidebarOpen(prev => !prev);
 
-    const [chatList, setChatList] = useState<{ id: number; title: string }[]>([]);
+    const [chatList, setChatList] = useState<{ id: number; title: string, conversation_uuid: string }[]>([]);
 
     const fetchConversations = async () => {
         try {
@@ -36,6 +36,7 @@ const DashboardLayout: React.FC = () => {
                     .map((chat: ConversationDTO) => ({
                         id: chat.id,
                         title: chat.conversation_title,
+                        conversation_uuid: chat.conversation_uuid,
                     }));
 
                 setChatList(filteredChats);

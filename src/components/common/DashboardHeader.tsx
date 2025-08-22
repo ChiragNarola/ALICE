@@ -4,6 +4,7 @@ import userimg from "../../assets/images/user-img.png";
 import { useNavigate } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import PageLoader from "./PageLoader";
+import { useChat } from "../../contexts/ChatContext";
 
 interface DashboardHeaderProps {
   showMessageDropdown: boolean;
@@ -27,6 +28,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   handleToggle
 }) => {
   const navigate = useNavigate();
+  const { clearMessages, ensureAliceIntro, setSelectedConversationId } = useChat();
   const { isChatVisible } = useChatVisibility();
 
   const [userName, setUserName] = useState<string>()
@@ -59,7 +61,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     };
   }, [showUserDropdown, setShowUserDropdown, userRef]);
 
-
+  const onNewChat = () => {
+    clearMessages();
+    ensureAliceIntro();
+    setSelectedConversationId(null);
+    navigate("/chat");
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-alice-peach px-4 sm:px-6 md:px-[30px] py-3 sm:py-4 md:py-5 flex items-center justify-between border-b border-alice-gray">
@@ -124,7 +131,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 Profile
               </button>
               <button
-                onClick={() => { navigate("/chat") }}
+                onClick={() => { onNewChat() }}
                 className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
               >
                 Chat

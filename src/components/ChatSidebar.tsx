@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { getConversationMessageById } from "../api/api-services";
 import { useChat } from "../contexts/ChatContext";
 import { useAuth } from "../contexts/AuthContext";
-import { Check, Save, X } from "lucide-react";
+import { Check, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ChatSidebarProps {
-  chats: { id: number; title: string }[];
+  chats: { id: number; title: string, conversation_uuid: string }[];
   setIsSidebarOpen?: any;
   isOpen?: boolean;
   onClose?: () => void;
@@ -48,8 +49,9 @@ const DropdownMenu = ({ onClose, onRename, onArchive }: any) => (
 );
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSidebarOpen, onClose, archive, rename }) => {
-  const { replaceMessages, ensureAliceIntro, selectedConversationId, setSelectedConversationId, mapApiToUI } = useChat();
+  const { clearMessages, replaceMessages, ensureAliceIntro, selectedConversationId, setSelectedConversationId, mapApiToUI } = useChat();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
@@ -62,7 +64,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
   const load = async () => {
     if (!selectedConversationId && !user) return;
     if (selectedIndex === 0) return;
-
     try {
       const response = await getConversationMessageById(selectedIndex);
       if (response.IsSuccess) {
@@ -88,6 +89,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
     setEditingChatId(null);
   };
 
+  const onNewChat = () => {
+    clearMessages();
+    ensureAliceIntro();
+    setSelectedIndex(0);
+    setSelectedConversationId(null);
+    navigate("/chat");
+    setIsSidebarOpen(false);
+  };
   return (
     <aside
       className={`
@@ -106,7 +115,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
           &times;
         </button>
       </div>
-
+      <button
+        onClick={onNewChat}
+        className="w-full mb-3 px-3 py-2 text-sm bg-teal-800 text-white hover:bg-teal-900 rounded-lg shadow-sm transition"
+      >
+        + New Chat
+      </button>
       <ul className="space-y-1 h-full max-h-[calc(100vh-80px)] overflow-y-auto scroll-smooth custom-scrollbar pe-2">
         {chats.map((chat, idx) => (
           <li key={chat.id} className="relative group">
@@ -114,7 +128,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors duration-150
                 ${idx === selectedIndex ? "bg-gray-100 text-gray-900 font-medium" : "hover:bg-gray-50 text-gray-700"}
               `}
-              onClick={() => editingChatId === null && (setSelectedIndex(chat.id), setSelectedConversationId(chat.id))}
+              onClick={() => editingChatId === null && (setSelectedIndex(chat.id), setSelectedConversationId(chat.id), chat.conversation_uuid ? navigate(`/chat?v=${chat.conversation_uuid}`) : '')}
             >
               {editingChatId === chat.id ? (
                 <>

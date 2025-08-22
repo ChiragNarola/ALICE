@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import type { ChatInputProps } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
+import { useSearchParams } from "react-router-dom";
 
 type Message = {
   from: "alice" | "user";
@@ -29,11 +30,16 @@ const ChatPage: React.FC = () => {
       actions: true,
     },
   ]);
-
+  const [searchParams] = useSearchParams();
   const handleGenerate = () => {
-    const uniqueId = uuidv4();
-    setChatboardUniqueId(uniqueId);
-    // console.log("Generated UUID:", uniqueId);
+    const conversationUUID = searchParams.get("v");
+    if (conversationUUID) {
+      setChatboardUniqueId(conversationUUID);
+    } else {
+      const uniqueId = uuidv4();
+      setChatboardUniqueId(uniqueId);
+      // console.log("Generated UUID:", uniqueId);
+    }
   };
 
   useEffect(() => {
