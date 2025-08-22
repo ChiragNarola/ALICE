@@ -49,17 +49,17 @@ body {
 }
 
 .chat_wrapper::-webkit-scrollbar {
-  width: 0px;
+  width: 10px;
 }
 
-/* .chat_wrapper::-webkit-scrollbar-thumb{
-    border-radius: 10px !important;
-    background-color: #008080 !important;
+.chat_wrapper::-webkit-scrollbar-thumb {
+  border-radius: 10px !important;
+  background-color: #008080 !important;
 }
 
-.chat_wrapper::-webkit-scrollbar-track{
-    border-radius: 10px !important;
-} */
+.chat_wrapper::-webkit-scrollbar-track {
+  border-radius: 10px !important;
+}
 
 .multi-range-slider .bar-left,
 .multi-range-slider .thumb::before,

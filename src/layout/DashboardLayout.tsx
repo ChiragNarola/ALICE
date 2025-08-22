@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { Outlet } from "react-router-dom";
 import { ChatVisibilityProvider } from "../contexts/ChatVisibilityContext";
 import ChatSidebar from "../components/ChatSidebar";
-import { getConversationList } from '../api/api-services';
+import { getConversationList, updateConversationtitleById, archiveConversationById } from '../api/api-services';
 import type { ConversationDTO } from "../routes/models/request/Chat";
 
 const DashboardLayout: React.FC = () => {
@@ -25,29 +25,62 @@ const DashboardLayout: React.FC = () => {
 
     const [chatList, setChatList] = useState<{ id: number; title: string }[]>([]);
 
-    useEffect(() => {
-        const fetchConversations = async () => {
-            try {
-                const response = await getConversationList();
+    const fetchConversations = async () => {
+        try {
+            const response = await getConversationList();
+            // console.log(response);
+            if (response.IsSuccess && response.Data) {
+                // filter out deleted, then map to {id, title}
+                const filteredChats = response.Data
+                    .filter((chat: ConversationDTO) => !chat.is_deleted && !chat.is_archived)
+                    .map((chat: ConversationDTO) => ({
+                        id: chat.id,
+                        title: chat.conversation_title,
+                    }));
 
-                if (response.IsSuccess && response.Data) {
-                    // filter out deleted, then map to {id, title}
-                    const filteredChats = response.Data
-                        .filter((chat: ConversationDTO) => !chat.is_deleted)
-                        .map((chat: ConversationDTO) => ({
-                            id: chat.id,
-                            title: chat.conversation_title,
-                        }));
-
-                    setChatList(filteredChats);
-                }
-            } catch (error) {
-                console.error("Error fetching conversations:", error);
+                setChatList(filteredChats);
             }
-        };
+        } catch (error) {
+            console.error("Error fetching conversations:", error);
+        }
+    };
 
+    useEffect(() => {
         fetchConversations();
     }, []);
+
+    // Archive conversation
+    const Archive = async (id: number) => {
+        try {
+            const response = await archiveConversationById(id);
+            if (response.IsSuccess) {
+                toast.success("Conversation archived successfully.");
+                fetchConversations();
+            }
+        } catch (error) {
+            console.error("Error archiving conversation:", error);
+        }
+    };
+
+    // Rename chat inline
+    const renameInline = async (chatId: number, editedTitle: string) => {
+        try {
+            if (!editedTitle.trim()) return;
+
+            const formData = new FormData();
+            formData.append("title", editedTitle);
+
+            const response = await updateConversationtitleById(chatId, formData);
+            if (response.IsSuccess) {
+                toast.success("Chat renamed successfully!");
+                fetchConversations();
+                // setEditingChatId(null);
+            }
+        } catch (error) {
+            console.error("Failed to rename chat:", error);
+        }
+    };
+
     return (
         <ChatVisibilityProvider>
             <div className="min-h-screen flex flex-col bg-[#FEFCF8]">
@@ -58,7 +91,7 @@ const DashboardLayout: React.FC = () => {
                         aria-label="Close sidebar overlay"
                     />
                 )}
-                <ChatSidebar chats={chatList} isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onClose={handleToggle} />
+                <ChatSidebar chats={chatList} isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onClose={handleToggle} archive={Archive} rename={renameInline} />
                 <DashboardHeader
                     showMessageDropdown={showMessageDropdown}
                     setShowMessageDropdown={setShowMessageDropdown}

@@ -130,14 +130,43 @@ export const getStaffDetailsForLoginUser = async (): Promise<APIResponse<staffDT
     }
 };
 
+export const updatestaffDetails = async (
+    formData: FormData
+): Promise<APIResponse<StaffDetails>> => {
+    try {
+        const urlEncoded = new URLSearchParams();
+        formData.forEach((value, key) => {
+            urlEncoded.append(key, value.toString());
+        });
+
+        const response = await axiosInstance.put<APIResponse<StaffDetails>>(
+            `/users/staff_details`,
+            urlEncoded.toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Staff details submission failed",
+        };
+    }
+};
+
 //Child APIs
-export const submitChildDetails = async (
+export const insertChildDetails = async (
     formData: ChatInputRM[]
 ): Promise<APIResponse<ChatInputRM>> => {
     try {
         const response = await axiosInstance.post<APIResponse<ChatInputRM>>(
             "/children/create",
-            formData, // send as JSON
+            formData,
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -155,6 +184,31 @@ export const submitChildDetails = async (
     }
 };
 
+export const updateChildDetails = async (
+    id: number,
+    formData: FormData
+): Promise<APIResponse<ChatInputRM>> => {
+    try {
+        const response = await axiosInstance.put<APIResponse<ChatInputRM>>(
+            `/children/${id}`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Children details update failed",
+        };
+    }
+};
+
 export const getChildDetailsForLoginUser = async (): Promise<APIResponse<ChildInputDTO[]>> => {
     try {
         const res = await axiosInstance.get(`children/getChild`);
@@ -167,6 +221,15 @@ export const getChildDetailsForLoginUser = async (): Promise<APIResponse<ChildIn
                 Message: "Fetching children details failed",
             }
         );
+    }
+};
+
+export const deleteChildApi = async (id: number): Promise<APIResponse<any>> => {
+    try {
+        const response = await axiosInstance.delete(`/children/delete?id=${id}`);
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data || { message: 'Delete failed' };
     }
 };
 
@@ -376,6 +439,8 @@ export const chatAPI = async (requestdata: ChatInputProps): Promise<any> => {
     }
 };
 
+
+
 //Conversation APIs
 export const getConversationList = async (): Promise<APIResponse<ConversationDTO[]>> => {
     try {
@@ -406,4 +471,46 @@ export const getConversationMessageById = async (id: number): Promise<APIRespons
         );
     }
 };
+
+export const archiveConversationById = async (id: number): Promise<APIResponse<ConversationDTO[]>> => {
+    try {
+        const res = await axiosInstance.patch(`conversation/archiveConversation/${id}`);
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching Conversation failed",
+            }
+        );
+    }
+};
+
+export const updateConversationtitleById = async (id: number, formData: FormData): Promise<APIResponse<ConversationDTO[]>> => {
+    const urlEncoded = new URLSearchParams();
+    formData.forEach((value, key) => {
+        urlEncoded.append(key, value.toString());
+    });
+    try {
+        const response = await axiosInstance.patch(
+            `conversation/updateConversationTitle/${id}`,
+            urlEncoded.toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to create concern",
+        };
+    }
+};
+
 

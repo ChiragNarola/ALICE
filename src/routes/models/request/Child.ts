@@ -12,7 +12,7 @@ export interface ChildInfo {
 }
 
 export interface ChatInputRM {
-  id: number;
+  id?: number;
   name: string;
   date_of_birth: string;
   gender: string;

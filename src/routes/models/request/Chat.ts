@@ -10,6 +10,7 @@ export interface ConversationDTO {
     is_testdata: boolean;
     conversation_uuid: string;
     is_deleted: boolean;
+    is_archived: boolean;
     created_at: string;
     conversation_title: string;
 }

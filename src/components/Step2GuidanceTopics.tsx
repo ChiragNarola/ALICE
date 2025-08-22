@@ -1,8 +1,9 @@
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import topic_img from '../assets/images/topic-icon.svg';
 import { useChildren } from '../contexts/ChildrenContext';
-import { area_of_interests } from '../api/api-services';
+import { area_of_interests, deleteChildApi } from '../api/api-services';
 import type { AreaOfInterestDTO } from '../routes/models/response/Response';
+import { toast } from 'react-toastify';
 
 export interface StepRefType {
   validateAndSubmit: () => Promise<boolean>;
@@ -60,6 +61,26 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
     });
   };
 
+  function handleDelete(idx: number, child_id: number | undefined) {
+    if (window.confirm("Are you sure you want to delete this child?")) {
+      if (child_id) {
+        deleteChildApi(child_id).then((result) => {
+          if (result?.IsSuccess) {
+            toast.success("Child deleted successfully");
+            deleteChild(idx);
+          } else {
+            toast.error(result.Message);
+            console.error("Failed to delete child", result);
+          }
+        }).catch((error) => {
+          console.error("Error deleting child:", error);
+        });
+      } else {
+        deleteChild(idx);
+      }
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-top sm:justify-between gap-4">
@@ -84,9 +105,9 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
               }`}
           >
             <div className="absolute top-4 right-4">
-              {idx !== 0 && <button
+              {children.length > 1 && <button
                 type="button"
-                onClick={() => deleteChild(idx)}
+                onClick={() => handleDelete(idx, child.id)}
                 className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-[#F00044] text-white font-semibold flex items-center gap-1 px-3 py-1.5 sm:px-[10px] sm:py-[5px] rounded-md hover:bg-[#e6002e] transition-colors text-sm"
               >
                 <svg width="18" height="18" className="me-[6px]" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
