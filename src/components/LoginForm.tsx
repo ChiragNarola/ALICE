@@ -6,9 +6,11 @@ import { useAuth } from '../contexts/AuthContext';
 import type { LoginFormInputs } from '../routes/models/request/Auth';
 import 'react-phone-input-2/lib/style.css';
 import { Eye, EyeOff } from 'lucide-react';
+import { useChildren } from '../contexts/ChildrenContext';
 
 const LoginForm = () => {
   const { login, logout } = useAuth();
+  const { clearChild } = useChildren();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +31,7 @@ const LoginForm = () => {
       const response = await login(formData);
 
       if (response?.IsSuccess) {
+        clearChild();
         const roles = response.Data?.user?.roles ?? [];
         const role = roles[0]; // assuming single role per user
 
@@ -159,3 +162,4 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+

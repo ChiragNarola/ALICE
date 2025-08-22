@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  GraduationCap,
   Laptop2,
   ClipboardCheck
 } from "lucide-react";

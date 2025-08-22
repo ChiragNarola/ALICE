@@ -8,6 +8,7 @@ type ChildrenContextType = {
   addChild: () => void;
   addChilddata: (data: ChildInfo) => void;
   deleteChild: (index: number) => void;
+  clearChild: () => void;
 };
 
 const ChildrenContext = createContext<ChildrenContextType | undefined>(undefined);
@@ -52,8 +53,12 @@ export const ChildrenProvider = ({ children: node }: { children: ReactNode }) =>
     setChildren((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const clearChild = () => {
+    setChildren([]);
+  };
+
   return (
-    <ChildrenContext.Provider value={{ children, updateChild, addChild, addChilddata, deleteChild }}>
+    <ChildrenContext.Provider value={{ children, updateChild, addChild, addChilddata, deleteChild, clearChild }}>
       {node}
     </ChildrenContext.Provider>
   );
