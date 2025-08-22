@@ -185,12 +185,11 @@ export const insertChildDetails = async (
 };
 
 export const updateChildDetails = async (
-    id: number,
-    formData: FormData
+    formData: ChatInputRM[]
 ): Promise<APIResponse<ChatInputRM>> => {
     try {
         const response = await axiosInstance.put<APIResponse<ChatInputRM>>(
-            `/children/${id}`,
+            `/children/update_children`,
             formData,
             {
                 headers: {

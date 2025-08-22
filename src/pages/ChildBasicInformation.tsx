@@ -75,7 +75,6 @@ const ChildBasicInformation: React.FC = () => {
       const isParent = user.roles?.includes("parent");
       const isStaff = user.roles?.includes("staff");
 
-      // ----- Helper: Build staff FormData -----
       const buildStaffForm = (): FormData => {
         const formData = new FormData();
         formData.append("age_group", finalData.age_group);
@@ -84,30 +83,26 @@ const ChildBasicInformation: React.FC = () => {
         return formData;
       };
 
-      // ----- Submit children -----
+      const successRoles: string[] = [];
+      const failedRoles: string[] = [];
+
+      // ----- Parent block -----
       if (isParent) {
-        const newChildren = []; // collect new children here
+        const newChildren: any[] = [];
+        const updateChildren: any[] = [];
 
         for (const [index, child] of finalData.children.entries()) {
           if (child.id && child.id > 0) {
-            // ---- UPDATE existing child ----
-            const formData = new FormData();
-            formData.append("name", [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "));
-            formData.append("date_of_birth", child.dob || "");
-            formData.append("gender", child.gender || "");
-            formData.append("things_to_keep_in_mind", child.thingsToKeepInMind || "");
-            formData.append("area_of_interest", JSON.stringify(child.topics || []));
-            formData.append("concerns", JSON.stringify(child.concerns || []));
-
-            const res = await updateChildDetails(child.id, formData);
-            if (res.IsSuccess) {
-              toast.success(`Child ${child.firstName} updated successfully`);
-            } else {
-              toast.error(res.Message || `Failed to update ${child.firstName}`);
-            }
-
+            updateChildren.push({
+              id: child.id,
+              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+              date_of_birth: child.dob || "",
+              gender: child.gender || "",
+              things_to_keep_in_mind: child.thingsToKeepInMind || "",
+              area_of_interest: finalData.topics[index] || [],
+              concerns: finalData.concerns[index] || []
+            });
           } else {
-            // ---- COLLECT new child for later insert ----
             newChildren.push({
               id: 0,
               name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
@@ -120,29 +115,49 @@ const ChildBasicInformation: React.FC = () => {
           }
         }
 
-        // ---- Perform insert in one API call ----
-        if (newChildren.length > 0) {
-          const res = await insertChildDetails(newChildren);
-          if (res.IsSuccess) {
-            toast.success(`Added ${newChildren.length} child(ren) successfully`);
-          } else {
-            toast.error(res.Message || "Failed to add new children");
+        try {
+          if (newChildren.length > 0) {
+            const res = await insertChildDetails(newChildren);
+            if (!res.IsSuccess) throw new Error(res.Message || "Insert failed");
           }
+          if (updateChildren.length > 0) {
+            const res = await updateChildDetails(updateChildren);
+            if (!res.IsSuccess) throw new Error(res.Message || "Update failed");
+          }
+          successRoles.push("child");
+        } catch (err) {
+          console.error("Parent error:", err);
+          failedRoles.push("child");
         }
       }
 
-      // ----- Submit staff -----
+      // ----- Staff block -----
       if (isStaff) {
-        const staffForm = buildStaffForm();
-        const staffRes = user.isStaffDetailAdded ? await updatestaffDetails(staffForm) : await submitStaffDetails(staffForm);
-        if (staffRes.IsSuccess) {
-          toast.success("Staff details submitted successfully");
-        } else {
-          toast.error(staffRes.Message || "Something went wrong with staff details");
+        try {
+          const staffForm = buildStaffForm();
+          const staffRes = user.isStaffDetailAdded
+            ? await updatestaffDetails(staffForm)
+            : await submitStaffDetails(staffForm);
+
+          if (!staffRes.IsSuccess) throw new Error(staffRes.Message || "Staff failed");
+          successRoles.push("staff");
+        } catch (err) {
+          console.error("Staff error:", err);
+          failedRoles.push("staff");
         }
       }
 
-      if (!isParent && !isStaff) {
+      // ----- Final toast -----
+      if (successRoles.length && !failedRoles.length) {
+        toast.success(`Details submitted successfully.`);
+      } else if (failedRoles.length && !successRoles.length) {
+        toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
+        // toast.error(`Failed to submit details for [${failedRoles.join(", ")}]`);
+      } else if (successRoles.length && failedRoles.length) {
+        toast.info(
+          `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
+        );
+      } else {
         toast.error("User has no matching roles");
       }
     } catch (error) {
@@ -150,7 +165,6 @@ const ChildBasicInformation: React.FC = () => {
       toast.error("Failed to submit form. Please try again.");
     }
   };
-
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
