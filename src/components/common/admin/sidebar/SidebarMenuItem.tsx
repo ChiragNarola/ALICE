@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 
 import type { SidebarItemBadge, SidebarSubItem } from "./SidebarItems";
@@ -46,8 +46,8 @@ export function SidebarMenuItem({
         className={`
           flex w-full items-center gap-2 rounded-md px-2 py-3 text-sm font-semibold
           transition-colors duration-200
-          ${isActive 
-            ? "bg-[#dbfff3b7]  text-[#008080]"  
+          ${isActive
+            ? "bg-[#dbfff3b7]  text-[#008080]"
             : "text-[#333333] hover:bg-teal-100"}             
           ${collapsed ? "justify-center" : ""}
         `}

@@ -1,5 +1,3 @@
-import React from "react";
-
 const AdminDashboard = () => {
   return (
     <div className="p-6 space-y-6">

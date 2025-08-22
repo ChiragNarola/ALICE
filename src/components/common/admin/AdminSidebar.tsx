@@ -14,7 +14,7 @@ export function Sidebar({ className }: SidebarProps) {
     const [collapsed, setCollapsed] = useState(false);
     const [posExpanded, setPosExpanded] = useState(false);
     const location = useLocation();
-
+    console.log(className);
     const isPosPath = location.pathname.startsWith('/pos');
 
     useEffect(() => {

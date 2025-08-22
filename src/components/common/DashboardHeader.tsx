@@ -3,7 +3,7 @@ import logo from "../../assets/images/logo.svg";
 import userimg from "../../assets/images/user-img.png";
 import { useNavigate } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
-import PageLoader from "./PageLoader";
+// import PageLoader from "./PageLoader";
 import { useChat } from "../../contexts/ChatContext";
 
 interface DashboardHeaderProps {
@@ -22,7 +22,7 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   showUserDropdown,
   setShowUserDropdown,
-  messageRef,
+  // messageRef,
   userRef,
   handleLogout,
   handleToggle,

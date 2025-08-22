@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Button from "../../ui/Button";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
 import { Users, Search } from "lucide-react";

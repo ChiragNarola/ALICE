@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Button from "../../ui/Button";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { Search, ClipboardCheck, Laptop2, Trash2 } from "lucide-react";
+import { Search, Laptop2, Trash2 } from "lucide-react";
 import { getAreasOfInterestList, deleteAreaOfInterest, createAreaOfInterest } from "../../../api/api-services";
 import type { AreaOfInterestDTO } from "../../../routes/models/response/Response";
 import { toast } from "react-toastify";

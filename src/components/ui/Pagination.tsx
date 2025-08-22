@@ -21,7 +21,7 @@ export default function Pagination({
 }: PaginationProps) {
     const startEntry = (currentPage - 1) * pageSize + 1;
     const endEntry = Math.min(currentPage * pageSize, totalEntries);
-    const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+    // const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
     function getVisiblePages(current: number, total: number, maxVisible = 5) {
         const pages: (number | "...")[] = [];

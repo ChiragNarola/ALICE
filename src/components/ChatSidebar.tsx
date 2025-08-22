@@ -14,7 +14,7 @@ interface ChatSidebarProps {
   rename?: (id: number, title: string) => void;
 }
 
-const DropdownMenu = ({ onClose, onRename, onArchive }: any) => (
+const DropdownMenu = ({ onRename, onArchive }: any) => (
   <div className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-lg py-2 z-50 animate-fade-in">
     <button
       onClick={onRename}

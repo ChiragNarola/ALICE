@@ -1,4 +1,4 @@
-import logo from "../../../assets/images/favicon.ico"
+// import logo from "../../../assets/images/favicon.ico"
 import Avatar from "react-avatar";
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";

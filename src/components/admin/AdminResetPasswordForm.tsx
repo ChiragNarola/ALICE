@@ -15,7 +15,7 @@ const AdminResetPasswordForm = () => {
     mode: 'onChange',
   });
 
-  const onSubmit = async (data: { password: string; confirmPassword: string }) => {
+  const onSubmit = async () => {
     setLoading(true);
     try {
       // TODO: Replace with actual reset password logic
@@ -74,9 +74,8 @@ const AdminResetPasswordForm = () => {
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 text-sm font-semibold text-white bg-alice-teal hover:bg-teal-700 rounded-md transition duration-200 ${
-          loading ? 'opacity-70 cursor-not-allowed' : ''
-        }`}
+        className={`w-full py-3 text-sm font-semibold text-white bg-alice-teal hover:bg-teal-700 rounded-md transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''
+          }`}
       >
         {loading ? (
           <div className="flex items-center justify-center gap-2">

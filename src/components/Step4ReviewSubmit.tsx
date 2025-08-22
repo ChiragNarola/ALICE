@@ -39,7 +39,7 @@ const Step4ReviewSubmit = forwardRef<
     validateAndSubmit: async () => {
       const isValid = await trigger();
       if (isValid) {
-        const values = getValues();
+        // const values = getValues();
         //console.log("Step 4 Values:", values);
       }
       return isValid;
