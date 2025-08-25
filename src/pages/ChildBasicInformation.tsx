@@ -98,7 +98,7 @@ const ChildBasicInformation: React.FC = () => {
           if (child.id && child.id > 0) {
             updateChildren.push({
               id: child.id,
-              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+              name: [child.firstName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.thingsToKeepInMind || "",
@@ -108,7 +108,7 @@ const ChildBasicInformation: React.FC = () => {
           } else {
             newChildren.push({
               id: 0,
-              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+              name: [child.firstName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.thingsToKeepInMind || "",
