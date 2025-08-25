@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 const childSchema = z.object({
   id: z.number().optional(),
   firstName: z.string().min(1, "First name is required"),
-  middleName: z.string().min(1, "Middle name is required"),
+  middleName: z.string().optional(),
   lastName: z.string().min(1, "Last name is required"),
   gender: z.enum(['Boy', 'Girl', 'Prefer not to say']),
   dob: z.string().min(1, "Date of Birth is required"),
@@ -202,7 +202,7 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
             {/* Middle Name */}
             <div className="flex-1 min-w-[180px]">
               <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-                <span className="bg-[#FEFCF8] px-[5px]">Child’s Middle Name <span className="text-red-500">*</span></span>
+                <span className="bg-[#FEFCF8] px-[5px]">Child’s Middle Name</span>
               </label>
               <Controller
                 name={`children.${idx}.middleName`}
