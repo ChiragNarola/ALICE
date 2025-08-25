@@ -5,6 +5,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css"; // default styles
 
 interface ChatSidebarProps {
   chats: { id: number; title: string, conversation_uuid: string }[];
@@ -196,7 +198,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
                   </div>
                 </>
               ) : (
-                <span className="truncate">{chat.title}</span>
+                <Tippy content={chat.title} placement="bottom">
+                  <span className="truncate cursor-help">{chat.title}</span>
+                </Tippy>
               )}
 
               <span

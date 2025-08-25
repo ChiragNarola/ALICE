@@ -19,7 +19,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                             type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            placeholder={`Hello ${user?.firstName}, welcome! Please type your question below, and I’ll be happy to help.`}
+                            placeholder={`Hello ${user?.firstName}, How may I help you today?`}
                             className="w-full flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-base md:text-lg px-2 font-normal"
                         />
                     </div>
