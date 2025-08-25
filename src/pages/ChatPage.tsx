@@ -19,7 +19,7 @@ type Message = {
 };
 
 const ChatPage: React.FC = () => {
-  const { messages } = useChat();
+  const { messages, refreshChatList } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const [message, setMessage] = useState("");
@@ -93,6 +93,7 @@ const ChatPage: React.FC = () => {
           },
         ]);
         setMessage("");
+        refreshChatList();
       }
     } catch (error) {
       console.error("Chat send error:", error);
