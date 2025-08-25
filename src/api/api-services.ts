@@ -512,4 +512,39 @@ export const updateConversationtitleById = async (id: number, formData: FormData
     }
 };
 
+export const updateConversationReactionById = async (id: number, reaction: number): Promise<APIResponse<ConversationDTO[]>> => {
+    try {
+        const response = await axiosInstance.patch(
+            `conversation/updateConversation/${id}`,
+            null,
+            {
+                params: { reaction: reaction },
+            }
+        );
 
+
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to create concern",
+        };
+    }
+};
+
+
+export const getConversationMessageByUUId = async (UUID: string | undefined): Promise<APIResponse<ConversationDTO[]>> => {
+    try {
+        const res = await axiosInstance.get(`conversation/conversations/${UUID}/messages`);
+        return res.data;
+    } catch (error: any) {
+        throw (
+            error?.response?.data ?? {
+                IsSuccess: false,
+                Data: null,
+                Message: "Fetching Conversation failed",
+            }
+        );
+    }
+};

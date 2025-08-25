@@ -22,6 +22,7 @@ export interface ChatMessageUI {
     from: Sender;
     text: string;
     actions?: boolean;
+    like?: string | null;
     ts?: string;
 }
 

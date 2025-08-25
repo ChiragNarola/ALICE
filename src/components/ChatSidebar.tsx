@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getConversationMessageById } from "../api/api-services";
+import { getConversationMessageByUUId } from "../api/api-services";
 import { useChat } from "../contexts/ChatContext";
 import { useAuth } from "../contexts/AuthContext";
 import { Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 interface ChatSidebarProps {
   chats: { id: number; title: string, conversation_uuid: string }[];
@@ -49,7 +50,7 @@ const DropdownMenu = ({ onRename, onArchive }: any) => (
 );
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSidebarOpen, onClose, archive, rename }) => {
-  const { clearMessages, replaceMessages, ensureAliceIntro, selectedConversationId, setSelectedConversationId, mapApiToUI } = useChat();
+  const { clearMessages, replaceMessages, ensureAliceIntro, setSelectedConversationId, mapApiToUI } = useChat();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -59,29 +60,57 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
   const [editedTitle, setEditedTitle] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Load conversation messages
-  const load = async () => {
-    if (!selectedConversationId && !user) return;
-    if (selectedIndex === 0) return;
-    try {
-      const response = await getConversationMessageById(selectedIndex);
-      if (response.IsSuccess) {
-        const apiMessages: any[] = Array.isArray(response) ? response : response?.Data ?? [];
-        const filteredMessages = apiMessages.filter((item) => !item.is_deleted && !item.is_archived);
-        const ui = mapApiToUI(filteredMessages, user?.id ?? 0);
-        replaceMessages(ui);
-        ensureAliceIntro();
-        setIsSidebarOpen(false);
-      }
-    } catch (e) {
-      console.error("Failed to load messages", e);
-    }
-  };
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    load();
-  }, [selectedIndex]);
+    const conversationUUID = searchParams.get("v");
+
+    if (!conversationUUID || !user) return;
+
+    const fetchMessages = async () => {
+      try {
+        const response = await getConversationMessageByUUId(conversationUUID);
+
+        if (response?.IsSuccess) {
+          const apiMessages: any[] = Array.isArray(response) ? response : response?.Data ?? [];
+          const filteredMessages = apiMessages.filter((item) => !item.is_deleted && !item.is_archived);
+
+          const ui = mapApiToUI(filteredMessages, user?.id ?? 0);
+          replaceMessages(ui);
+          ensureAliceIntro();
+          setIsSidebarOpen(false);
+        }
+      } catch (e) {
+        console.error("Failed to load messages", e);
+      }
+    };
+
+    fetchMessages();
+  }, [searchParams, user]);
+
+
+  // Load conversation messages
+  // const load = async () => {
+  //   if (!selectedConversationId && !user) return;
+  //   if (selectedIndex === 0) return;
+  //   try {
+  //     const response = await getConversationMessageById(selectedIndex);
+  //     if (response.IsSuccess) {
+  //       const apiMessages: any[] = Array.isArray(response) ? response : response?.Data ?? [];
+  //       const filteredMessages = apiMessages.filter((item) => !item.is_deleted && !item.is_archived);
+  //       const ui = mapApiToUI(filteredMessages, user?.id ?? 0);
+  //       replaceMessages(ui);
+  //       ensureAliceIntro();
+  //       setIsSidebarOpen(false);
+  //     }
+  //   } catch (e) {
+  //     console.error("Failed to load messages", e);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   load();
+  // }, [selectedIndex]);
 
   const handleRenameSave = (chatId: number) => {
     if (!editedTitle.trim()) return;

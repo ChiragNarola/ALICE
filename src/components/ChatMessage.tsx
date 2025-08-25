@@ -1,15 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { getConversationMessageByUUId } from "../api/api-services";
 
 interface ChatMessageProps {
     from: "alice" | "user";
     text: string;
     actions?: boolean;
     userimg: string;
+    like?: string | null;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg }) => {
     const isAlice = from === "alice";
+    const [liked, setLiked] = useState(false);
+    const [disliked, setDisliked] = useState(false);
     const copyToClipboard = async (text: string) => {
         try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -31,6 +35,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg 
             console.error("Failed to copy!", err);
         }
     };
+
+    const handleLike = () => {
+        setLiked(!liked);
+        if (!liked && disliked) setDisliked(false); // remove dislike if like is clicked
+    };
+
+    const handleDislike = () => {
+        setDisliked(!disliked);
+        if (!disliked && liked) setLiked(false); // remove like if dislike is clicked
+    };
+
 
 
     return (
@@ -61,6 +76,44 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg 
                             </svg>
                             Share
                         </button> */}
+                        {/* Like (Thumbs Up) */}
+                        <button
+                            onClick={handleLike}
+                            className={`flex items-center gap-2 hover:underline text-sm sm:text-base font-normal ${liked ? "text-green-600" : ""
+                                }`}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18" height="18"
+                                fill={liked ? "green" : "#008080"}
+                                viewBox="0 0 24 24"
+                            >
+                                <path d="M2 21h4V9H2v12zM23 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32
+                       c0-.41-.17-.79-.44-1.06L14.17 2 7.59 8.59C7.21 8.95 7 9.45 7 10v9c0 
+                       1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                            </svg>
+
+                        </button>
+
+                        {/* Dislike (Thumbs Down) */}
+                        <button
+                            onClick={handleDislike}
+                            className={`flex items-center gap-2 hover:underline text-sm sm:text-base font-normal ${disliked ? "text-red-600" : ""
+                                }`}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18" height="18"
+                                fill={disliked ? "red" : "#008080"}
+                                viewBox="0 0 24 24"
+                            >
+                                <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22L1.14 11.27c-.09.23-.14.47-.14.73v2c0 
+                       1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 
+                       22l6.59-6.59c.38-.36.59-.86.59-1.41V5c0-1.1-.9-2-2-2zm7 
+                       0h-4v12h4V3z"/>
+                            </svg>
+
+                        </button>
                     </div>
                 )}
             </div>
