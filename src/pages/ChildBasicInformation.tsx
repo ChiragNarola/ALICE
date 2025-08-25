@@ -231,8 +231,22 @@ const ChildBasicInformation: React.FC = () => {
           const response = await getChildDetailsForLoginUser();
           if (response.IsSuccess && Array.isArray(response.Data)) {
             const apiChildren = mapChildDetails(response.Data);
-            console.log(apiChildren);
+            // console.log(apiChildren);
             stepRef.current?.setFormValues({ children: apiChildren });
+          } else {
+            stepRef.current?.setFormValues({
+              children: [
+                {
+                  firstName: '',
+                  middleName: '',
+                  lastName: '',
+                  gender: 'Boy',
+                  dob: '',
+                  topics: [],
+                  concerns: [],
+                }
+              ]
+            });
           }
         }
 
