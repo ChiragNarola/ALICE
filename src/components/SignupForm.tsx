@@ -127,7 +127,7 @@ const SignupForm = () => {
             type="radio"
             value="country"
             checked={locationType === 'country'}
-            onChange={() => setLocationType('country')}
+            onChange={() => { setLocationType('country'); setValue('location', ''); }}
             className="w-6 h-6 border border-[#1B1B1B80] rounded-[4px] bg-[#FEFCF8] accent-alice-teal focus:ring-0"
           />
           Country
@@ -137,7 +137,7 @@ const SignupForm = () => {
             type="radio"
             value="pincode"
             checked={locationType === 'pincode'}
-            onChange={() => setLocationType('pincode')}
+            onChange={() => { setLocationType('pincode'); setValue('location', ''); }}
             className="w-6 h-6 border border-[#1B1B1B80] rounded-[4px] bg-[#FEFCF8] accent-alice-teal focus:ring-0"
           />
           Pincode

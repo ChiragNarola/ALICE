@@ -8,6 +8,7 @@ import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { useChildren } from '../contexts/ChildrenContext';
+import { useNavigate } from 'react-router-dom';
 
 const steps = [
   'Child’s Basic Information',
@@ -29,6 +30,7 @@ const ChildBasicInformation: React.FC = () => {
   const [userDetails, setUserDetails] = useState<number>(0);
   const { user } = useAuth();
   const { addChilddata } = useChildren();
+  const navigate = useNavigate();
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -150,6 +152,7 @@ const ChildBasicInformation: React.FC = () => {
       // ----- Final toast -----
       if (successRoles.length && !failedRoles.length) {
         toast.success(`Details submitted successfully.`);
+        navigate("/chat");
       } else if (failedRoles.length && !successRoles.length) {
         toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
         // toast.error(`Failed to submit details for [${failedRoles.join(", ")}]`);
