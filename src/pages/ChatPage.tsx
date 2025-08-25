@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
-import { chatAPI, getConversationList } from '../api/api-services';
+import { chatAPI } from '../api/api-services';
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
-import type { ChatInputProps, ConversationDTO } from "../routes/models/request/Chat";
+import type { ChatInputProps } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 
