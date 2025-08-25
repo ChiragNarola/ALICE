@@ -11,6 +11,7 @@ import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 
 type Message = {
+  id?: number;
   from: "alice" | "user";
   text: string;
   actions?: any;
@@ -26,6 +27,7 @@ const ChatPage: React.FC = () => {
   const [searching, IsSearching] = useState(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
+      id: 0,
       from: "alice",
       text: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
       actions: true,
@@ -76,12 +78,14 @@ const ChatPage: React.FC = () => {
         setChatMessages((prev) => [
           ...prev,
           {
+            id: 0,
             from: "user",
             text: message,
             actions: true,
             like: null,
           },
           {
+            id: 0,
             from: "alice",
             text: response,
             actions: true,

@@ -3,6 +3,7 @@ import ChatMessage from "./ChatMessage";
 import userimg from "../assets/images/user-img.png";
 
 type Message = {
+  id?: number;
   from: "alice" | "user";
   text: string;
   actions?: any;
@@ -26,6 +27,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
       {messages.map((msg, idx) => (
         <ChatMessage
           key={idx}
+          id={msg.id}
           from={msg.from}
           text={msg.text}
           actions={msg.actions}

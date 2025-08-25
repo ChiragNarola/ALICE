@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { getConversationMessageByUUId } from "../api/api-services";
+import { updateConversationReactionById } from "../api/api-services";
 
 interface ChatMessageProps {
+    id?: number;
     from: "alice" | "user";
     text: string;
     actions?: boolean;
@@ -10,7 +11,7 @@ interface ChatMessageProps {
     like?: string | null;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ id, from, text, actions, userimg }) => {
     const isAlice = from === "alice";
     const [liked, setLiked] = useState(false);
     const [disliked, setDisliked] = useState(false);
@@ -36,13 +37,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg 
         }
     };
 
-    const handleLike = () => {
+    const handleLike = (id: number) => {
         setLiked(!liked);
+        updateConversationReactionById(id, 1);
         if (!liked && disliked) setDisliked(false); // remove dislike if like is clicked
     };
 
-    const handleDislike = () => {
+    const handleDislike = (id: number) => {
         setDisliked(!disliked);
+        updateConversationReactionById(id, 0);
         if (!disliked && liked) setLiked(false); // remove like if dislike is clicked
     };
 
@@ -78,7 +81,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg 
                         </button> */}
                         {/* Like (Thumbs Up) */}
                         <button
-                            onClick={handleLike}
+                            onClick={() => id && handleLike(id)}
                             className={`flex items-center gap-2 hover:underline text-sm sm:text-base font-normal ${liked ? "text-green-600" : ""
                                 }`}
                         >
@@ -97,7 +100,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ from, text, actions, userimg 
 
                         {/* Dislike (Thumbs Down) */}
                         <button
-                            onClick={handleDislike}
+                            onClick={() => id && handleDislike(id)}
                             className={`flex items-center gap-2 hover:underline text-sm sm:text-base font-normal ${disliked ? "text-red-600" : ""
                                 }`}
                         >

@@ -1,24 +1,29 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import PageLoader from "../components/common/PageLoader";
 
 const DefaultRoute = () => {
     const { user, isLoading } = useAuth();
 
-    if (isLoading) return <div><PageLoader /></div>;
+    if (isLoading) return <PageLoader />;
     if (!user) return <Navigate to="/login" replace />;
 
+    // Admin
     if (user.roles?.includes("admin")) {
         return <Navigate to="/admin/dashboard" replace />;
     }
-    if (user.roles?.includes("parent")) {
-        return <Navigate to="/chat" replace />;
-    }
-    if (user.roles?.includes("staff")) {
+
+    // Parent or staff with completed setup
+    if (
+        (user.roles?.includes("parent") && user.isChildrenAdded) ||
+        (user.roles?.includes("staff") && user.isStaffDetailAdded) ||
+        (user.roles?.length === 2 && user.isChildrenAdded && user.isStaffDetailAdded)
+    ) {
         return <Navigate to="/chat" replace />;
     }
 
-    return <Navigate to="/login" replace />;
+    // Fallback → incomplete profile
+    return <Navigate to="/child-basic-info" replace />;
 };
 
 export default DefaultRoute;

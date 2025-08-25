@@ -85,8 +85,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </button>}
         <div className="flex items-center gap-12">
           {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
-          <img src={logo} alt="Logo" className="h-15" />
-          <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, {`${userName}`}</span>
+          <img
+            onClick={onNewChat}
+            src={logo}
+            alt="Logo"
+            className="h-12 w-auto cursor-pointer hover:opacity-80 transition"
+          />
+          {/* <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, {`${userName}`}</span> */}
         </div>
       </div>
       <div className="flex items-center gap-3 sm:gap-6 relative">
