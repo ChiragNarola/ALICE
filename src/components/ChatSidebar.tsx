@@ -10,7 +10,7 @@ import "tippy.js/dist/tippy.css"; // default styles
 import PageLoader from "./common/PageLoader";
 
 interface ChatSidebarProps {
-  chats: { id: number; title: string, conversation_uuid: string }[];
+  // chats: { id: number; title: string, conversation_uuid: string }[];
   setIsSidebarOpen?: any;
   isOpen?: boolean;
   onClose?: () => void;
@@ -52,10 +52,11 @@ const DropdownMenu = ({ onRename, onArchive }: any) => (
   </div>
 );
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSidebarOpen, onClose, archive, rename }) => {
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen = true, setIsSidebarOpen, onClose, archive, rename }) => {
   const { clearMessages, replaceMessages, ensureAliceIntro, setSelectedConversationId, mapApiToUI } = useChat();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { chatList } = useChat();
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
@@ -174,7 +175,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ chats, isOpen = true, setIsSi
             + New Chat
           </button>
           <ul className="space-y-1 h-full max-h-[calc(100vh-80px)] overflow-y-auto scroll-smooth custom-scrollbar pe-2">
-            {chats.map((chat, idx) => (
+            {chatList.map((chat: any, idx: any) => (
               <li key={chat.id} className="relative group">
                 <div
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors duration-150

@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
-import { chatAPI } from '../api/api-services';
+import { chatAPI, getConversationList } from '../api/api-services';
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
-import type { ChatInputProps } from "../routes/models/request/Chat";
+import type { ChatInputProps, ConversationDTO } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 
@@ -19,7 +19,7 @@ type Message = {
 };
 
 const ChatPage: React.FC = () => {
-  const { messages } = useChat();
+  const { messages, refreshChatList } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const [message, setMessage] = useState("");
@@ -93,6 +93,7 @@ const ChatPage: React.FC = () => {
           },
         ]);
         setMessage("");
+        refreshChatList();
       }
     } catch (error) {
       console.error("Chat send error:", error);
