@@ -34,14 +34,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const [userName, setUserName] = useState<string>()
 
-  useEffect(() => {
-    const user = localStorage.getItem("auth_user");
+useEffect(() => {
+  const storedUser = sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
 
-    if (user) {
-      const parsedUser = JSON.parse(user);
-      setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`)
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`);
+    } catch {
+      // fallback if data is corrupted
+      setUserName("");
     }
-  }, [])
+  }
+}, []);
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

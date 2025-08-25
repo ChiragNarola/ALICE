@@ -125,26 +125,35 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
             </div>
             <div className="mb-2 font-semibold">Topics</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6">
-              {TOPICS.map((topic) => {
-                const checked = child.topics.includes(topic.id);
-                return (
-                  <label
-                    key={topic.id}
-                    className={`flex items-center px-3 xl:px-5 py-[14px] lg:py-[18px] rounded-xl border transition-all cursor-pointer select-none text-[15px] md:text-base font-normal ${checked
-                      ? 'bg-alice-teal text-white border-alice-teal'
-                      : 'bg-white text-alice-darkgray border-[#E5E5E5] hover:border-alice-teal'
-                      }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => handleTopicToggle(idx, topic.id)}
-                      className="mr-[10px] w-[22px] h-[22px] rounded accent-white border border-[#E5E5E5] focus:ring-0"
-                    />
-                    {topic.interest}
-                  </label>
-                );
-              })}
+              {TOPICS.length === 0 ? (
+                // Loader while waiting for topics
+                <div className="flex justify-center items-center py-6">
+                  <lord-icon src="https://cdn.lordicon.com/ktsahwvc.json" colors="primary:#0CA6A6" trigger="loop" state="loop-transparency" style={{ width: '40px', height: '40px' }} />
+                </div>
+              ) : (
+                // Render checkboxes once topics are fetched
+                TOPICS.map((topic) => {
+                  const checked = child.topics.includes(topic.id);
+                  return (
+                    <label
+                      key={topic.id}
+                      className={`flex items-center px-3 xl:px-5 py-[14px] lg:py-[18px] rounded-xl border transition-all cursor-pointer select-none text-[15px] md:text-base font-normal ${checked
+                          ? 'bg-alice-teal text-white border-alice-teal'
+                          : 'bg-white text-alice-darkgray border-[#E5E5E5] hover:border-alice-teal'
+                        }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => handleTopicToggle(idx, topic.id)}
+                        className="mr-[10px] w-[22px] h-[22px] rounded accent-white border border-[#E5E5E5] focus:ring-0"
+                      />
+                      {topic.interest}
+                    </label>
+                  );
+                })
+              )}
+
             </div>
             {hasError ?
               <p className="text-red-500 text-sm mt-2">Please select at least one topic for this child.</p>

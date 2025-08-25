@@ -27,7 +27,7 @@ export const ChildrenProvider = ({ children: node }: { children: ReactNode }) =>
       ...prev,
       {
         firstName: '',
-        // middleName: '',
+        middleName: '',
         lastName: '',
         gender: 'Boy',
         dob: '',

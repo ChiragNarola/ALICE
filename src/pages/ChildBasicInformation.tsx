@@ -25,10 +25,10 @@ interface StepRefHandle {
 
 const ChildBasicInformation: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [Clicked, setClicked] = useState(0);
   const [showMessageDropdown, setShowMessageDropdown] = React.useState(false);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [userDetails, setUserDetails] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const { addChilddata } = useChildren();
   const navigate = useNavigate();
@@ -64,7 +64,9 @@ const ChildBasicInformation: React.FC = () => {
     }
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
+  setIsSubmitting(true); // start loader
+  try {
     const isValid = await stepRef.current?.validateAndSubmit();
     if (!isValid) return;
 
@@ -73,103 +75,104 @@ const ChildBasicInformation: React.FC = () => {
 
     console.log("Submitting final form data:", finalData);
 
-    try {
-      if (!user) return;
+    if (!user) return;
 
-      const isParent = user.roles?.includes("parent");
-      const isStaff = user.roles?.includes("staff");
+    const isParent = user.roles?.includes("parent");
+    const isStaff = user.roles?.includes("staff");
 
-      const buildStaffForm = (): FormData => {
-        const formData = new FormData();
-        formData.append("age_group", finalData.age_group);
-        formData.append("role_in_organisation", finalData.role_in_organisation);
-        formData.append("qualification", finalData.qualification);
-        return formData;
-      };
+    const buildStaffForm = (): FormData => {
+      const formData = new FormData();
+      formData.append("age_group", finalData.age_group);
+      formData.append("role_in_organisation", finalData.role_in_organisation);
+      formData.append("qualification", finalData.qualification);
+      return formData;
+    };
 
-      const successRoles: string[] = [];
-      const failedRoles: string[] = [];
+    const successRoles: string[] = [];
+    const failedRoles: string[] = [];
 
-      // ----- Parent block -----
-      if (isParent) {
-        const newChildren: any[] = [];
-        const updateChildren: any[] = [];
+    // ----- Parent block -----
+    if (isParent) {
+      const newChildren: any[] = [];
+      const updateChildren: any[] = [];
 
-        for (const [index, child] of finalData.children.entries()) {
-          if (child.id && child.id > 0) {
-            updateChildren.push({
-              id: child.id,
-              name: [child.firstName, child.lastName].filter(Boolean).join(" "),
-              date_of_birth: child.dob || "",
-              gender: child.gender || "",
-              things_to_keep_in_mind: child.thingsToKeepInMind || "",
-              area_of_interest: finalData.topics[index] || [],
-              concerns: finalData.concerns[index] || []
-            });
-          } else {
-            newChildren.push({
-              id: 0,
-              name: [child.firstName, child.lastName].filter(Boolean).join(" "),
-              date_of_birth: child.dob || "",
-              gender: child.gender || "",
-              things_to_keep_in_mind: child.thingsToKeepInMind || "",
-              area_of_interest: finalData.topics[index] || [],
-              concerns: finalData.concerns[index] || []
-            });
-          }
-        }
-
-        try {
-          if (newChildren.length > 0) {
-            const res = await insertChildDetails(newChildren);
-            if (!res.IsSuccess) throw new Error(res.Message || "Insert failed");
-          }
-          if (updateChildren.length > 0) {
-            const res = await updateChildDetails(updateChildren);
-            if (!res.IsSuccess) throw new Error(res.Message || "Update failed");
-          }
-          successRoles.push("child");
-        } catch (err) {
-          console.error("Parent error:", err);
-          failedRoles.push("child");
+      for (const [index, child] of finalData.children.entries()) {
+        if (child.id && child.id > 0) {
+          updateChildren.push({
+            id: child.id,
+            name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+            date_of_birth: child.dob || "",
+            gender: child.gender || "",
+            things_to_keep_in_mind: child.thingsToKeepInMind || "",
+            area_of_interest: finalData.topics[index] || [],
+            concerns: finalData.concerns[index] || []
+          });
+        } else {
+          newChildren.push({
+            id: 0,
+            name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+            date_of_birth: child.dob || "",
+            gender: child.gender || "",
+            things_to_keep_in_mind: child.thingsToKeepInMind || "",
+            area_of_interest: finalData.topics[index] || [],
+            concerns: finalData.concerns[index] || []
+          });
         }
       }
 
-      // ----- Staff block -----
-      if (isStaff) {
-        try {
-          const staffForm = buildStaffForm();
-          const staffRes = user.isStaffDetailAdded
-            ? await updatestaffDetails(staffForm)
-            : await submitStaffDetails(staffForm);
-
-          if (!staffRes.IsSuccess) throw new Error(staffRes.Message || "Staff failed");
-          successRoles.push("staff");
-        } catch (err) {
-          console.error("Staff error:", err);
-          failedRoles.push("staff");
+      try {
+        if (newChildren.length > 0) {
+          const res = await insertChildDetails(newChildren);
+          if (!res.IsSuccess) throw new Error(res.Message || "Insert failed");
         }
+        if (updateChildren.length > 0) {
+          const res = await updateChildDetails(updateChildren);
+          if (!res.IsSuccess) throw new Error(res.Message || "Update failed");
+        }
+        successRoles.push("child");
+      } catch (err) {
+        console.error("Parent error:", err);
+        failedRoles.push("child");
       }
-
-      // ----- Final toast -----
-      if (successRoles.length && !failedRoles.length) {
-        toast.success(`Details submitted successfully.`);
-        navigate("/chat");
-      } else if (failedRoles.length && !successRoles.length) {
-        toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
-        // toast.error(`Failed to submit details for [${failedRoles.join(", ")}]`);
-      } else if (successRoles.length && failedRoles.length) {
-        toast.info(
-          `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
-        );
-      } else {
-        toast.error("User has no matching roles");
-      }
-    } catch (error) {
-      console.error("Form submit error:", error);
-      toast.error("Failed to submit form. Please try again.");
     }
-  };
+
+    // ----- Staff block -----
+    if (isStaff) {
+      try {
+        const staffForm = buildStaffForm();
+        const staffRes = user.isStaffDetailAdded
+          ? await updatestaffDetails(staffForm)
+          : await submitStaffDetails(staffForm);
+
+        if (!staffRes.IsSuccess) throw new Error(staffRes.Message || "Staff failed");
+        successRoles.push("staff");
+      } catch (err) {
+        console.error("Staff error:", err);
+        failedRoles.push("staff");
+      }
+    }
+
+    // ----- Final toast -----
+    if (successRoles.length && !failedRoles.length) {
+      toast.success(`Details submitted successfully.`);
+      navigate("/chat");
+    } else if (failedRoles.length && !successRoles.length) {
+      toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
+    } else if (successRoles.length && failedRoles.length) {
+      toast.info(
+        `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
+      );
+    } else {
+      toast.error("User has no matching roles");
+    }
+  } catch (error) {
+    console.error("Form submit error:", error);
+    toast.error("Failed to submit form. Please try again.");
+  } finally {
+    setIsSubmitting(false); // stop loader
+  }
+};
+
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
@@ -328,8 +331,7 @@ const ChildBasicInformation: React.FC = () => {
                       }
                     `}
                     onClick={() => {
-                       setClicked(idx);
-                      if (Clicked < currentStep) {
+                      if (idx < currentStep) {
                         setCurrentStep(idx)
                       }
                     }}
@@ -370,13 +372,23 @@ const ChildBasicInformation: React.FC = () => {
           <div className="flex justify-between mt-4 lg:mt-6 flex-col-reverse sm:flex-row gap-4 sm:gap-0">
             <button onClick={prevStep} disabled={currentStep === 0 || userDetails === 1} className="px-6 py-[12px] lg:py-[17px] rounded-xl border border-alice-black text-alice-black hover:bg-alice-black hover:text-white font-semibold disabled:opacity-50 w-full sm:max-w-[100px] lg:max-w-[180px] transition-colors ease-in-out duration-300 disabled:pointer-events-none">Cancel</button>
 
-            <button
-              onClick={isSaveStep ? handleSubmit : nextStep}
-              // disabled={isSaveStep || isLastStep}
-              className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300"
-            >
-              {isSaveStep ? 'Save' : 'Continue to Guidance Topics'}
-            </button>
+      <button
+  onClick={isSaveStep ? handleSubmit : nextStep}
+  disabled={isSubmitting}
+  className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300 flex justify-center items-center gap-2"
+>
+  {isSubmitting && (
+    <lord-icon
+      src="https://cdn.lordicon.com/ktsahwvc.json"
+      colors="primary:#ffffff"
+      trigger="loop"
+      state="loop-transparency"
+      style={{ width: '24px', height: '24px' }}
+    />
+  )}
+  {isSaveStep ? 'Save' : 'Continue'}
+</button>
+
 
           </div>
         </section>

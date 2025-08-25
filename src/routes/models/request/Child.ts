@@ -3,7 +3,7 @@ export interface ChildInfo {
   topics: number[];
   concerns: number[];
   firstName: string;
-  // middleName: string;
+  middleName: string;
   lastName: string;
   gender: 'Boy' | 'Girl' | 'Prefer not to say';
   // years: string;
