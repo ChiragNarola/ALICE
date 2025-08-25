@@ -25,6 +25,7 @@ interface StepRefHandle {
 
 const ChildBasicInformation: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [Clicked, setClicked] = useState(0);
   const [showMessageDropdown, setShowMessageDropdown] = React.useState(false);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [userDetails, setUserDetails] = useState<number>(0);
@@ -45,7 +46,7 @@ const ChildBasicInformation: React.FC = () => {
   const [formSubmit, setFormSubmit] = useState<any>({});
 
   const nextStep = async () => {
-    console.log("currentStep-----------------<>",currentStep)
+    console.log("currentStep-----------------<>", currentStep)
     const isValid = await stepRef.current?.validateAndSubmit();
     if (isValid) {
       const newData = stepRef.current?.getValues?.();
@@ -98,7 +99,7 @@ const ChildBasicInformation: React.FC = () => {
           if (child.id && child.id > 0) {
             updateChildren.push({
               id: child.id,
-              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+              name: [child.firstName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.thingsToKeepInMind || "",
@@ -108,7 +109,7 @@ const ChildBasicInformation: React.FC = () => {
           } else {
             newChildren.push({
               id: 0,
-              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
+              name: [child.firstName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.thingsToKeepInMind || "",
@@ -235,21 +236,6 @@ const ChildBasicInformation: React.FC = () => {
             // console.log(apiChildren);
             stepRef.current?.setFormValues({ children: apiChildren });
           }
-          //  else {
-          //   stepRef.current?.setFormValues({
-          //     children: [
-          //       {
-          //         firstName: '',
-          //         middleName: '',
-          //         lastName: '',
-          //         gender: 'Boy',
-          //         dob: '',
-          //         topics: [],
-          //         concerns: [],
-          //       }
-          //     ]
-          //   });
-          // }
         }
 
         if (isStaff) {
@@ -333,14 +319,20 @@ const ChildBasicInformation: React.FC = () => {
 
                   {/* Step circle */}
                   <div
-                    className={`z-10 text-[20px] w-[30px] h-[30px] lg:w-[50px] lg:h-[50px] flex items-center justify-center rounded-full border-2 font-bold transition-all
+                    className={`z-10 text-[20px] w-[30px] h-[30px] lg:w-[50px]  lg:h-[50px] flex items-center justify-center rounded-full border-2 font-bold transition-all
                       ${isCompleted
-                        ? 'bg-alice-teal text-white border-alice-teal'
+                        ? 'bg-alice-teal text-white border-alice-teal cursor-pointer'
                         : isCurrent || userDetails === 1
-                          ? 'bg-white text-alice-teal border-alice-teal'
+                          ? 'bg-white text-alice-teal border-alice-teal cursor-pointer'
                           : 'bg-[#E9E9E9] text-alice-darkgray/25 border-[#E9E9E9]'
                       }
                     `}
+                    onClick={() => {
+                       setClicked(idx);
+                      if (Clicked < currentStep) {
+                        setCurrentStep(idx)
+                      }
+                    }}
                   >
                     {userDetails === 1 ? 1 : idx + 1}
                   </div>

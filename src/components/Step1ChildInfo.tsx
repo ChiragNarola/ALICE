@@ -25,7 +25,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; setFormValues: (data: FormValues) => void; }, {}>((_, ref) => {
-  const { children, updateChild, addChild, deleteChild } = useChildren();
+  const { children, updateChild, addChild, deleteChild,  } = useChildren();
 
   const {
     control,
@@ -61,7 +61,11 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
         if (isValid) {
           const formValues = getValues();
           formValues.children.forEach((child, idx) => {
-            updateChild(idx, child);
+            if(children.length <= 0){
+              addChild()
+            }else{
+              updateChild(idx, child);
+            }
           });
         }
         return isValid;

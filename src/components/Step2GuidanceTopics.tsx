@@ -30,14 +30,11 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
     const areaOfInterests = async () => {
       const interestList = await area_of_interests();
       if (interestList.IsSuccess) {
-        console.log("interestList------->",interestList)
         setTOPICS(interestList.Data);
       }
 
     };
     areaOfInterests();
-     console.log("interestList------->",TOPICS)
-     console.log("children",children)
   }, []);
 
 
