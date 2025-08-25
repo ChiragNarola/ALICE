@@ -45,6 +45,7 @@ const ChildBasicInformation: React.FC = () => {
   const [formSubmit, setFormSubmit] = useState<any>({});
 
   const nextStep = async () => {
+    console.log("currentStep-----------------<>",currentStep)
     const isValid = await stepRef.current?.validateAndSubmit();
     if (isValid) {
       const newData = stepRef.current?.getValues?.();
@@ -214,7 +215,7 @@ const ChildBasicInformation: React.FC = () => {
               const childData = {
                 id: child.id,
                 firstName: nameParts[0] || "",
-                middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : nameParts[1] || "",
+                // middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : nameParts[1] || "",
                 lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
                 gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
                 dob: child.date_of_birth,
@@ -233,21 +234,22 @@ const ChildBasicInformation: React.FC = () => {
             const apiChildren = mapChildDetails(response.Data);
             // console.log(apiChildren);
             stepRef.current?.setFormValues({ children: apiChildren });
-          } else {
-            stepRef.current?.setFormValues({
-              children: [
-                {
-                  firstName: '',
-                  middleName: '',
-                  lastName: '',
-                  gender: 'Boy',
-                  dob: '',
-                  topics: [],
-                  concerns: [],
-                }
-              ]
-            });
           }
+          //  else {
+          //   stepRef.current?.setFormValues({
+          //     children: [
+          //       {
+          //         firstName: '',
+          //         middleName: '',
+          //         lastName: '',
+          //         gender: 'Boy',
+          //         dob: '',
+          //         topics: [],
+          //         concerns: [],
+          //       }
+          //     ]
+          //   });
+          // }
         }
 
         if (isStaff) {
