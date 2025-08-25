@@ -11,7 +11,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
     const { user } = useAuth();
 
     return (
-        <form onSubmit={onSend} className="w-full bg-white rounded-2xl border border-alice-gray p-3 sm:p-4 md:p-6 flex flex-col gap-2 my-4 lg:my-6">
+        <form onSubmit={onSend} className="w-full bg-white rounded-2xl border border-alice-gray p-2 sm:p-2 md:p-3 flex flex-col gap-2 my-4 lg:my-6">
             <div className="flex gap-4 sm:gap-6 items-center">
                 <div className="flex-1">
                     <div>

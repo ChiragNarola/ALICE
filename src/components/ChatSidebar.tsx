@@ -6,7 +6,7 @@ import { Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css"; // default styles
+import "tippy.js/dist/tippy.css";
 import PageLoader from "./common/PageLoader";
 
 interface ChatSidebarProps {
