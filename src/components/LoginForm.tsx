@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { useAuth } from '../contexts/AuthContext';
-import type { LoginFormInputs } from '../routes/models/request/Auth';
-import 'react-phone-input-2/lib/style.css';
-import { Eye, EyeOff } from 'lucide-react';
-import { useChildren } from '../contexts/ChildrenContext';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
+import type { LoginFormInputs } from "../routes/models/request/Auth";
+import "react-phone-input-2/lib/style.css";
+import { Eye, EyeOff } from "lucide-react";
+import { useChildren } from "../contexts/ChildrenContext";
 
 const LoginForm = () => {
   const { login, logout } = useAuth();
@@ -14,12 +14,13 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // NEW state
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
-  } = useForm<LoginFormInputs>({ mode: 'onChange' });
+    formState: { errors },
+  } = useForm<LoginFormInputs>({ mode: "onChange" });
 
   const onSubmit = async (data: LoginFormInputs) => {
     setLoading(true);
@@ -28,7 +29,7 @@ const LoginForm = () => {
       formData.append("username", data.username);
       formData.append("password", data.password);
 
-      const response = await login(formData);
+      const response = await login(formData, rememberMe); // pass rememberMe flag ✅
 
       if (response?.IsSuccess) {
         clearChild();
@@ -53,7 +54,6 @@ const LoginForm = () => {
     }
   };
 
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h2 className="text-[24px] sm:text-[28px] lg:text-[32px] 2xl:text-[36px] font-bold text-alice-black leading-[1.35]">
@@ -65,7 +65,10 @@ const LoginForm = () => {
 
       {/* Email Field */}
       <div className="mb-6">
-        <label htmlFor="email" className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+        <label
+          htmlFor="email"
+          className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]"
+        >
           <span className="bg-[#FEFCF8] px-[5px]">Email</span>
         </label>
         <input
@@ -73,16 +76,18 @@ const LoginForm = () => {
           type="email"
           autoComplete="off"
           placeholder="Johndoe@gmail.com"
-          {...register('username', {
-            required: 'Email is required',
+          {...register("username", {
+            required: "Email is required",
             pattern: {
               value: /^\S+@\S+$/i,
-              message: 'Invalid email format'
-            }
+              message: "Invalid email format",
+            },
           })}
           className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />
-        {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
+        {errors.username && (
+          <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+        )}
       </div>
 
       {/* Password Field */}
@@ -94,25 +99,21 @@ const LoginForm = () => {
         </label>
 
         <input
-          {...register('password', {
-            required: 'Password is required',
+          {...register("password", {
+            required: "Password is required",
             minLength: {
               value: 8,
-              message: 'Password must be at least 8 characters',
+              message: "Password must be at least 8 characters",
             },
-            // pattern: {
-            //   value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/,
-            //   message: 'Password must include uppercase, lowercase, and special character',
-            // },
           })}
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           placeholder="Password"
           className="w-full pr-12 px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />
 
         <button
           type="button"
-          onClick={() => setShowPassword(prev => !prev)}
+          onClick={() => setShowPassword((prev) => !prev)}
           className="absolute right-4 top-[35px] text-alice-darkgray"
         >
           {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -123,15 +124,23 @@ const LoginForm = () => {
         )}
       </div>
 
+      {/* Remember Me + Forgot Password */}
       <div className="flex items-center justify-between mb-6 2xl:mb-9 gap-3 flex-wrap">
         <label className="flex items-center gap-3 text-[14px] lg:text-base xl:text-lg font-normal text-alice-darkgray">
           <input
             type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)} 
             className="w-6 h-6 border border-[#1B1B1B80] rounded-[4px] bg-[#FEFCF8] accent-alice-teal focus:ring-0"
           />
           Keep me logged in
         </label>
-        <a href="#" className="text-alice-teal font-semibold text-[14px] lg:text-base hover:underline">Forgot Password?</a>
+        <a
+          href="#"
+          className="text-alice-teal font-semibold text-[14px] lg:text-base hover:underline"
+        >
+          Forgot Password?
+        </a>
       </div>
 
       <button
@@ -152,8 +161,11 @@ const LoginForm = () => {
       </button>
 
       <p className="text-center text-[14px] lg:text-base text-alice-black font-semibold">
-        Don’t have an account?{' '}
-        <NavLink to="/signup" className="text-alice-teal font-medium hover:underline">
+        Don’t have an account?{" "}
+        <NavLink
+          to="/signup"
+          className="text-alice-teal font-medium hover:underline"
+        >
           Signup for free
         </NavLink>
       </p>
@@ -162,4 +174,3 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
-
