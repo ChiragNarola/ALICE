@@ -144,7 +144,7 @@ const ChatPage: React.FC = () => {
 
       const headerMessageId = response.headers.get("x-message-id");
       const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
-
+      setMessage("");
       // console.log("x-message-id:", newMessageId);
 
       const reader = response.body.getReader();

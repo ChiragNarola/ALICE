@@ -5,6 +5,7 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { Copy, ThumbsDown, ThumbsUp } from "lucide-react";
 import TypingIndicator from "./ui/TypingIndicator";
+import ReactMarkdown from "react-markdown";
 
 interface ChatMessageProps {
     id?: number | undefined;
@@ -123,7 +124,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         `}
                     >
                         <div className="whitespace-pre-line text-sm sm:text-base lg:text-base font-normal">
-                            {text === "..." ? <TypingIndicator /> : text}
+                            {text === "..." ? <TypingIndicator /> :
+                                <ReactMarkdown
+                                    components={{
+                                        a: ({ node, ...props }) => (
+                                            <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline" />
+                                        ),
+                                    }}
+                                >
+                                    {text.replace(/\n{2,}/g, "\n")}
+                                </ReactMarkdown>}
                         </div>
                     </div>
 
