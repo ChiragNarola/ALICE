@@ -144,7 +144,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             </Tippy>
 
                             {/* Like - Dislike */}
-                            {id !== undefined && id !== null && id !== 0 && (
+                            {isAlice && id !== undefined && id !== null && id !== 0 && (
                                 <>
                                     <Tippy content="Like" placement="bottom">
                                         <button
