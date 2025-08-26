@@ -9,13 +9,14 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { useChildren } from '../contexts/ChildrenContext';
 import { useNavigate } from 'react-router-dom';
+import type { ChildInfo } from '../routes/models/request/Child';
 
-const steps = [
-  'Child’s Basic Information',
-  'Topics of Guidance',
-  'Current Concerns',
-  'Review & Submit',
-];
+// const steps = [
+//   'Child’s Basic Information',
+//   'Topics of Guidance',
+//   'Current Concerns',
+//   'Review & Submit',
+// ];
 
 interface StepRefHandle {
   validateAndSubmit: () => Promise<boolean>;
@@ -25,13 +26,20 @@ interface StepRefHandle {
 
 const ChildBasicInformation: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [highest, setHighest] = useState(-1);
   const [showMessageDropdown, setShowMessageDropdown] = React.useState(false);
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
+  const [isloading, setisloading] = React.useState(false);
   const [userDetails, setUserDetails] = useState<number>(0);
   const { user } = useAuth();
-  const { addChilddata } = useChildren();
+  const { addChilddata, clearChild } = useChildren();
   const navigate = useNavigate();
+  const [steps, setSteps] = useState([
+    { id: 0, name: 'Child’s Basic Information', isCompleted: false },
+    { id: 1, name: 'Topics of Guidance', isCompleted: false },
+    { id: 2, name: 'Current Concerns', isCompleted: false },
+    { id: 3, name: 'Review & Submit', isCompleted: false },
+  ]);
+
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -58,15 +66,19 @@ const ChildBasicInformation: React.FC = () => {
       }
 
       if (!isSaveStep) {
+        setSteps(prevSteps =>
+          prevSteps.map(step =>
+            step.id === currentStep ? { ...step, isCompleted: true } : step
+          )
+        );
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-      }
-      if(currentStep>highest){
-        setHighest(currentStep)
       }
     }
   };
 
+
   const handleSubmit = async () => {
+    setisloading(true)
     const isValid = await stepRef.current?.validateAndSubmit();
     if (!isValid) return;
 
@@ -157,19 +169,25 @@ const ChildBasicInformation: React.FC = () => {
       if (successRoles.length && !failedRoles.length) {
         toast.success(`Details submitted successfully.`);
         navigate("/chat");
+              setisloading(false)
       } else if (failedRoles.length && !successRoles.length) {
+              setisloading(false)
         toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
         // toast.error(`Failed to submit details for [${failedRoles.join(", ")}]`);
       } else if (successRoles.length && failedRoles.length) {
         toast.info(
           `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
         );
+              setisloading(false)
       } else {
+              setisloading(false)
         toast.error("User has no matching roles");
       }
+
     } catch (error) {
       console.error("Form submit error:", error);
       toast.error("Failed to submit form. Please try again.");
+      setisloading(false)
     }
   };
 
@@ -218,14 +236,13 @@ const ChildBasicInformation: React.FC = () => {
               const childData = {
                 id: child.id,
                 firstName: nameParts[0] || "",
-                // middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : nameParts[1] || "",
+                middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : nameParts[1] || "",
                 lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
                 gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
                 dob: child.date_of_birth,
                 topics: (child.area_of_interest || []).map((a: any) => a.id),
                 concerns: (child.concerns || []).map((a: any) => a.id),
               };
-
               addChilddata(childData);
               return childData;
             });
@@ -234,8 +251,13 @@ const ChildBasicInformation: React.FC = () => {
         if (isParent) {
           const response = await getChildDetailsForLoginUser();
           if (response.IsSuccess && Array.isArray(response.Data)) {
+            clearChild()
+            setSteps(prevSteps =>
+              prevSteps.map(step =>
+                [0, 1, 2].includes(step.id) ? { ...step, isCompleted: true } : step
+              )
+            );
             const apiChildren = mapChildDetails(response.Data);
-            // console.log(apiChildren);
             stepRef.current?.setFormValues({ children: apiChildren });
           }
         }
@@ -243,6 +265,11 @@ const ChildBasicInformation: React.FC = () => {
         if (isStaff) {
           const staff_response = await getStaffDetailsForLoginUser();
           if (staff_response.IsSuccess) {
+            setSteps(prevSteps =>
+              prevSteps.map(step =>
+                [3].includes(step.id) ? { ...step, isCompleted: true } : step
+              )
+            );
             stepRef.current?.setFormValues({
               role_in_organisation: staff_response.Data.role_in_organisation || "",
               qualification: staff_response.Data.qualification || "",
@@ -257,7 +284,7 @@ const ChildBasicInformation: React.FC = () => {
     };
 
     fetchUserDetails();
-  }, [currentStep, user]);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -294,7 +321,7 @@ const ChildBasicInformation: React.FC = () => {
           <p className="text-sm text-alice-darkgray font-normal">Provide your child’s details to recieve personalized guidence and Support</p>
           <div className="border-t border-alice-gray my-4 md:my-6"></div>
           <ol className="relative">
-            {steps.map((step, idx) => {
+            {steps.map((stepObj, idx) => {
               // Step states
               if (userDetails == 1) {
                 if (idx !== 3) return null;
@@ -302,16 +329,16 @@ const ChildBasicInformation: React.FC = () => {
               if (userDetails == 2) {
                 if (idx == 3) return null;
               }
-              const isCompleted = idx < currentStep;
+              // const isCompleted = idx < currentStep;
               const isCurrent = idx === currentStep;
               // const isUpcoming = idx > currentStep; // Not needed, but for clarity
 
               return (
-                <li key={step} className="flex items-center relative min-h-[30px] lg:min-h-[50px] mb-[24px] lg:mb-[50px] last:mb-0">
+                <li key={stepObj.id} className="flex items-center relative min-h-[30px] lg:min-h-[50px] mb-[24px] lg:mb-[50px] last:mb-0">
                   {/* Vertical line */}
                   {(((idx !== steps.length - 1 && userDetails !== idx)) && (userDetails !== 1)) && (
                     <span
-                      className={`absolute left-[14px] lg:left-[24px] top-[30px] lg:top-[50px] w-0.5 h-[calc(100%-0px)] ${isCompleted
+                      className={`absolute left-[14px] lg:left-[24px] top-[30px] lg:top-[50px] w-0.5 h-[calc(100%-0px)] ${stepObj.isCompleted
                         ? 'bg-alice-teal'
                         : 'bg-[#E5E5E5]'
                         }`}
@@ -322,7 +349,7 @@ const ChildBasicInformation: React.FC = () => {
                   {/* Step circle */}
                   <div
                     className={`z-10 text-[20px] w-[30px] h-[30px] lg:w-[50px]  lg:h-[50px] flex items-center justify-center rounded-full border-2 font-bold transition-all
-                      ${isCompleted
+                      ${stepObj.isCompleted && !isCurrent
                         ? 'bg-alice-teal text-white border-alice-teal cursor-pointer'
                         : isCurrent || userDetails === 1
                           ? 'bg-white text-alice-teal border-alice-teal cursor-pointer'
@@ -330,25 +357,30 @@ const ChildBasicInformation: React.FC = () => {
                       }
                     `}
                     onClick={() => {
-                      if (idx < currentStep) {
-                        setCurrentStep(idx)
+                      if (stepObj.isCompleted) {
+                        setCurrentStep(stepObj.id)
                       }
                     }}
                   >
-                    {userDetails === 1 ? 1 : idx + 1}
+                    {userDetails === 1 ? 1 : stepObj.id + 1}
                   </div>
 
                   {/* Step label */}
                   <span
                     className={`ml-[10px] font-semibold text-base
-                      ${isCompleted
-                        ? 'text-alice-teal'
+                      ${stepObj.isCompleted && !isCurrent
+                        ? 'text-alice-teal cursor-pointer hover:text-black'
                         : isCurrent || userDetails === 1
                           ? 'text-alice-black'
                           : 'text-alice-black/50'
                       }`}
+                    onClick={() => {
+                      if (stepObj.isCompleted) {
+                        setCurrentStep(stepObj.id)
+                      }
+                    }}
                   >
-                    {step}
+                    {stepObj.name}
                   </span>
                 </li>
               );
@@ -371,13 +403,35 @@ const ChildBasicInformation: React.FC = () => {
           <div className="flex justify-between mt-4 lg:mt-6 flex-col-reverse sm:flex-row gap-4 sm:gap-0">
             <button onClick={prevStep} disabled={currentStep === 0 || userDetails === 1} className="px-6 py-[12px] lg:py-[17px] rounded-xl border border-alice-black text-alice-black hover:bg-alice-black hover:text-white font-semibold disabled:opacity-50 w-full sm:max-w-[100px] lg:max-w-[180px] transition-colors ease-in-out duration-300 disabled:pointer-events-none">Cancel</button>
 
-            <button
-              onClick={isSaveStep ? handleSubmit : nextStep}
-              // disabled={isSaveStep || isLastStep}
-              className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300"
-            >
-              {isSaveStep ? 'Save' : 'Continue'}
-            </button>
+            {!isloading ?
+              <button
+                onClick={isSaveStep ? handleSubmit : nextStep}
+                // disabled={isSaveStep}
+                className="px-4 py-[13px] lg:py-[17px] rounded-xl bg-alice-teal hover:bg-teal-800 text-white font-semibold disabled:opacity-50 w-full sm:max-w-[260px] lg:max-w-[281px] transition-colors ease-in-out duration-300"
+              >
+                {isSaveStep ? 'Save' : 'Continue'}
+              </button>
+              :
+
+              <button
+                className="px-4 rounded-xl 
+             bg-alice-teal hover:bg-teal-800 
+             active:bg-teal-900 active:opacity-80
+             text-white font-semibold 
+             disabled:opacity-50 
+             w-full sm:max-w-[260px] lg:max-w-[281px] 
+             transition-colors ease-in-out duration-300"
+              >
+                <lord-icon
+                  src="https://cdn.lordicon.com/ktsahwvc.json"
+                  colors="primary:#ffffff"
+                  trigger="loop"
+                  state="loop-transparency"
+                  style={{ width: "25px", height: "25px" }}
+                />
+              </button>
+
+            }
 
           </div>
         </section>

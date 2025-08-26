@@ -1,4 +1,5 @@
-import { forwardRef, useImperativeHandle } from 'react';
+import { v4 as uuid } from 'uuid'; // install with npm i uuid
+import { forwardRef, useImperativeHandle,useEffect } from 'react';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +9,7 @@ import { deleteChildApi } from '../api/api-services';
 import { toast } from 'react-toastify';
 
 const childSchema = z.object({
-  id: z.number().optional(),
+  id: z.union([z.string(), z.number()]).optional(),
   firstName: z.string().min(2, "First name is required"),
   middleName: z.string().optional(),
   lastName: z.string().min(2, "Last name is required"),
@@ -25,7 +26,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; setFormValues: (data: FormValues) => void; }, {}>((_, ref) => {
-  const { children, updateChild, addChild, deleteChild,  } = useChildren();
+  const { children, updateChild, addChild, deleteChild, addChilddata } = useChildren();
 
   const {
     control,
@@ -34,21 +35,29 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    defaultValues: { children: children.length > 0 ? children : [
-      {
-        id: 0,
-        firstName: "",
-        middleName: "",   
-        lastName: "",
-        gender: "Boy",
-        dob: "",
-        topics: [],
-        concerns: [],
-      },
-    ],},
+    defaultValues: {
+      children: children.length > 0 ? children : [
+        {
+          id: uuid(),
+          firstName: "",
+          middleName: "",
+          lastName: "",
+          gender: "Boy",
+          dob: "",
+          topics: [],
+          concerns: [],
+        },
+      ],
+    },
     resolver: zodResolver(formSchema),
     mode: 'onChange',
   });
+
+  useEffect(() => {
+  if (children && children.length > 0) {
+    reset({ children }, { keepErrors: true }); // re-populate the form
+  }
+}, [children, reset]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -60,11 +69,12 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
       return trigger().then((isValid) => {
         if (isValid) {
           const formValues = getValues();
+          console.log(formValues)
           formValues.children.forEach((child, idx) => {
-            if(children.length <= 0){
-              addChild()
-            }else{
+            if (children[idx]) {
               updateChild(idx, child);
+            } else {
+              addChilddata(child);
             }
           });
         }
@@ -75,31 +85,31 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
       return getValues();
     },
     setFormValues: (data: FormValues) => {
-      reset(data);
+    reset(data, { keepErrors: true }); 
     },
   }));
 
-  function handleDelete(idx: number, child_id: number | undefined) {
-    if (window.confirm("Are you sure you want to delete this child?")) {
-      if (child_id) {
-        deleteChildApi(child_id).then((result) => {
-          if (result?.IsSuccess) {
-            toast.success("Child deleted successfully");
-            remove(idx);
-            deleteChild(idx);
-          } else {
-            toast.error(result.Message);
-            console.error("Failed to delete child", result);
-          }
-        }).catch((error) => {
-          console.error("Error deleting child:", error);
-        });
-      } else {
-        remove(idx);
-        deleteChild(idx);
-      }
+function handleDelete(idx: number, child_id: string | number | undefined) {
+  if (window.confirm("Are you sure you want to delete this child?")) {
+    if (typeof child_id === "number") {
+      // Only call API for backend children
+      deleteChildApi(child_id).then((result) => {
+        if (result?.IsSuccess) {
+          toast.success("Child deleted successfully");
+          remove(idx);
+          deleteChild(idx);
+        } else {
+          toast.error(result.Message);
+        }
+      });
+    } else {
+      // Local-only child (UUID) → just remove from form/context
+      remove(idx);
+      deleteChild(idx);
     }
   }
+}
+
 
   return (
     <div>
@@ -117,9 +127,9 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
           type="button"
           onClick={() => {
             append({
-              id: 0,
+              id:  uuid(),
               firstName: '',
-              // middleName: '',
+              middleName: '',
               lastName: '',
               gender: 'Boy',
               dob: '',

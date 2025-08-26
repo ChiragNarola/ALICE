@@ -9,8 +9,6 @@ export interface StepRefType {
   validateAndSubmit: () => Promise<boolean>;
   getValues: () => any;
 }
-
-
 const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
   const { children, updateChild, deleteChild } = useChildren();
   const [errors, setErrors] = useState<boolean[]>([]);
