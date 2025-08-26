@@ -118,12 +118,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 <div className="flex flex-col w-full">
                     {/* Message bubble */}
                     <div
-                        className={`w-full rounded-2xl p-3 sm:p-4 lg:p-6
+                        className={`w-full rounded-lg p-3
                             ${isAlice ? "text-alice-black rounded-bl-none" : "text-alice-black rounded-br-none"}
                             ${liked ? "bg-green-50" : disliked ? "bg-red-50" : isAlice ? "bg-[#0080800D]" : "bg-[#1B1B1B0D]"}
                         `}
                     >
-                        <div className="whitespace-pre-line text-sm sm:text-base lg:text-base font-normal">
+                        <div className="whitespace-pre-line text-sm font-normal">
                             {text === "..." ? <TypingIndicator /> :
                                 <ReactMarkdown
                                     components={{

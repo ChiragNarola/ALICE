@@ -24,7 +24,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId 
   }, [messages]);
 
   return (
-    <div className="flex-1 flex flex-col gap-6 sm:gap-8 lg:gap-12 py-6 md:py-[30px] overflow-y-auto max-h-[calc(100vh-284px)] lg:max-h-[calc(100vh-300px)] px-2 chat_wrapper">
+    <div className="flex-1 flex flex-col gap-6 sm:gap-8 py-6 md:py-[30px] overflow-y-auto max-h-[calc(100vh-284px)] lg:max-h-[calc(100vh-300px)] px-2 chat_wrapper">
       {messages.map((msg, idx) => (
         <ChatMessage
           key={idx}

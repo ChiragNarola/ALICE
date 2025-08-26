@@ -182,7 +182,7 @@ const ChatPage: React.FC = () => {
 
   return (
     <>
-      <main className="flex-1 flex px-2 sm:px-0 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">
+      <main className="flex-1 flex px-2 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">
         {/* max-w-[1300px] sm:w-[95%] */}
         {!isSidebarOpen && <span onClick={handleToggle} className="absolute z-100 top-[5px] left-4 material-symbols-outlined text-gray-700 text-2xl cursor-pointer font-bold">
           menu_open
@@ -190,7 +190,7 @@ const ChatPage: React.FC = () => {
         {/* <section className="overflow-hidden">
           <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} />
         </section> */}
-        <section className="mx-auto right pe-5">
+        <section className="mx-auto right pe-5 h-[calc(100vh-140px)] relative">
           {isChatVisible && <>
             <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
             <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} />

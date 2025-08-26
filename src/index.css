@@ -89,7 +89,7 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.08);
+  background: #008080;
   border-radius: 6px;
   transition: background 0.2s;
 }
