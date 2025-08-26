@@ -12,12 +12,12 @@ type Message = {
 
 interface ChatMessagesProps {
   messages: Message[];
+  chatBordUniqueId: string;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  // console.log("messages:");
-  // console.log(messages);
+
   // Auto scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,6 +33,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
           text={msg.text}
           actions={msg.actions}
           userimg={userimg}
+          user_response={msg.user_response}
+          chatBordUniqueId={chatBordUniqueId}
         />
       ))}
       {/* dummy div for scroll-to-bottom */}

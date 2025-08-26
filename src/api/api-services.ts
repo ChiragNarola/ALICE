@@ -512,10 +512,10 @@ export const updateConversationtitleById = async (id: number, formData: FormData
     }
 };
 
-export const updateConversationReactionById = async (id: number, reaction: number | null): Promise<APIResponse<ConversationDTO[]>> => {
+export const updateConversationReactionById = async (conversation_uuid: string, message_id: number, reaction: number | null): Promise<APIResponse<ConversationDTO[]>> => {
     try {
-        const response = await axiosInstance.put(
-            `conversation/updateConversation/${id}?reaction=${reaction}`
+        const response = await axiosInstance.post(
+            `conversation/${conversation_uuid}/messages/${message_id}/feedback?reaction=${reaction}`
         );
 
         return response.data;

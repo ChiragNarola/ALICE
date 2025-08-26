@@ -12,6 +12,7 @@ interface ChatMessageProps {
     actions?: boolean;
     userimg: string;
     user_response?: string | null; // "like", "dislike", or null
+    chatBordUniqueId: string;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -21,6 +22,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     actions,
     userimg,
     user_response,
+    chatBordUniqueId
 }) => {
     const isAlice = from === "alice";
 
@@ -55,14 +57,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const handleLike = async (id: number) => {
         try {
-            if (liked) {
-                setLiked(false);
-                await updateConversationReactionById(id, null);
-            } else {
+            // if (liked) {
+            //     setLiked(false);
+            //     await updateConversationReactionById(chatBordUniqueId, id, null);
+            // } else {
+            const response = await updateConversationReactionById(chatBordUniqueId, id, 0);
+            if (response.IsSuccess) {
                 setLiked(true);
                 setDisliked(false);
-                await updateConversationReactionById(id, 0);
             }
+            // }
         } catch (error) {
             console.error("Error updating like:", error);
         }
@@ -70,14 +74,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const handleDislike = async (id: number) => {
         try {
-            if (disliked) {
-                setDisliked(false);
-                await updateConversationReactionById(id, null);
-            } else {
+            // if (disliked) {
+            //     setDisliked(false);
+            //     await updateConversationReactionById(chatBordUniqueId, id, null);
+            // } else {
+            const response = await updateConversationReactionById(chatBordUniqueId, id, 1);
+            if (response.IsSuccess) {
                 setDisliked(true);
                 setLiked(false);
-                await updateConversationReactionById(id, 1);
             }
+            //}
         } catch (error) {
             console.error("Error updating dislike:", error);
         }
@@ -142,21 +148,29 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                 <>
                                     <Tippy content="Like" placement="bottom">
                                         <button
-                                            onClick={() => handleLike(id)}
+                                            onClick={() => liked ? "" : handleLike(id)}
                                             className={`flex items-center gap-1 px-2 py-1 rounded-md transition ${liked ? "text-green-600 bg-green-50" : "text-teal-700 hover:bg-teal-50"
                                                 }`}
                                         >
-                                            <ThumbsUp className="w-4 h-4" />
+                                            <ThumbsUp
+                                                className="w-4 h-4"
+                                                stroke="currentColor"
+                                                fill={liked ? "teal" : "none"}
+                                            />
                                         </button>
                                     </Tippy>
 
                                     <Tippy content="Dislike" placement="bottom">
                                         <button
-                                            onClick={() => handleDislike(id)}
+                                            onClick={() => disliked ? "" : handleDislike(id)}
                                             className={`flex items-center gap-1 px-2 py-1 rounded-md transition ${disliked ? "text-red-600 bg-red-50" : "text-teal-700 hover:bg-teal-50"
                                                 }`}
                                         >
-                                            <ThumbsDown className="w-4 h-4" />
+                                            <ThumbsDown
+                                                className="w-4 h-4"
+                                                stroke="currentColor"
+                                                fill={disliked ? "red" : "none"}
+                                            />
                                         </button>
                                     </Tippy>
                                 </>
