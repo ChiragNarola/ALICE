@@ -4,6 +4,7 @@ import { updateConversationReactionById } from "../api/api-services";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { Copy, ThumbsDown, ThumbsUp } from "lucide-react";
+import TypingIndicator from "./ui/TypingIndicator";
 
 interface ChatMessageProps {
     id?: number | undefined;
@@ -122,7 +123,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         `}
                     >
                         <div className="whitespace-pre-line text-sm sm:text-base lg:text-base font-normal">
-                            {text}
+                            {text === "..." ? <TypingIndicator /> : text}
                         </div>
                     </div>
 
