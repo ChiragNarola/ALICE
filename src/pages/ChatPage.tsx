@@ -37,6 +37,7 @@ const ChatPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const handleGenerate = () => {
     const conversationUUID = searchParams.get("v");
+    // console.log("conversation UUID:", conversationUUID);
     if (conversationUUID) {
       setChatboardUniqueId(conversationUUID);
     } else {
@@ -48,7 +49,7 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     handleGenerate();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!messages || messages.length === 0) return;
@@ -73,6 +74,7 @@ const ChatPage: React.FC = () => {
         "conversation_id": chatBordUniqueId,
         "user_id": user?.id
       };
+      // console.log(request_data);
       const response = await chatAPI(request_data);
       if (response) {
         setChatMessages((prev) => [
@@ -102,8 +104,8 @@ const ChatPage: React.FC = () => {
       setMessage("");
     }
   };
-  console.log("chatMessages");
-  console.log(chatMessages);
+  // console.log("chatMessages");
+  // console.log(chatMessages);
   return (
     <>
       <main className="flex-1 flex px-2 sm:px-0 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">

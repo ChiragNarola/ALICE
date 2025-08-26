@@ -51,7 +51,7 @@ const DashboardLayout: React.FC = () => {
 
             const response = await updateConversationtitleById(chatId, formData);
             if (response.IsSuccess) {
-                toast.success("Chat renamed successfully!");
+                toast.success("Chat title renamed successfully!");
                 refreshChatList();
                 // setEditingChatId(null);
             }
