@@ -13,6 +13,7 @@ export interface ConversationDTO {
     is_archived: boolean;
     created_at: string;
     conversation_title: string;
+    conversation_id: number;
 }
 
 export type Sender = "user" | "alice";
@@ -22,7 +23,7 @@ export interface ChatMessageUI {
     from: Sender;
     text: string;
     actions?: boolean;
-    like?: string | null;
+    user_response?: string | null;
     ts?: string;
 }
 

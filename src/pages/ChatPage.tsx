@@ -15,7 +15,7 @@ type Message = {
   from: "alice" | "user";
   text: string;
   actions?: any;
-  like?: string | null;
+  user_response?: string | null;
 };
 
 const ChatPage: React.FC = () => {
@@ -31,7 +31,7 @@ const ChatPage: React.FC = () => {
       from: "alice",
       text: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
       actions: true,
-      like: null,
+      user_response: null,
     },
   ]);
   const [searchParams] = useSearchParams();
@@ -82,14 +82,14 @@ const ChatPage: React.FC = () => {
             from: "user",
             text: message,
             actions: true,
-            like: null,
+            user_response: null,
           },
           {
             id: 0,
             from: "alice",
             text: response,
             actions: true,
-            like: null,
+            user_response: null,
           },
         ]);
         setMessage("");
@@ -102,7 +102,8 @@ const ChatPage: React.FC = () => {
       setMessage("");
     }
   };
-
+  console.log("chatMessages");
+  console.log(chatMessages);
   return (
     <>
       <main className="flex-1 flex px-2 sm:px-0 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">

@@ -3,13 +3,14 @@ import { toast } from "react-toastify";
 import { updateConversationReactionById } from "../api/api-services";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
+
 interface ChatMessageProps {
     id?: number | undefined;
     from: "alice" | "user";
     text: string;
     actions?: boolean;
     userimg: string;
-    like?: number | null; // 1 = like, 0 = dislike, null = no reaction
+    user_response?: string | null; // "like", "dislike", or null
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -18,17 +19,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     text,
     actions,
     userimg,
-    like,
+    user_response,
 }) => {
     const isAlice = from === "alice";
 
-    const [liked, setLiked] = useState(like === 1);
-    const [disliked, setDisliked] = useState(like === 0);
+    const [liked, setLiked] = useState(user_response === "like");
+    const [disliked, setDisliked] = useState(user_response === "dislike");
 
     useEffect(() => {
-        setLiked(like === 1);
-        setDisliked(like === 0);
-    }, [like]);
+        setLiked(user_response === "like");
+        setDisliked(user_response === "dislike");
+    }, [user_response]);
 
     // copy to clipboard helper
     const copyToClipboard = async (text: string) => {
@@ -36,7 +37,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(text);
             } else {
-                // fallback for unsupported browsers
                 const textarea = document.createElement("textarea");
                 textarea.value = text;
                 textarea.style.position = "fixed";
@@ -60,7 +60,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             } else {
                 setLiked(true);
                 setDisliked(false);
-                await updateConversationReactionById(id, 1);
+                await updateConversationReactionById(id, 0);
             }
         } catch (error) {
             console.error("Error updating like:", error);
@@ -75,7 +75,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             } else {
                 setDisliked(true);
                 setLiked(false);
-                await updateConversationReactionById(id, 0);
+                await updateConversationReactionById(id, 1);
             }
         } catch (error) {
             console.error("Error updating dislike:", error);
@@ -109,10 +109,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 <div className="flex flex-col w-full">
                     {/* Message bubble */}
                     <div
-                        className={`w-full rounded-2xl p-3 sm:p-4 lg:p-6 ${isAlice
-                            ? "bg-[#0080800D] text-alice-black rounded-bl-none"
-                            : "bg-[#1B1B1B0D] text-alice-black rounded-br-none"
-                            }`}
+                        className={`w-full rounded-2xl p-3 sm:p-4 lg:p-6
+                            ${isAlice ? "text-alice-black rounded-bl-none" : "text-alice-black rounded-br-none"}
+                            ${liked ? "bg-green-50" : disliked ? "bg-red-50" : isAlice ? "bg-[#0080800D]" : "bg-[#1B1B1B0D]"}
+                        `}
                     >
                         <div className="whitespace-pre-line text-sm sm:text-base lg:text-base font-normal">
                             {text}
@@ -150,10 +150,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                     <span className="hidden sm:inline">Copy</span>
                                 </button>
                             </Tippy>
-
-                            {id && (
+                            {/* {liked} */}
+                            {/* Like - Dislike */}
+                            {/* {id && id !== 0 && (
                                 <>
-                                    {/* Like */}
                                     <Tippy content="Like" placement="bottom">
                                         <button
                                             onClick={() => handleLike(id)}
@@ -176,7 +176,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                         </button>
                                     </Tippy>
 
-                                    {/* Dislike */}
                                     <Tippy content="Dislike" placement="bottom">
                                         <button
                                             onClick={() => handleDislike(id)}
@@ -200,8 +199,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                         </button>
                                     </Tippy>
                                 </>
-                            )}
-
+                            )} */}
                         </div>
                     )}
                 </div>

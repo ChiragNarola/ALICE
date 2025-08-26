@@ -7,7 +7,7 @@ type Message = {
   from: "alice" | "user";
   text: string;
   actions?: any;
-  like?: string | null;
+  user_response?: string | null;
 };
 
 interface ChatMessagesProps {
@@ -16,7 +16,8 @@ interface ChatMessagesProps {
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
-
+  console.log("messages:");
+  console.log(messages);
   // Auto scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
