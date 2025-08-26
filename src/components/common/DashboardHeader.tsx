@@ -3,8 +3,8 @@ import logo from "../../assets/images/logo.svg";
 import userimg from "../../assets/images/user-img.png";
 import { useNavigate } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
-// import PageLoader from "./PageLoader";
 import { useChat } from "../../contexts/ChatContext";
+import { User, MessageCircle, LogOut } from "lucide-react";
 
 interface DashboardHeaderProps {
   showMessageDropdown: boolean;
@@ -34,19 +34,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const [userName, setUserName] = useState<string>()
 
-useEffect(() => {
-  const storedUser = sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
 
-  if (storedUser) {
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`);
-    } catch {
-      // fallback if data is corrupted
-      setUserName("");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`);
+      } catch {
+        // fallback if data is corrupted
+        setUserName("");
+      }
     }
-  }
-}, []);
+  }, []);
 
 
   useEffect(() => {
@@ -126,33 +126,68 @@ useEffect(() => {
         <div className="relative" ref={userRef}>
           <button
             onClick={() => setShowUserDropdown((prev) => !prev)}
-            className="flex items-center gap-[6px] sm:gap-[10px] focus:outline-none"
+            className="flex items-center gap-2 sm:gap-3 focus:outline-none"
           >
-            <img src={userimg} alt="User Avatar" className="w-[50px] h-[50px] lg:w-[60px] lg:h-[60px] rounded-full object-cover" />
-            <span className="hidden sm:inline-block text-[14px] sm:text-base font-semibold text-alice-black">{`${userName}`}</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 1L5.00002 5L1 1" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <img
+              src={userimg}
+              alt="User Avatar"
+              className="w-12 h-12 lg:w-14 lg:h-14 rounded-full object-cover"
+            />
+            <span className="hidden sm:inline-block text-sm sm:text-base font-semibold text-alice-black">
+              {userName}
+            </span>
+            <svg
+              width="10"
+              height="6"
+              viewBox="0 0 10 6"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 1L5.00002 5L1 1"
+                stroke="black"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
+
           {/* User Dropdown */}
           {showUserDropdown && (
-            <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
+            <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
+
+              {/* Profile */}
               <button
-                onClick={() => { navigate("/child-basic-info"); setIsSidebarOpen(false); }}
-                className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+                onClick={() => {
+                  navigate("/child-basic-info");
+                  setIsSidebarOpen(false);
+                }}
+                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
               >
+                <User className="w-5 h-5" />
                 Profile
               </button>
+
+              {/* Chat */}
               <button
-                onClick={() => { onNewChat() }}
-                className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+                onClick={() => {
+                  onNewChat();
+                }}
+                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
               >
+                <MessageCircle className="w-5 h-5" />
                 Chat
               </button>
-              <hr />
+
+              <hr className="my-1 border-gray-200" />
+
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="block w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10">
+                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+              >
+                <LogOut className="w-5 h-5" />
                 Logout
               </button>
             </div>

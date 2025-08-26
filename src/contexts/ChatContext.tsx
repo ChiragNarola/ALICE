@@ -56,7 +56,7 @@ export const ChatProvider = ({ children }: { children: any }) => {
                 text: m.message,
                 ts: m.created_at,
                 actions: true,
-                like: m.user_response,
+                user_response: m.user_response,
             }));
     };
 

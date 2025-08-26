@@ -7,14 +7,15 @@ type Message = {
   from: "alice" | "user";
   text: string;
   actions?: any;
-  like?: string | null;
+  user_response?: string | null;
 };
 
 interface ChatMessagesProps {
   messages: Message[];
+  chatBordUniqueId: string;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Auto scroll to bottom when messages change
@@ -32,6 +33,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
           text={msg.text}
           actions={msg.actions}
           userimg={userimg}
+          user_response={msg.user_response}
+          chatBordUniqueId={chatBordUniqueId}
         />
       ))}
       {/* dummy div for scroll-to-bottom */}

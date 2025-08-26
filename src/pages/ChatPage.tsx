@@ -15,7 +15,7 @@ type Message = {
   from: "alice" | "user";
   text: string;
   actions?: any;
-  like?: string | null;
+  user_response?: string | null;
 };
 
 const ChatPage: React.FC = () => {
@@ -31,12 +31,13 @@ const ChatPage: React.FC = () => {
       from: "alice",
       text: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
       actions: true,
-      like: null,
+      user_response: null,
     },
   ]);
   const [searchParams] = useSearchParams();
   const handleGenerate = () => {
     const conversationUUID = searchParams.get("v");
+    // console.log("conversation UUID:", conversationUUID);
     if (conversationUUID) {
       setChatboardUniqueId(conversationUUID);
     } else {
@@ -48,7 +49,7 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     handleGenerate();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!messages || messages.length === 0) return;
@@ -73,6 +74,7 @@ const ChatPage: React.FC = () => {
         "conversation_id": chatBordUniqueId,
         "user_id": user?.id
       };
+
       const response = await chatAPI(request_data);
       if (response) {
         setChatMessages((prev) => [
@@ -82,14 +84,14 @@ const ChatPage: React.FC = () => {
             from: "user",
             text: message,
             actions: true,
-            like: null,
+            user_response: null,
           },
           {
             id: 0,
             from: "alice",
             text: response,
             actions: true,
-            like: null,
+            user_response: null,
           },
         ]);
         setMessage("");
@@ -115,7 +117,7 @@ const ChatPage: React.FC = () => {
         </section> */}
         <section className="mx-auto right pe-5">
           {isChatVisible && <>
-            <ChatMessages messages={chatMessages} />
+            <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
             <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} />
           </>}
         </section>
