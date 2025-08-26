@@ -142,8 +142,8 @@ const ChatPage: React.FC = () => {
 
       if (!response.body) throw new Error("No response body received.");
 
-      // const headerMessageId = response.headers.get("x-message-id");
-      // const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
+      const headerMessageId = response.headers.get("x-message-id");
+      const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
 
       // console.log("x-message-id:", newMessageId);
 
@@ -163,7 +163,7 @@ const ChatPage: React.FC = () => {
           const copy = [...prev];
           copy[botIndex] = {
             ...copy[botIndex],
-            // id: newMessageId || 0,
+            id: newMessageId || 0,
             text: accumulatedText,
           };
           return copy;
