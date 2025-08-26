@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { getConversationMessageByUUId } from "../api/api-services";
 import { useChat } from "../contexts/ChatContext";
 import { useAuth } from "../contexts/AuthContext";
-import { Check, X } from "lucide-react";
+import { Archive, Check, Pencil, Plus, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
@@ -18,46 +18,21 @@ interface ChatSidebarProps {
 
 const DropdownMenu = ({ onRename, onArchive }: any) => (
   <div className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-lg py-2 z-50 animate-fade-in">
+    {/* Rename */}
     <button
       onClick={onRename}
-      className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
+      className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
     >
-      <span className="mr-2">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M16.475 5.408l2.117 2.117a2 2 0 0 1 0 2.828l-8.485 8.485a2 2 0 0 1-1.414.586H6v-2.693a2 2 0 0 1 .586-1.414l8.485-8.485a2 2 0 0 1 2.828 0z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
+      <Pencil className="w-4 h-4 mr-2" />
       Rename
     </button>
+
+    {/* Archive */}
     <button
       onClick={onArchive}
-      className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
+      className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
     >
-      <span className="mr-2">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-          <rect
-            x="3"
-            y="7"
-            width="18"
-            height="13"
-            rx="2"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M16 3v4M8 3v4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </span>
+      <Archive className="w-4 h-4 mr-2" />
       Archive
     </button>
   </div>
@@ -167,9 +142,10 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
           <button
             onClick={onNewChat}
-            className="w-full mb-3 px-3 py-2 text-sm bg-teal-800 text-white hover:bg-teal-900 rounded-lg shadow-sm transition"
+            className="w-full mb-3 px-3 py-2 text-sm bg-teal-800 text-white hover:bg-teal-900 rounded-lg shadow-sm transition flex items-center justify-center gap-2"
           >
-            + New Chat
+            <Plus className="w-4 h-4 text-white" />
+            New Chat
           </button>
 
           <ul className="space-y-1 h-full max-h-[calc(100vh-80px)] overflow-y-auto scroll-smooth custom-scrollbar pe-2">
