@@ -416,27 +416,27 @@ export const area_of_interests = async (): Promise<APIResponse<AreaOfInterestDTO
 };
 
 //Chat API
-export const chatAPI = async (requestdata: ChatInputProps): Promise<any> => {
-    try {
-        const response = await axios.post(
-            import.meta.env.VITE_API_CHAT_API_URL,
-            requestdata,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+// export const chatAPI = async (requestdata: ChatInputProps): Promise<any> => {
+//     try {
+//         const response = await axios.post(
+//             import.meta.env.VITE_API_CHAT_API_URL,
+//             requestdata,
+//             {
+//                 headers: {
+//                     "Content-Type": "application/json",
+//                 },
+//             }
+//         );
 
-        return response.data;
-    } catch (error: any) {
-        throw error?.response?.data ?? {
-            IsSuccess: false,
-            Data: null,
-            Message: "Failed to get chat result",
-        };
-    }
-};
+//         return response;
+//     } catch (error: any) {
+//         throw error?.response?.data ?? {
+//             IsSuccess: false,
+//             Data: null,
+//             Message: "Failed to get chat result",
+//         };
+//     }
+// };
 
 
 

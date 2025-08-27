@@ -3,12 +3,12 @@ import React, { useEffect, useState } from "react";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
-import { chatAPI } from '../api/api-services';
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import type { ChatInputProps } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type Message = {
   id?: number;
@@ -63,47 +63,122 @@ const ChatPage: React.FC = () => {
   const { isChatVisible, setChatVisible } = useChatVisibility();
   setChatVisible(true);
 
+  // const handleSendMessage = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   IsSearching(true);
+  //   if (!message.trim()) return;
+
+  //   try {
+  //     const request_data: ChatInputProps = {
+  //       "query": message,
+  //       "conversation_id": chatBordUniqueId,
+  //       "user_id": user?.id
+  //     };
+
+  //     const response = await chatAPI(request_data);
+  //     if (response) {
+  //       setChatMessages((prev) => [
+  //         ...prev,
+  //         {
+  //           id: 0,
+  //           from: "user",
+  //           text: message,
+  //           actions: true,
+  //           user_response: null,
+  //         },
+  //         {
+  //           id: 0,
+  //           from: "alice",
+  //           text: response,
+  //           actions: true,
+  //           user_response: null,
+  //         },
+  //       ]);
+  //       setMessage("");
+  //       refreshChatList();
+  //     }
+  //   } catch (error) {
+  //     console.error("Chat send error:", error);
+  //   } finally {
+  //     IsSearching(false);
+  //     setMessage("");
+  //   }
+  // };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    IsSearching(true);
     if (!message.trim()) return;
+    IsSearching(true);
+
+    // Add user message immediately
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        id: 0,
+        from: "user",
+        text: message,
+        actions: true,
+        user_response: null,
+      },
+    ]);
+
+    // Add a placeholder bot message
+    const botIndex = chatMessages.length + 1;
+    setChatMessages((prev) => [
+      ...prev,
+      { id: 0, from: "alice", text: "...", actions: true },
+    ]);
 
     try {
-      const request_data: ChatInputProps = {
-        "query": message,
-        "conversation_id": chatBordUniqueId,
-        "user_id": user?.id
-      };
+      const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: message,
+          conversation_id: chatBordUniqueId,
+          user_id: user?.id,
+        }),
+      });
 
-      const response = await chatAPI(request_data);
-      if (response) {
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            id: 0,
-            from: "user",
-            text: message,
-            actions: true,
-            user_response: null,
-          },
-          {
-            id: 0,
-            from: "alice",
-            text: response,
-            actions: true,
-            user_response: null,
-          },
-        ]);
-        setMessage("");
-        refreshChatList();
+      if (!response.body) throw new Error("No response body received.");
+
+      const headerMessageId = response.headers.get("x-message-id");
+      const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
+
+      // console.log("x-message-id:", newMessageId);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      let accumulatedText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedText += chunk;
+
+        setChatMessages((prev) => {
+          const copy = [...prev];
+          copy[botIndex] = {
+            ...copy[botIndex],
+            id: newMessageId || 0,
+            text: accumulatedText,
+          };
+          return copy;
+        });
       }
-    } catch (error) {
-      console.error("Chat send error:", error);
+    } catch (err: any) {
+      console.error("Chat API error:", err);
+      toast.error("Something went wrong. Please try again.");
     } finally {
-      IsSearching(false);
       setMessage("");
+      refreshChatList();
+      IsSearching(false);
     }
   };
+
 
   return (
     <>
