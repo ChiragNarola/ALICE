@@ -5,10 +5,10 @@ import ChatInput from "../components/ChatInput";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
-import type { ChatInputProps } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { AlertTriangle } from "lucide-react";
 
 type Message = {
   id?: number;
@@ -171,7 +171,18 @@ const ChatPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Chat API error:", err);
-      toast.error("Something went wrong. Please try again.");
+      // toast.error("Something went wrong. Please try again.");
+      setChatMessages((prev) => {
+        const copy = [...prev];
+        if (copy[botIndex]) {
+          copy[botIndex] = {
+            ...copy[botIndex],
+            text: "Something went wrong. Please try again...",
+            actions: false,
+          };
+        }
+        return copy;
+      });
     } finally {
       setMessage("");
       refreshChatList();

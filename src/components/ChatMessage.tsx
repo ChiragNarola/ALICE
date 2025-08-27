@@ -120,7 +120,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     <div
                         className={`w-full rounded-lg p-3
                             ${isAlice ? "text-alice-black rounded-bl-none" : "text-alice-black rounded-br-none"}
-                            ${liked ? "bg-green-50" : disliked ? "bg-red-50" : isAlice ? "bg-[#0080800D]" : "bg-[#1B1B1B0D]"}
+                            ${isAlice ? "bg-[#0080800D]" : "bg-[#1B1B1B0D]"}
+                            ${text === "Something went wrong. Please try again." ? "bg-red-50" : ""}
                         `}
                     >
                         <div className="whitespace-pre-line text-sm font-normal">
