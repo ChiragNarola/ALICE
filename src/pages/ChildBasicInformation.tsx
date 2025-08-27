@@ -30,6 +30,8 @@ const ChildBasicInformation: React.FC = () => {
   const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [isloading, setisloading] = React.useState(false);
   const [userDetails, setUserDetails] = useState<number>(0);
+  const [staffData, setStaffData] = useState<any>(null);
+
   const { user } = useAuth();
   const { addChilddata, clearChild } = useChildren();
   const navigate = useNavigate();
@@ -50,13 +52,16 @@ const ChildBasicInformation: React.FC = () => {
   // const goToStep = (step: number) => setCurrentStep(step);
   // Add this to maintain form ref/trigger
   const stepRef = useRef<StepRefHandle>(null);
+  const step4Ref = useRef<StepRefHandle>(null);
 
   const [formSubmit, setFormSubmit] = useState<any>({});
 
   const nextStep = async () => {
-    const isValid = await stepRef.current?.validateAndSubmit();
+    const activeRef = currentStep === 3 ? step4Ref : stepRef;
+
+    const isValid = await activeRef.current?.validateAndSubmit();
     if (isValid) {
-      const newData = stepRef.current?.getValues?.();
+      const newData = activeRef.current?.getValues?.();
       if (newData) {
         // Merge new data into state
         setFormSubmit((prev: any) => {
@@ -76,9 +81,7 @@ const ChildBasicInformation: React.FC = () => {
     }
   };
 
-
   const handleSubmit = async () => {
-    setisloading(true)
     const isValid = await stepRef.current?.validateAndSubmit();
     if (!isValid) return;
 
@@ -106,6 +109,7 @@ const ChildBasicInformation: React.FC = () => {
 
       // ----- Parent block -----
       if (isParent) {
+        setisloading(true)
         const newChildren: any[] = [];
         const updateChildren: any[] = [];
 
@@ -137,15 +141,19 @@ const ChildBasicInformation: React.FC = () => {
           if (newChildren.length > 0) {
             const res = await insertChildDetails(newChildren);
             if (!res.IsSuccess) throw new Error(res.Message || "Insert failed");
+            setisloading(false)
           }
           if (updateChildren.length > 0) {
             const res = await updateChildDetails(updateChildren);
             if (!res.IsSuccess) throw new Error(res.Message || "Update failed");
+            setisloading(false)
           }
           successRoles.push("child");
+          setisloading(false)
         } catch (err) {
           console.error("Parent error:", err);
           failedRoles.push("child");
+          setisloading(false)
         }
       }
 
@@ -153,15 +161,18 @@ const ChildBasicInformation: React.FC = () => {
       if (isStaff) {
         try {
           const staffForm = buildStaffForm();
+          setisloading(true)
           const staffRes = user.isStaffDetailAdded
             ? await updatestaffDetails(staffForm)
             : await submitStaffDetails(staffForm);
 
           if (!staffRes.IsSuccess) throw new Error(staffRes.Message || "Staff failed");
+          setisloading(false)
           successRoles.push("staff");
         } catch (err) {
           console.error("Staff error:", err);
           failedRoles.push("staff");
+          setisloading(false)
         }
       }
 
@@ -169,18 +180,18 @@ const ChildBasicInformation: React.FC = () => {
       if (successRoles.length && !failedRoles.length) {
         toast.success(`Details submitted successfully.`);
         navigate("/chat");
-              setisloading(false)
+        setisloading(false)
       } else if (failedRoles.length && !successRoles.length) {
-              setisloading(false)
+        setisloading(false)
         toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
         // toast.error(`Failed to submit details for [${failedRoles.join(", ")}]`);
       } else if (successRoles.length && failedRoles.length) {
         toast.info(
           `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
         );
-              setisloading(false)
+        setisloading(false)
       } else {
-              setisloading(false)
+        setisloading(false)
         toast.error("User has no matching roles");
       }
 
@@ -219,6 +230,11 @@ const ChildBasicInformation: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (currentStep === 3 && staffData && step4Ref.current) {
+      step4Ref.current.setFormValues(staffData);
+    }
+  }, [currentStep, staffData]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -226,6 +242,7 @@ const ChildBasicInformation: React.FC = () => {
         if (!user) return;
         const isParent = user.roles?.includes("parent");
         const isStaff = user.roles?.includes("staff");
+
 
         const mapChildDetails = (children: any[]) =>
           children
@@ -270,14 +287,14 @@ const ChildBasicInformation: React.FC = () => {
                 [3].includes(step.id) ? { ...step, isCompleted: true } : step
               )
             );
-            stepRef.current?.setFormValues({
+
+            setStaffData({
               role_in_organisation: staff_response.Data.role_in_organisation || "",
               qualification: staff_response.Data.qualification || "",
               age_group: staff_response.Data.age_group || "1-5",
             });
           }
         }
-
       } catch (error) {
         console.error("Error fetching child/staff details:", error);
       }
@@ -394,7 +411,7 @@ const ChildBasicInformation: React.FC = () => {
             {(currentStep === 0 && userDetails !== 1) && <Step1ChildInfo ref={stepRef} />}
             {(currentStep === 1 && userDetails !== 1) && <Step2GuidanceTopics ref={stepRef} />}
             {(currentStep === 2 && userDetails !== 1) && <Step3CurrentConcerns ref={stepRef} />}
-            {(currentStep === 3 && userDetails !== 2) && <Step4ReviewSubmit ref={stepRef} />}
+            {(currentStep === 3 && userDetails !== 2) && <Step4ReviewSubmit ref={step4Ref} />}
             {(currentStep > 3 && userDetails !== 2) && (
               <div className="flex-1 flex items-center justify-center text-alice-darkgray text-lg">Step {currentStep + 1} content goes here.</div>
             )}
@@ -430,9 +447,7 @@ const ChildBasicInformation: React.FC = () => {
                   style={{ width: "25px", height: "25px" }}
                 />
               </button>
-
             }
-
           </div>
         </section>
       </main>

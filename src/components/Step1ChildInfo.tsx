@@ -53,11 +53,16 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
     mode: 'onChange',
   });
 
-  useEffect(() => {
-  if (children && children.length > 0) {
-    reset({ children }, { keepErrors: true }); // re-populate the form
+useEffect(() => {
+  if (
+    children &&
+    children.length > 0 &&
+    children.some((c) => typeof c.id === "number") // only API-fetched
+  ) {
+    reset({ children }, { keepErrors: true });
   }
 }, [children, reset]);
+
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -69,7 +74,6 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
       return trigger().then((isValid) => {
         if (isValid) {
           const formValues = getValues();
-          console.log(formValues)
           formValues.children.forEach((child, idx) => {
             if (children[idx]) {
               updateChild(idx, child);
@@ -85,6 +89,7 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
       return getValues();
     },
     setFormValues: (data: FormValues) => {
+    // console.log("Step1 data from setFormValues----->",data)
     reset(data, { keepErrors: true }); 
     },
   }));
@@ -109,7 +114,6 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
     }
   }
 }
-
 
   return (
     <div>

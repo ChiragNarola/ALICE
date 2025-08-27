@@ -46,8 +46,8 @@ const Step4ReviewSubmit = forwardRef<
     },
     getValues: () => getValues(),
     setFormValues: (data) => {
-      // console.log("Step4 setFormValues called with:", data);
-      reset(data);
+  // console.log("Step4 setFormValues received:", data);
+  reset(data);
     },
   }));
 
