@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 const childSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
   firstName: z.string().min(2, "First name is required"),
-  middleName: z.string().optional(),
+  middleName: z.string().min(2, "Middle name is required"),
   lastName: z.string().min(2, "Last name is required"),
   gender: z.enum(['Boy', 'Girl', 'Prefer not to say']),
   dob: z.string().min(1, "Date of Birth is required"),
@@ -53,11 +53,16 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
     mode: 'onChange',
   });
 
-  useEffect(() => {
-  if (children && children.length > 0) {
-    reset({ children }, { keepErrors: true }); // re-populate the form
+useEffect(() => {
+  if (
+    children &&
+    children.length > 0 &&
+    children.some((c) => typeof c.id === "number") // only API-fetched
+  ) {
+    reset({ children }, { keepErrors: true });
   }
 }, [children, reset]);
+
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -69,7 +74,6 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
       return trigger().then((isValid) => {
         if (isValid) {
           const formValues = getValues();
-          console.log(formValues)
           formValues.children.forEach((child, idx) => {
             if (children[idx]) {
               updateChild(idx, child);
@@ -85,6 +89,7 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
       return getValues();
     },
     setFormValues: (data: FormValues) => {
+    // console.log("Step1 data from setFormValues----->",data)
     reset(data, { keepErrors: true }); 
     },
   }));
@@ -109,7 +114,6 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
     }
   }
 }
-
 
   return (
     <div>
@@ -227,7 +231,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
             {/* Middle Name */}
             <div className="flex-1 min-w-[180px]">
               <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-                <span className="bg-[#FEFCF8] px-[5px]">Child’s Middle Name</span>
+                <span className="bg-[#FEFCF8] px-[5px]">Child’s Middle Name <span className="text-red-500">*</span></span>
               </label>
               <Controller
                 name={`children.${idx}.middleName`}
