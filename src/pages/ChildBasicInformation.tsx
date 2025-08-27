@@ -91,7 +91,7 @@ const ChildBasicInformation: React.FC = () => {
     const finalData = { ...formSubmit, ...newData };
 
     console.log("Submitting final form data:", finalData);
-
+    setisloading(true);
     try {
       if (!user) return;
 
@@ -111,7 +111,6 @@ const ChildBasicInformation: React.FC = () => {
 
       // ----- Parent block -----
       if (isParent) {
-        setisloading(true)
         const newChildren: any[] = [];
         const updateChildren: any[] = [];
 
@@ -143,12 +142,10 @@ const ChildBasicInformation: React.FC = () => {
           if (newChildren.length > 0) {
             const res = await insertChildDetails(newChildren);
             if (!res.IsSuccess) throw new Error(res.Message || "Insert failed");
-            setisloading(false)
           }
           if (updateChildren.length > 0) {
             const res = await updateChildDetails(updateChildren);
             if (!res.IsSuccess) throw new Error(res.Message || "Update failed");
-            setisloading(false)
           }
           successRoles.push("child");
           setisloading(false)
@@ -163,18 +160,15 @@ const ChildBasicInformation: React.FC = () => {
       if (isStaff) {
         try {
           const staffForm = buildStaffForm();
-          setisloading(true)
           const staffRes = user.isStaffDetailAdded
             ? await updatestaffDetails(staffForm)
             : await submitStaffDetails(staffForm);
 
           if (!staffRes.IsSuccess) throw new Error(staffRes.Message || "Staff failed");
-          setisloading(false)
           successRoles.push("staff");
         } catch (err) {
           console.error("Staff error:", err);
           failedRoles.push("staff");
-          setisloading(false)
         }
       }
 
@@ -182,24 +176,22 @@ const ChildBasicInformation: React.FC = () => {
       if (successRoles.length && !failedRoles.length) {
         toast.success(`Details submitted successfully.`);
         navigate("/chat");
-        setisloading(false)
       } else if (failedRoles.length && !successRoles.length) {
-        setisloading(false)
         toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
       } else if (successRoles.length && failedRoles.length) {
         toast.info(
           `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
         );
-        setisloading(false)
       } else {
-        setisloading(false)
         toast.error("User has no matching roles");
       }
 
     } catch (error) {
       console.error("Form submit error:", error);
       toast.error("Failed to submit form. Please try again.");
-      setisloading(false)
+    }
+    finally {
+      setisloading(false);
     }
   };
 
@@ -263,13 +255,16 @@ const ChildBasicInformation: React.FC = () => {
                 concerns: (child.concerns || []).map((a: any) => a.id),
               };
               addChilddata(childData);
+              stepRef.current?.setFormValues({ isloading: false });
               return childData;
             });
 
 
         if (isParent) {
+          stepRef.current?.setFormValues({ isloading: true });
           const response = await getChildDetailsForLoginUser();
           if (response.IsSuccess && Array.isArray(response.Data)) {
+
             clearChild()
             setSteps(prevSteps =>
               prevSteps.map(step =>
@@ -277,7 +272,9 @@ const ChildBasicInformation: React.FC = () => {
               )
             );
             const apiChildren = mapChildDetails(response.Data);
-            stepRef.current?.setFormValues({ children: apiChildren });
+            // stepRef.current?.setFormValues({ children: apiChildren });
+          } else {
+            stepRef.current?.setFormValues({ isloading: false });
           }
         }
 
