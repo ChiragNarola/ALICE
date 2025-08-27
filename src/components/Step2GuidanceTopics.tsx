@@ -124,11 +124,11 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
               {idx === 0 ? 'st' : idx === 1 ? 'nd' : idx === 2 ? 'rd' : 'th'} Child Information
             </div>
             <div className="mb-2 font-semibold">Topics</div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6">
+            <div className={` ${TOPICS.length === 0 ? "flex items-center justify-center" : "grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6" } `}>
               {TOPICS.length === 0 ? (
                 // Loader while waiting for topics
-                <div className="flex justify-center items-center py-6">
-         <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
+                <div className="flex  justify-center items-center py-6">
+         <div className=" w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 // Render checkboxes once topics are fetched
