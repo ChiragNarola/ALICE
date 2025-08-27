@@ -74,7 +74,7 @@ useEffect(() => {
       return trigger().then((isValid) => {
         if (isValid) {
           const formValues = getValues();
-          formValues.children.forEach((child, idx) => {
+          formValues.children.forEach((child:any, idx) => {
             if (children[idx]) {
               updateChild(idx, child);
             } else {

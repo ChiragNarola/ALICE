@@ -125,13 +125,7 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
   {CONCERNS.length === 0 ? (
     // Loader while waiting for concerns
     <div className="flex justify-center items-center py-6">
-      <lord-icon
-        src="https://cdn.lordicon.com/ktsahwvc.json"
-        colors="primary:#0CA6A6"
-        trigger="loop"
-        state="loop-transparency"
-        style={{ width: '40px', height: '40px' }}
-      />
+       <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
     </div>
   ) : (
     // Render checkboxes once concerns are fetched

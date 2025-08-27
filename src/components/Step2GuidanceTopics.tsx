@@ -9,6 +9,8 @@ export interface StepRefType {
   validateAndSubmit: () => Promise<boolean>;
   getValues: () => any;
 }
+
+
 const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
   const { children, updateChild, deleteChild } = useChildren();
   const [errors, setErrors] = useState<boolean[]>([]);
@@ -126,7 +128,7 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
               {TOPICS.length === 0 ? (
                 // Loader while waiting for topics
                 <div className="flex justify-center items-center py-6">
-                  <lord-icon src="https://cdn.lordicon.com/ktsahwvc.json" colors="primary:#0CA6A6" trigger="loop" state="loop-transparency" style={{ width: '40px', height: '40px' }} />
+         <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 // Render checkboxes once topics are fetched

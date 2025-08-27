@@ -82,10 +82,12 @@ const ChildBasicInformation: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    const isValid = await stepRef.current?.validateAndSubmit();
+    const activeRef = currentStep === 3 ? step4Ref : stepRef;
+
+    const isValid = await activeRef.current?.validateAndSubmit();
     if (!isValid) return;
 
-    const newData = stepRef.current?.getValues?.();
+    const newData = activeRef.current?.getValues?.();
     const finalData = { ...formSubmit, ...newData };
 
     console.log("Submitting final form data:", finalData);
@@ -184,7 +186,6 @@ const ChildBasicInformation: React.FC = () => {
       } else if (failedRoles.length && !successRoles.length) {
         setisloading(false)
         toast.error(`Failed to submit ${failedRoles.join(", ")} details`);
-        // toast.error(`Failed to submit details for [${failedRoles.join(", ")}]`);
       } else if (successRoles.length && failedRoles.length) {
         toast.info(
           `Some details succeeded: ${successRoles.join(", ")}, but failed for ${failedRoles.join(", ")}`
@@ -201,6 +202,7 @@ const ChildBasicInformation: React.FC = () => {
       setisloading(false)
     }
   };
+
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
   const isSaveStep = (userDetails === 2 && currentStep === 2) || userDetails === 1 || userDetails == 3 && currentStep == 3;
@@ -437,16 +439,12 @@ const ChildBasicInformation: React.FC = () => {
              text-white font-semibold 
              disabled:opacity-50 
              w-full sm:max-w-[260px] lg:max-w-[281px] 
-             transition-colors ease-in-out duration-300"
+             transition-colors ease-in-out duration-300
+             flex items-center justify-center"
               >
-                <lord-icon
-                  src="https://cdn.lordicon.com/ktsahwvc.json"
-                  colors="primary:#ffffff"
-                  trigger="loop"
-                  state="loop-transparency"
-                  style={{ width: "25px", height: "25px" }}
-                />
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               </button>
+
             }
           </div>
         </section>
