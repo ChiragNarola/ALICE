@@ -89,7 +89,7 @@ useEffect(() => {
       return getValues();
     },
     setFormValues: (data:any) => {
-    console.log("Step1 data from setFormValues----->",data)
+    // console.log("Step1 data from setFormValues----->",data)
     // reset(data, { keepErrors: true }); 
      setisloading(data.isloading)
     },

@@ -33,7 +33,7 @@ const ChildBasicInformation: React.FC = () => {
   const [staffData, setStaffData] = useState<any>(null);
 
   const { user } = useAuth();
-  const { addChilddata, clearChild } = useChildren();
+  const { children, addChilddata, clearChild } = useChildren();
   const navigate = useNavigate();
   const [steps, setSteps] = useState([
     { id: 0, name: 'Child’s Basic Information', isCompleted: false },
@@ -89,6 +89,29 @@ const ChildBasicInformation: React.FC = () => {
 
     const newData = activeRef.current?.getValues?.();
     const finalData = { ...formSubmit, ...newData };
+if(!finalData.children){
+  let childrens : any[] =[]
+  children.map(child =>{
+   childrens.push(child)
+  })
+  finalData.children=childrens
+}
+
+if(!finalData.concerns){
+  let concern : number[][] =[]
+  children.map(child =>{
+   return concern.push(child.concerns);
+  })
+  finalData.concerns=concern
+}
+
+if(!finalData.topics){
+  let topic : number[][] =[]
+  children.map(child =>{
+   return topic.push(child.topics);
+  })
+  finalData.topics=topic
+}
 
     console.log("Submitting final form data:", finalData);
     setisloading(true);
