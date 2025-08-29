@@ -1,10 +1,10 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
-import type { ChatInputProps, ConversationDTO } from '../routes/models/request/Chat';
+import type { ConversationDTO } from '../routes/models/request/Chat';
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
 import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
-import axios from 'axios';
+// import axios from 'axios';
 
 //Auth
 export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {

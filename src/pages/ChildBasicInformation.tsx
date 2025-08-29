@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import { useChildren } from '../contexts/ChildrenContext';
 import { useNavigate } from 'react-router-dom';
-import type { ChildInfo } from '../routes/models/request/Child';
 
 // const steps = [
 //   'Child’s Basic Information',
@@ -112,7 +111,6 @@ if(!finalData.topics){
   })
   finalData.topics=topic
 }
-
     console.log("Submitting final form data:", finalData);
     setisloading(true);
     try {
@@ -295,6 +293,7 @@ if(!finalData.topics){
               )
             );
             const apiChildren = mapChildDetails(response.Data);
+            console.log("Data is setting in children State :",apiChildren)
             // stepRef.current?.setFormValues({ children: apiChildren });
           } else {
             stepRef.current?.setFormValues({ isloading: false });

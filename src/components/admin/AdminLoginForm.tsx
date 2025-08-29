@@ -12,6 +12,7 @@ const AdminLoginForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -26,7 +27,7 @@ const AdminLoginForm = () => {
       formData.append("username", data.username);
       formData.append("password", data.password);
 
-      const response = await login(formData);
+      const response = await login(formData, rememberMe);
 
       if (response?.IsSuccess) {
         const roles = response.Data?.user?.roles ?? [];
@@ -50,7 +51,7 @@ const AdminLoginForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5  bg-white px-2 ">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 bg-white px-2">
       {/* Email Field */}
       <div className='mt-5'>
         <label htmlFor="email" className="block text-sm font-medium text-gray-800 mb-1">
@@ -82,10 +83,6 @@ const AdminLoginForm = () => {
           {...register('password', {
             required: 'Password is required',
             minLength: { value: 8, message: 'Min 8 characters' },
-            // pattern: {
-            //   value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/,
-            //   message: 'Must include upper, lower & special char',
-            // },
           })}
           id="password"
           type={showPassword ? 'text' : 'password'}
@@ -105,10 +102,14 @@ const AdminLoginForm = () => {
       {/* Options */}
       <div className="flex items-center justify-between text-sm text-gray-700">
         <label className="flex items-center gap-2">
-          <input type="checkbox" className="w-4 h-4 text-alice-teal border-gray-300 focus:ring-alice-teal" />
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="w-4 h-4 text-alice-teal border-gray-300 focus:ring-alice-teal"
+          />
           Keep me logged in
         </label>
-        {/* <NavLink to="/admin/forgot-password" className="text-alice-teal hover:underline font-medium">Forgot password?</NavLink> */}
       </div>
 
       {/* Submit Button */}
