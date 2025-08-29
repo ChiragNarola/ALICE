@@ -11,7 +11,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
     const { user } = useAuth();
 
     return (
-        <form onSubmit={onSend} className="w-full bg-white rounded-2xl border border-alice-gray p-2 sm:p-2 md:p-3 flex flex-col gap-2 my-4 lg:my-6">
+        <form onSubmit={onSend} className="w-full bg-white rounded-xl border border-alice-gray p-2 flex flex-col gap-2 my-2 md:my-4 absolute bottom-0">
             <div className="flex gap-4 sm:gap-6 items-center">
                 <div className="flex-1">
                     <div>
@@ -20,7 +20,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder={`Hello ${user?.firstName}, How may I help you today?`}
-                            className="w-full flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-base md:text-lg px-2 font-normal"
+                            className="w-full flex-1 border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-sm px-2 font-normal"
                         />
                     </div>
                     {/* <hr className="my-4 md:my-6 border-alice-gray" />
@@ -45,7 +45,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, message, setMessage, sear
                 <button
                     type="submit"
                     disabled={searching}
-                    className={`bg-alice-teal w-[44px] h-[44px] sm:w-[60px] sm:h-[60px] rounded-full flex items-center justify-center text-white transition 
+                    className={`bg-alice-teal w-[38px] h-[38px] p-2 rounded-full flex items-center justify-center text-white transition 
     ${searching ? "opacity-60 cursor-not-allowed" : "hover:bg-teal-700"}`}
                 >
                     {searching ? (

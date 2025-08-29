@@ -5,6 +5,7 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { Copy, ThumbsDown, ThumbsUp } from "lucide-react";
 import TypingIndicator from "./ui/TypingIndicator";
+import ReactMarkdown from "react-markdown";
 
 interface ChatMessageProps {
     id?: number | undefined;
@@ -117,13 +118,23 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 <div className="flex flex-col w-full">
                     {/* Message bubble */}
                     <div
-                        className={`w-full rounded-2xl p-3 sm:p-4 lg:p-6
+                        className={`w-full rounded-lg p-3
                             ${isAlice ? "text-alice-black rounded-bl-none" : "text-alice-black rounded-br-none"}
-                            ${liked ? "bg-green-50" : disliked ? "bg-red-50" : isAlice ? "bg-[#0080800D]" : "bg-[#1B1B1B0D]"}
+                            ${isAlice ? "bg-[#0080800D]" : "bg-[#1B1B1B0D]"}
+                            ${text === "Something went wrong. Please try again." ? "bg-red-50" : ""}
                         `}
                     >
-                        <div className="whitespace-pre-line text-sm sm:text-base lg:text-base font-normal">
-                            {text === "..." ? <TypingIndicator /> : text}
+                        <div className="whitespace-pre-line text-sm font-normal">
+                            {text === "..." ? <TypingIndicator /> :
+                                <ReactMarkdown
+                                    components={{
+                                        a: ({ node, ...props }) => (
+                                            <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline" />
+                                        ),
+                                    }}
+                                >
+                                    {text.replace(/\n{2,}/g, "\n")}
+                                </ReactMarkdown>}
                         </div>
                     </div>
 

@@ -19,6 +19,7 @@
     "react-avatar": "^5.0.4",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.61.1",
+    "react-markdown": "^10.1.0",
     "react-phone-input-2": "^2.15.1",
     "react-router-dom": "^7.6.3",
     "react-toastify": "^11.0.5",
