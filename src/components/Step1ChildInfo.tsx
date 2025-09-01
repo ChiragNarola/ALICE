@@ -10,9 +10,17 @@ import { toast } from 'react-toastify';
 
 const childSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
-  firstName: z.string().min(2, "First name is required"),
-  middleName: z.string().min(2, "Middle name is required"),
-  lastName: z.string().min(2, "Last name is required"),
+ firstName: z
+    .string()
+    .min(2, "First name must be at least 2 letters")
+    .nonempty("First name is required"),
+  middleName: z
+    .string()
+    .nonempty("Middle name is required"),
+  lastName: z
+    .string()
+    .min(2, "Last name must be at least 2 letters")
+    .nonempty("Last name is required"),
   gender: z.enum(['Boy', 'Girl', 'Prefer not to say']),
   dob: z.string().min(1, "Date of Birth is required"),
   topics: z.array(z.number()).optional(),

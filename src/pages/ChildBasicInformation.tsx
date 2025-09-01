@@ -38,7 +38,7 @@ const ChildBasicInformation: React.FC = () => {
     { id: 0, name: 'Child’s Basic Information', isCompleted: false },
     { id: 1, name: 'Topics of Guidance', isCompleted: false },
     { id: 2, name: 'Current Concerns', isCompleted: false },
-    { id: 3, name: 'Review & Submit', isCompleted: false },
+    { id: 3, name: 'Your experience information', isCompleted: false },
   ]);
 
 
@@ -139,7 +139,7 @@ if(!finalData.topics){
           if (child.id && child.id > 0) {
             updateChildren.push({
               id: child.id,
-              name: [child.firstName, child.middle, child.lastName].filter(Boolean).join(" "),
+              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.thingsToKeepInMind || "",
@@ -149,7 +149,7 @@ if(!finalData.topics){
           } else {
             newChildren.push({
               id: 0,
-              name: [child.firstName, child.middle, child.lastName].filter(Boolean).join(" "),
+              name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.thingsToKeepInMind || "",
@@ -264,7 +264,6 @@ if(!finalData.topics){
             .filter(child => !child.is_deleted)
             .map(child => {
               const nameParts = (child.name || "").trim().split(" ");
-
               const childData = {
                 id: child.id,
                 firstName: nameParts[0] || "",
@@ -285,7 +284,6 @@ if(!finalData.topics){
           stepRef.current?.setFormValues({ isloading: true });
           const response = await getChildDetailsForLoginUser();
           if (response.IsSuccess && Array.isArray(response.Data)) {
-
             clearChild()
             setSteps(prevSteps =>
               prevSteps.map(step =>
@@ -308,7 +306,6 @@ if(!finalData.topics){
                 [3].includes(step.id) ? { ...step, isCompleted: true } : step
               )
             );
-
             setStaffData({
               role_in_organisation: staff_response.Data.role_in_organisation || "",
               qualification: staff_response.Data.qualification || "",
