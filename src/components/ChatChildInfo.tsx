@@ -138,29 +138,29 @@ const ChatChildInfo: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="p-4 space-y-4">
+            <div className="p-3 space-y-3">
               {childrens.map((child) => (
                 <div
                   key={child.id}
-                  className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 group hover:border-teal-200"
+                  className="bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200/60 p-3 shadow-sm hover:shadow-md transition-all duration-300 group hover:border-teal-200"
                 >
                   {/* Profile Section */}
-                  <div className="flex items-start gap-4 mb-4">
+                  <div className="flex items-start gap-3 mb-3">
                     {/* Profile Picture */}
                     <div className="relative">
-                      <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-lg">
+                      <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-md">
                         {child.firstName.charAt(0).toUpperCase()}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                     </div>
 
                     {/* User Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="mb-3">
+                      <div className="mb-2">
                         <Tippy content={[child.firstName, child.middleName, child.lastName]
                           .filter(Boolean)
                           .join(" ")} placement="bottom">
-                          <h2 className="text-lg font-bold text-gray-900 truncate">
+                          <h2 className="text-base font-bold text-gray-900 truncate">
                             {[child.firstName, child.middleName, child.lastName]
                               .filter(Boolean)
                               .join(" ")}
@@ -169,13 +169,13 @@ const ChatChildInfo: React.FC = () => {
                       </div>
 
                       {/* Stats */}
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
                           <span className="text-gray-600 font-medium">DOB: {child.dob}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
                           <span className="text-gray-600 font-medium">
                             {(() => {
                               const birthDate = new Date(child.dob);
@@ -212,23 +212,23 @@ const ChatChildInfo: React.FC = () => {
                   </div>
 
                   {/* Divider */}
-                  <div className="border-t border-gray-200 my-4"></div>
+                  <div className="border-t border-gray-200 my-2"></div>
                   {/* Topics of Interest */}
                   {child.topics.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
-                          <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="mb-3">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <div className="w-4 h-4 bg-green-100 rounded flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
-                        <h4 className="text-sm font-bold text-gray-800">Areas of Interest</h4>
+                        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wide">Interests</h4>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1">
                         {child.topics.map((topic: any, i: any) => (
                           <span
                             key={i}
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors"
+                            className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full bg-green-50 text-green-700 border border-green-200"
                           >
                             {topic}
                           </span>
@@ -240,19 +240,19 @@ const ChatChildInfo: React.FC = () => {
                   {/* Concerns */}
                   {child.concerns.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <svg className="w-3 h-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <div className="w-4 h-4 bg-orange-100 rounded flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                           </svg>
                         </div>
-                        <h4 className="text-sm font-bold text-gray-800">Areas of Concern</h4>
+                        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wide">Concerns</h4>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1">
                         {child.concerns.map((concern: any, i: any) => (
                           <span
                             key={i}
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors"
+                            className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full bg-orange-50 text-orange-700 border border-orange-200"
                           >
                             {concern}
                           </span>
