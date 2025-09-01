@@ -14,5 +14,7 @@ export interface SignupFormInputs {
     // postalCode?: string;
     role: string[];// ['Parent', 'Staff']
     confirmPassword: string;
+
+    country?: string;
 };
 
