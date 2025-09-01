@@ -1,3 +1,4 @@
+import type { DateParams, FeedbackRatingDTO, CostEstimateDTO } from '../routes/models/request/AdminRequest';
 import type { SignupFormInputs } from '../routes/models/request/Auth';
 import type { ConversationDTO } from '../routes/models/request/Chat';
 import type { ChatInputRM } from '../routes/models/request/Child';
@@ -545,117 +546,100 @@ export const getConversationMessageByUUId = async (UUID: string | undefined): Pr
 
 //Admin Dashboard Page:- 
 
-interface DateParams {
-  start_date: string; 
-  end_date: string;  
-}
 export const getNewSignUps = async (
-  params: DateParams
+    params: DateParams
 ): Promise<APIResponse<UserDTO[]>> => {
-  try {
-    const response = await axiosInstance.post(
-      `admin/newSignUps`,
-      null, 
-      {
-        params: {
-          start_date: params.start_date,
-          end_date: params.end_date,
-        },
-      }
-    );
-    return response.data;
-  } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Failed to fetch new signups",
-    };
-  }
+    try {
+        const response = await axiosInstance.post(
+            `admin/newSignUps`,
+            null,
+            {
+                params: {
+                    start_date: params.start_date,
+                    end_date: params.end_date,
+                },
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to fetch new signups",
+        };
+    }
 };
-
 
 export const getTotalChats = async (
-  params: DateParams
+    params: DateParams
 ): Promise<APIResponse<{ totalChats: number }>> => {
-  try {
-    const response = await axiosInstance.post(
-      `admin/totalChats`,
-      null,
-      {
-        params: {
-          start_date: params.start_date,
-          end_date: params.end_date,
-        },
-      }
-    );
+    try {
+        const response = await axiosInstance.post(
+            `admin/totalChats`,
+            null,
+            {
+                params: {
+                    start_date: params.start_date,
+                    end_date: params.end_date,
+                },
+            }
+        );
 
-    return response.data;
-  } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Failed to fetch total chats",
-    };
-  }
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to fetch total chats",
+        };
+    }
 };
-
-interface FeedbackRatingDTO {
-  label: "GREEN" | "RED" | "AMBER";
-  count: number;
-}
 
 export const getFeedbackRatings = async (
-  params: DateParams
+    params: DateParams
 ): Promise<APIResponse<FeedbackRatingDTO[]>> => {
-  try {
-    const response = await axiosInstance.post(
-      `admin/feedbackRatings`,
-      null, 
-      {
-        params: {
-          start_date: params.start_date,
-          end_date: params.end_date,
-        },
-      }
-    );
+    try {
+        const response = await axiosInstance.post(
+            `admin/feedbackRatings`,
+            null,
+            {
+                params: {
+                    start_date: params.start_date,
+                    end_date: params.end_date,
+                },
+            }
+        );
 
-    return response.data;
-  } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Failed to fetch feedback ratings",
-    };
-  }
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to fetch feedback ratings",
+        };
+    }
 };
 
-
-interface CostEstimateDTO {
-  modelName: string;
-  totalTokens: number;
-  cost: number; // in euros
-}
-
 export const getCostEstimate = async (
-  params: DateParams
+    params: DateParams
 ): Promise<APIResponse<CostEstimateDTO[]>> => {
-  try {
-    const response = await axiosInstance.get(
-      `admin/costEstimate`,
-      {
-        params: {
-          start_date: params.start_date,
-          end_date: params.end_date,
-        },
-      }
-    );
+    try {
+        const response = await axiosInstance.get(
+            `admin/costEstimate`,
+            {
+                params: {
+                    start_date: params.start_date,
+                    end_date: params.end_date,
+                },
+            }
+        );
 
-    return response.data;
-  } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Failed to fetch cost estimate",
-    };
-  }
+        return response.data;
+    } catch (error: any) {
+        throw error?.response?.data ?? {
+            IsSuccess: false,
+            Data: null,
+            Message: "Failed to fetch cost estimate",
+        };
+    }
 };
