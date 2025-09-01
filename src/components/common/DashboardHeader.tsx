@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/images/logo.svg";
 import userimg from "../../assets/images/user-img.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import { useChat } from "../../contexts/ChatContext";
 import { User, MessageCircle, LogOut } from "lucide-react";
@@ -29,6 +29,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   setIsSidebarOpen
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { clearMessages, ensureAliceIntro, setSelectedConversationId } = useChat();
   const { isChatVisible } = useChatVisibility();
 
@@ -163,7 +164,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   navigate("/child-basic-info");
                   setIsSidebarOpen(false);
                 }}
-                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+                className={`flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 transition-colors duration-300 ${
+                  location.pathname === "/child-basic-info" 
+                    ? "text-alice-teal bg-alice-teal/10 font-semibold" 
+                    : "text-gray-700 hover:text-alice-teal hover:bg-alice-teal/10"
+                }`}
               >
                 <User className="w-5 h-5" />
                 Profile
@@ -174,7 +179,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 onClick={() => {
                   onNewChat();
                 }}
-                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+                className={`flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 transition-colors duration-300 ${
+                  location.pathname === "/chat" 
+                    ? "text-alice-teal bg-alice-teal/10 font-semibold" 
+                    : "text-gray-700 hover:text-alice-teal hover:bg-alice-teal/10"
+                }`}
               >
                 <MessageCircle className="w-5 h-5" />
                 Chat
