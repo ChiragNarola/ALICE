@@ -4,6 +4,7 @@ import {
   area_of_interests,
   area_of_concerns,
 } from "../api/api-services";
+import Tippy from "@tippyjs/react";
 
 const ChatChildInfo: React.FC = () => {
   const [childrens, setChildrens] = useState<any[]>([]);
@@ -75,78 +76,160 @@ const ChatChildInfo: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-2xl shadow-lg w-full max-w-[22rem] mx-auto max-h-[80vh] overflow-y-auto scrollbar-hide">
-      {/* Sticky Heading */}
-      <h1 className="sticky top-[-35px] pt-5 h-[70px] z-10 text-lg sm:text-xl font-extrabold text-gray-800 mb-6 border-b-2 border-blue-200 pb-2 flex items-center gap-2 bg-gradient-to-br from-gray-50 via-white to-gray-100">
-        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-        Children Information
-      </h1>
+    <div className="bg-gradient-to-br from-gray-50 to-white w-full max-w-[22rem] mx-auto max-h-[80vh] overflow-hidden border border-gray-200/50 shadow-xl rounded-2xl backdrop-blur-sm">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-teal-600 via-teal-500 to-teal-700 px-4 py-3 rounded-t-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
+        <div className="relative flex items-center gap-3">
+          <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-white drop-shadow-sm">Child Profiles</h1>
+            <p className="text-teal-100 text-xs font-medium">
+              {childrens.length} child{childrens.length !== 1 ? 'ren' : ''} registered
+            </p>
+          </div>
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[60vh]">
           <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="space-y-3">
-          {childrens.map((child) => (
-            <div
-              key={child.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <h2 className="text-sm sm:text-base font-semibold text-gray-900">
-                    {[child.firstName, child.middleName, child.lastName]
-                      .filter(Boolean)
-                      .join(" ")}
-                  </h2>
-                  <p className="text-[11px] text-gray-500">{child.dob}</p>
-                </div>
-                <button className="text-gray-400 hover:text-gray-600 text-base leading-none">
-                  ⋮
-                </button>
-              </div>
-
-              {/* Topics of Interest */}
-              {child.topics.length > 0 && (
-                <div className="mb-2">
-                  <h3 className="text-xs font-medium text-gray-700 mb-1">
-                    Interest
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {child.topics.map((topic, i) => (
-                      <span
-                        key={i}
-                        className="px-2.5 py-0.5 text-[11px] font-medium rounded-full bg-blue-50 text-alice-teal border border-blue-200"
-                      >
-                        {topic}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Concerns */}
-              {child.concerns.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-medium text-gray-700 mb-1">
-                    Concerns
-                  </h3>
-                  <ul className="space-y-0.5">
-                    {child.concerns.map((concern, i) => (
-                      <li
-                        key={i}
-                        className="text-[11px] px-2.5 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-md"
-                      >
-                        {concern}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+        <div className="p-3 max-h-[calc(80vh-80px)] overflow-y-auto custom-scrollbar">
+          {childrens.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-bold text-gray-800 mb-2">No children registered</h3>
+              <p className="text-gray-500 text-xs max-w-xs mx-auto leading-relaxed">Add a child to get started with personalized guidance and support.</p>
             </div>
-          ))}
+          ) : (
+            <div className="space-y-3">
+              {childrens.map((child) => (
+                <div
+                  key={child.id}
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-4 shadow-md hover:shadow-lg transition-all duration-300 group"
+                >
+                  {/* Profile Section */}
+                  <div className="flex items-start gap-3 mb-3">
+                    {/* Profile Picture */}
+                    <div className="relative">
+                      <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-sm">
+                        {child.firstName.charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+
+                    {/* User Info & Actions */}
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-2">
+                        <Tippy content={[child.firstName, child.middleName, child.lastName]
+                          .filter(Boolean)
+                          .join(" ")} placement="bottom">
+                          <h2 className="text-base font-bold text-gray-900 truncate">
+                            {[child.firstName, child.middleName, child.lastName]
+                              .filter(Boolean)
+                              .join(" ")}
+                          </h2>
+                        </Tippy>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex gap-3 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                          <span className="text-gray-600">{child.dob}</span>
+                          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                          <span className="text-gray-600">
+                            {(() => {
+                              const birthDate = new Date(child.dob);
+                              const today = new Date();
+
+                              let years = today.getFullYear() - birthDate.getFullYear();
+                              let months = today.getMonth() - birthDate.getMonth();
+                              const days = today.getDate() - birthDate.getDate();
+
+                              // Adjust if current month/day is before birth month/day
+                              if (days < 0) {
+                                months--; // not completed current month
+                              }
+                              if (months < 0) {
+                                years--;
+                                months += 12;
+                              }
+
+                              // Handle different formats
+                              if (years > 0 && months > 0) {
+                                return `${years} years ${months} months old`;
+                              } else if (years > 0) {
+                                return `${years} years old`;
+                              } else if (months > 0) {
+                                return `${months} months old`;
+                              } else {
+                                return "Less than a month old";
+                              }
+                            })()}
+                          </span>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <hr className="py-2" />
+                  {/* Topics of Interest */}
+                  {child.topics.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                        <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                          AREAS OF INTEREST
+                        </h4>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {child.topics.map((topic: any, i: any) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-200"
+                          >
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Concerns */}
+                  {child.concerns.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
+                        <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                          AREAS OF CONCERN
+                        </h4>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {child.concerns.map((concern: any, i: any) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-orange-50 text-orange-700 border border-orange-200"
+                          >
+                            {concern}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

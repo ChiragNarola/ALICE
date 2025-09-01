@@ -196,25 +196,39 @@ const ChatPage: React.FC = () => {
   return (
     <>
       <main className="flex-1 flex px-2 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">
-        {/* max-w-[1300px] sm:w-[95%] */}
-        {!isSidebarOpen && <span onClick={handleToggle} className="absolute z-100 top-[5px] left-4 material-symbols-outlined text-gray-700 text-2xl cursor-pointer font-bold">
-          menu_open
-        </span>}
-        {/* <section className="overflow-hidden">
-          <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} />
-        </section> */}
-        <section className="mx-auto right pe-5 h-[calc(100vh-140px)] relative">
-          {isChatVisible && <>
-            <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
-            <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} />
-          </>}
-        </section>
-          <section className="mx-auto right-1 pe-5 h-[calc(100vh-140px)] absolute">
-         
-            <ChatChildInfo  />
-            {/* <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} /> */}
+        {!isSidebarOpen && (
+          <span
+            onClick={handleToggle}
+            className="absolute z-50 top-[5px] left-4 material-symbols-outlined text-gray-700 text-2xl cursor-pointer font-bold"
+          >
+            menu_open
+          </span>
+        )}
+
+        {/* Reserve space for sidebar */}
+        <section className="w-[220px] shrink-0 overflow-hidden">
+          {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
         </section>
 
+        {/* Chat Section */}
+        <section className="flex-1 pr-5 h-[calc(100vh-140px)] relative">
+          {isChatVisible && (
+            <>
+              <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
+              <ChatInput
+                onSend={handleSendMessage}
+                setMessage={setMessage}
+                message={message}
+                searching={searching}
+              />
+            </>
+          )}
+        </section>
+
+        {/* Children Info */}
+        <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px]">
+          <ChatChildInfo />
+        </aside>
       </main>
     </>
   );
