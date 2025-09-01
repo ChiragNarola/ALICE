@@ -35,6 +35,8 @@ const Step4ReviewSubmit = forwardRef<
     mode: "onChange",
   });
 
+
+
   useImperativeHandle(ref, () => ({
     validateAndSubmit: async () => {
       const isValid = await trigger();
@@ -46,8 +48,8 @@ const Step4ReviewSubmit = forwardRef<
     },
     getValues: () => getValues(),
     setFormValues: (data) => {
-  // console.log("Step4 setFormValues received:", data);
-  reset(data);
+      console.log("Step4 setFormValues received:", data);
+      reset(data);
     },
   }));
 
@@ -118,10 +120,14 @@ const Step4ReviewSubmit = forwardRef<
           name="age_group"
           control={control}
           render={({ field: { value, onChange } }) => {
+            // Always derive from RHF value
+            console.log(value)
             const [min, max] = value.split("-").map(Number);
+
             return (
               <>
                 <MultiRangeSlider
+                  key={value} 
                   min={0}
                   max={10}
                   step={1}
@@ -141,6 +147,7 @@ const Step4ReviewSubmit = forwardRef<
                   thumbLeftColor="#008080"
                   thumbRightColor="#008080"
                 />
+
                 <div className="flex justify-between text-sm text-alice-darkgray mt-2">
                   <span>Min: {min}</span>
                   <span>Max: {max}</span>
@@ -154,6 +161,7 @@ const Step4ReviewSubmit = forwardRef<
             );
           }}
         />
+
       </div>
     </div>
   );

@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
+import ChatChildInfo from "../components/ChatChildInfo";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 // import type { ChatInputProps } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import { AlertTriangle } from "lucide-react";
+// import { toast } from "react-toastify";
+// import { AlertTriangle } from "lucide-react";
 
 type Message = {
   id?: number;
@@ -208,6 +209,12 @@ const ChatPage: React.FC = () => {
             <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} />
           </>}
         </section>
+          <section className="mx-auto right-1 pe-5 h-[calc(100vh-140px)] absolute">
+         
+            <ChatChildInfo  />
+            {/* <ChatInput onSend={handleSendMessage} setMessage={setMessage} message={message} searching={searching} /> */}
+        </section>
+
       </main>
     </>
   );
