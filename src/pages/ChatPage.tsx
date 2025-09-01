@@ -6,11 +6,9 @@ import ChatChildInfo from "../components/ChatChildInfo";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { useAuth } from "../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
-// import type { ChatInputProps } from "../routes/models/request/Chat";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
-// import { toast } from "react-toastify";
-// import { AlertTriangle } from "lucide-react";
+import StaffInfo from "../components/StaffInfo";
 
 type Message = {
   id?: number;
@@ -27,6 +25,7 @@ const ChatPage: React.FC = () => {
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState<'parent' | 'staff'>('parent');
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       id: 0,
@@ -65,48 +64,6 @@ const ChatPage: React.FC = () => {
   const { isChatVisible, setChatVisible } = useChatVisibility();
   setChatVisible(true);
 
-  // const handleSendMessage = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   IsSearching(true);
-  //   if (!message.trim()) return;
-
-  //   try {
-  //     const request_data: ChatInputProps = {
-  //       "query": message,
-  //       "conversation_id": chatBordUniqueId,
-  //       "user_id": user?.id
-  //     };
-
-  //     const response = await chatAPI(request_data);
-  //     if (response) {
-  //       setChatMessages((prev) => [
-  //         ...prev,
-  //         {
-  //           id: 0,
-  //           from: "user",
-  //           text: message,
-  //           actions: true,
-  //           user_response: null,
-  //         },
-  //         {
-  //           id: 0,
-  //           from: "alice",
-  //           text: response,
-  //           actions: true,
-  //           user_response: null,
-  //         },
-  //       ]);
-  //       setMessage("");
-  //       refreshChatList();
-  //     }
-  //   } catch (error) {
-  //     console.error("Chat send error:", error);
-  //   } finally {
-  //     IsSearching(false);
-  //     setMessage("");
-  //   }
-  // };
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -130,6 +87,7 @@ const ChatPage: React.FC = () => {
       ...prev,
       { id: 0, from: "alice", text: "...", actions: true },
     ]);
+    setMessage("");
 
     try {
       const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
@@ -226,9 +184,66 @@ const ChatPage: React.FC = () => {
         </section>
 
         {/* Children Info */}
-        <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px]">
-          <ChatChildInfo />
-        </aside>
+        {user?.roles && (
+          <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px]">
+            {user.roles.some(role => role.toLowerCase() === 'parent') && !user.roles.some(role => role.toLowerCase() === 'staff') && (
+              <ChatChildInfo />
+            )}
+            {user.roles.some(role => role.toLowerCase() === 'staff') && !user.roles.some(role => role.toLowerCase() === 'parent') && (
+              <StaffInfo />
+            )}
+            {user.roles.some(role => role.toLowerCase() === 'parent') && user.roles.some(role => role.toLowerCase() === 'staff') && (
+              <div className="h-full flex flex-col">
+                {/* Tab Header */}
+                <div className="bg-white border-b border-gray-200">
+
+                  {/* Tab Navigation */}
+                  <div className="flex bg-gray-50 mx-2 mb-2 rounded-xl p-1">
+                    <button
+                      onClick={() => setActiveTab('parent')}
+                      className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${activeTab === 'parent'
+                        ? 'bg-white text-teal-600 shadow-md border border-teal-100'
+                        : 'text-gray-600 hover:text-teal-600 hover:bg-white/50'
+                        }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${activeTab === 'parent' ? 'bg-teal-500' : 'bg-gray-400'
+                          }`}></div>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>Parent</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('staff')}
+                      className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${activeTab === 'staff'
+                        ? 'bg-white text-teal-600 shadow-md border border-teal-100'
+                        : 'text-gray-600 hover:text-teal-600 hover:bg-white/50'
+                        }`}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${activeTab === 'staff' ? 'bg-teal-500' : 'bg-gray-400'
+                          }`}></div>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                        </svg>
+                        <span>Staff</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tab Content */}
+                <div className="flex-1 overflow-hidden">
+                  {activeTab === 'parent' && <ChatChildInfo />}
+                  {activeTab === 'staff' && <StaffInfo />}
+                </div>
+              </div>
+            )}
+          </aside>
+        )}
+
       </main>
     </>
   );
