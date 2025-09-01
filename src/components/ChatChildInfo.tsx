@@ -146,7 +146,7 @@ const ChatChildInfo: React.FC = () => {
                         <div className="flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                           <span className="text-gray-600">{child.dob}</span>
-                          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                          <div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
                           <span className="text-gray-600">
                             {(() => {
                               const birthDate = new Date(child.dob);
@@ -187,7 +187,6 @@ const ChatChildInfo: React.FC = () => {
                   {child.topics.length > 0 && (
                     <div className="mb-3">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                         <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">
                           AREAS OF INTEREST
                         </h4>
@@ -209,7 +208,6 @@ const ChatChildInfo: React.FC = () => {
                   {child.concerns.length > 0 && (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
                         <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide">
                           AREAS OF CONCERN
                         </h4>
