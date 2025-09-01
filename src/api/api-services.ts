@@ -546,8 +546,8 @@ export const getConversationMessageByUUId = async (UUID: string | undefined): Pr
 //Admin Dashboard Page:- 
 
 interface DateParams {
-  start_date: string; // ISO date string
-  end_date: string;   // ISO date string
+  start_date: string; 
+  end_date: string;  
 }
 export const getNewSignUps = async (
   params: DateParams
@@ -610,7 +610,7 @@ export const getFeedbackRatings = async (
   try {
     const response = await axiosInstance.post(
       `admin/feedbackRatings`,
-      null, // POST body empty
+      null, 
       {
         params: {
           start_date: params.start_date,
