@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   getChildDetailsForLoginUser,
   area_of_interests,
@@ -76,10 +76,34 @@ const ChatChildInfo: React.FC = () => {
     fetchData();
   }, []);
 
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [listMaxHeight, setListMaxHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const recalc = () => {
+      try {
+        const headerEl = headerRef.current;
+        if (!headerEl) {
+          setListMaxHeight(null);
+          return;
+        }
+        const headerRect = headerEl.getBoundingClientRect();
+        const available = window.innerHeight - headerRect.bottom - 25;
+        setListMaxHeight(Math.max(200, Math.floor(available)));
+      } catch {
+        // ignore
+      }
+    };
+
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, []);
+
   return (
-    <div className="bg-white w-full h-full flex flex-col">
+    <div className="bg-white w-full h-full flex flex-col min-h-0">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4 relative overflow-hidden">
+      <div ref={headerRef} className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4 relative overflow-hidden sticky top-0 z-10">
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -118,7 +142,7 @@ const ChatChildInfo: React.FC = () => {
           <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0" style={listMaxHeight ? { maxHeight: `${listMaxHeight}px` } : undefined}>
           {childrens.length === 0 ? (
             <div className="text-center py-16 px-6">
               <div className="w-20 h-20 bg-gradient-to-br from-teal-100 to-teal-200 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">

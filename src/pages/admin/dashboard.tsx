@@ -272,9 +272,9 @@ const AdminDashboard = () => {
                       const label = entry.label?.trim().toLowerCase();
 
                       const colorMap: Record<string, string> = {
-                        green: "#10B981",
-                        amber: "#F59E0B",
-                        red: "#EF4444",
+                        like: "#10B981",
+                        neutral: "#F59E0B",
+                        dislike: "#EF4444",
                         blue: "#3B82F6",
                         teal: "#14B8A6",
                         gray: "#6B7280",
@@ -306,9 +306,9 @@ const AdminDashboard = () => {
                 {stats.feedback.map((item, idx) => {
                   const label = item.label?.trim().toLowerCase();
                   const colorMap: Record<string, string> = {
-                    green: "bg-emerald-500",
-                    amber: "bg-amber-500",
-                    red: "bg-red-500",
+                    like: "bg-emerald-500",
+                    neutral: "bg-amber-500",
+                    dislike: "bg-red-500",
                     blue: "bg-blue-500",
                     teal: "bg-teal-500",
                     gray: "bg-gray-500",
