@@ -141,6 +141,47 @@ const AdminDashboard = () => {
 
   const totalTopicChats = topics.reduce((sum, t) => sum + toNumberFromCompact(t.chats), 0);
 
+  // Helpers for Cost section - try to derive input/output if present or estimable
+  const deriveCostParts = (items: any[]) => {
+    let input = 0;
+    let output = 0;
+    let hasExplicit = false;
+    for (const item of items || []) {
+      const inputLike =
+        typeof item.input_cost === "number"
+          ? item.input_cost
+          : typeof item.prompt_cost === "number"
+            ? item.prompt_cost
+            : null;
+      const outputLike =
+        typeof item.output_cost === "number"
+          ? item.output_cost
+          : typeof item.completion_cost === "number"
+            ? item.completion_cost
+            : null;
+      if (inputLike !== null) {
+        input += inputLike;
+        hasExplicit = true;
+      }
+      if (outputLike !== null) {
+        output += outputLike;
+        hasExplicit = true;
+      }
+
+      // Fallback: split by token ratio if available
+      const promptTokens = Number(item.prompt_tokens ?? item["prompt tokens"]);
+      const completionTokens = Number(item.completion_tokens ?? item["completion tokens"]);
+      if (!hasExplicit && !Number.isNaN(promptTokens) && !Number.isNaN(completionTokens)) {
+        const totalTokens = promptTokens + completionTokens;
+        if (totalTokens > 0 && typeof item.cost === "number") {
+          input += (promptTokens / totalTokens) * item.cost;
+          output += (completionTokens / totalTokens) * item.cost;
+        }
+      }
+    }
+    return { input, output };
+  };
+
   return (
     // <div className="p-6 space-y-8 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
     <div className="max-w-7xl mx-auto space-y-8">
@@ -199,7 +240,7 @@ const AdminDashboard = () => {
             Icon: MessageCircle,
           },
           {
-            label: "Revenue (Est.)",
+            label: "Estimated Cost",
             value: `€${stats.revenue.toFixed(2)}`,
             color: "text-emerald-700",
             iconBg: "from-emerald-100 to-green-50",
@@ -221,6 +262,40 @@ const AdminDashboard = () => {
                       </p>
                       <p className="text-sm text-gray-500 mt-1">{label}</p>
                     </div>
+                  ) : label === "Estimated Cost" ? (
+                    <div className="flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className={`text-3xl font-extrabold ${color}`}>
+                            €
+                            {stats?.cost
+                              ? stats.cost.reduce((s: number, c: { cost?: number }) => s + (c.cost ?? 0), 0).toFixed(2)
+                              : "0.00"}
+                          </p>
+
+                          <p className="text-sm text-gray-500 mt-1">Estimated Cost</p>
+                        </div>
+                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${iconBg} ring-1 ${iconRing} shadow-sm`}>
+                          <Icon className="w-5 h-5 text-gray-700/80" />
+                        </div>
+                      </div>
+
+                      {stats?.cost && (() => {
+                        const parts = deriveCostParts(stats.cost);
+                        return (
+                          <div className="mt-3 space-y-1 text-sm">
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">Input cost</span>
+                              <span className="font-semibold text-gray-900">€{parts.input.toFixed(2)}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">Output cost</span>
+                              <span className="font-semibold text-gray-900">€{parts.output.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   ) : (
                     <div>
                       <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
@@ -228,9 +303,11 @@ const AdminDashboard = () => {
                     </div>
                   )}
                 </div>
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${iconBg} ring-1 ${iconRing} shadow-sm`}>
-                  <Icon className="w-5 h-5 text-gray-700/80" />
-                </div>
+                {label !== "Estimated Cost" && (
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${iconBg} ring-1 ${iconRing} shadow-sm`}>
+                    <Icon className="w-5 h-5 text-gray-700/80" />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -371,88 +448,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Cost Breakdown */}
-      <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
-        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
-          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            {/* <span className="w-2 h-2 bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full animate-pulse"></span> */}
-            <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-            AI Cost Breakdown
-          </h3>
-          <span className="text-xs px-2 py-1 rounded-full bg-teal-50 text-teal-700 ring-1 ring-teal-200">
-            Total €{stats.cost.reduce((s: number, c: any) => s + (c.cost || 0), 0).toFixed(2)}
-          </span>
-        </div>
-
-        {stats.cost && stats.cost.length > 0 ? (
-          <div className="space-y-5">
-            {stats.cost.map((item: any, idx: number) => {
-              const maxTokens = Math.max(
-                ...stats.cost.map((c: any) => parseInt(c["total tokens"]))
-              );
-              const usagePercent =
-                (parseInt(item["total tokens"]) / maxTokens) * 100;
-
-              return (
-                <div
-                  key={idx}
-                >
-                  {/* Model & Cost */}
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">
-                      {item.model_name}
-                    </span>
-                    <span className="text-sm font-semibold text-gray-900">
-                      €{item.cost.toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Tokens & Percentage */}
-                  <div className="flex justify-between items-center text-xs text-gray-500 mb-1.5">
-                    <span>Total Tokens</span>
-                    <span className="font-medium text-gray-700">
-                      {item["total tokens"].toLocaleString()} ({usagePercent.toFixed(1)}%)
-                    </span>
-                  </div>
-
-                  {/* Token Progress Bar */}
-                  <div className="relative w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-700 ease-in-out ${usagePercent < 50
-                        ? "bg-gradient-to-r from-teal-500 to-emerald-400"
-                        : usagePercent < 80
-                          ? "bg-gradient-to-r from-amber-400 to-orange-500"
-                          : "bg-gradient-to-r from-rose-500 to-red-600"
-                        }`}
-                      style={{ width: `${usagePercent}%` }}
-                    ></div>
-                    <span className="absolute -top-5 right-0 text-[10px] font-medium text-gray-600">{usagePercent.toFixed(0)}%</span>
-                  </div>
-
-                  {/* Helper Text */}
-                  <p className="mt-1.5 text-xs text-gray-500">
-                    {usagePercent < 50
-                      ? "Low usage compared to other models."
-                      : usagePercent < 80
-                        ? "Moderate usage — keep an eye on this model."
-                        : "High usage — this model is driving most of your costs."}
-                  </p>
-                </div>
-              );
-            })}
-
-            {/* Legend / Note */}
-            {/* <div className="pt-2 border-t border-gray-100 text-xs text-gray-500">
-              <p>
-                This chart shows each model’s token consumption relative to the
-                highest usage model in the selected date range.
-              </p>
-            </div> */}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-sm">No cost data available</p>
-        )}
-      </div>
     </div>
     // </div>
 
