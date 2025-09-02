@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { useForm, Controller } from 'react-hook-form';
-import { fetchCountries, registerUser } from '../api/api-services';
+import { registerUser } from '../api/api-services';
 import { toast } from 'react-toastify';
 import type { SignupFormInputs } from '../routes/models/request/Auth';
 import { Eye, EyeOff } from 'lucide-react';
@@ -14,8 +14,8 @@ const SignupForm = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [countries, setCountries] = useState<any[]>([]);
-  const [locationType, setLocationType] = useState<'country' | 'pincode'>('country');
+  // const [countries, setCountries] = useState<any[]>([]);
+  // const [locationType, setLocationType] = useState<'country' | 'pincode'>('country');
 
   const {
     register,

@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 
 const ChatChildInfo: React.FC = () => {
   const [childrens, setChildrens] = useState<any[]>([]);
-  const [TOPICS, setTOPICS] = useState<any[]>([]);
-  const [CONCERNS, setCONCERNS] = useState<any[]>([]);
+  // const [TOPICS, setTOPICS] = useState<any[]>([]);
+  // const [CONCERNS, setCONCERNS] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // start as true
   const navigate = useNavigate();
   useEffect(() => {
@@ -18,11 +18,11 @@ const ChatChildInfo: React.FC = () => {
       try {
         // fetch topics
         const interestList = await area_of_interests();
-        if (interestList.IsSuccess) setTOPICS(interestList.Data);
+        // if (interestList.IsSuccess) setTOPICS(interestList.Data);
 
         // fetch concerns
         const concernList = await area_of_concerns();
-        if (concernList.IsSuccess) setCONCERNS(concernList.Data);
+        // if (concernList.IsSuccess) setCONCERNS(concernList.Data);
 
         // fetch children after topics & concerns are ready
         const response = await getChildDetailsForLoginUser();

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { getStaffDetailsForLoginUser } from "../api/api-services";
 
 const StaffInfo: React.FC = () => {
@@ -10,7 +9,6 @@ const StaffInfo: React.FC = () => {
     childAgeMax: 9,
   });
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   // Fetch staff data from API
   useEffect(() => {
