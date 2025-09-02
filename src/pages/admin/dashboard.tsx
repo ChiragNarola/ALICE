@@ -21,13 +21,10 @@ import type {
 const AdminDashboard = () => {
 const today = new Date();
   const currentYear = today.getFullYear();
-
-  // Format as YYYY-MM-DD
   const formatDate = (date: Date) => date.toISOString().split("T")[0];
-
   const [dateRange, setDateRange] = useState<DateParams>({
-    start_date: `${currentYear}-01-01`, // First day of the year
-    end_date: formatDate(today),        // Current date
+    start_date: `${currentYear}-01-01`,
+    end_date: formatDate(today),        
   });
 
   useEffect(() => {
@@ -78,7 +75,7 @@ const fetchData = async () => {
             count: f.count,
           }))
         : [],
-      cost: costEstimate?.Data ?? [], // keep raw cost breakdown
+      cost: costEstimate?.Data ?? [], 
     });
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
@@ -94,7 +91,6 @@ const fetchData = async () => {
 <div className="p-6 space-y-8 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
   {/* Header + Date Filter */}
   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 pb-6">
-    {/* Title */}
     <div className="flex items-center space-x-3">
       <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
         <LayoutDashboard className="w-7 h-7 text-teal-600" />
