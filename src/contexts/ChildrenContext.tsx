@@ -31,6 +31,7 @@ export const ChildrenProvider = ({ children: node }: { children: ReactNode }) =>
         lastName: '',
         gender: 'Boy',
         dob: '',
+        things_to_keep_in_mind: '',
         topics: [],
         concerns: [],
       },

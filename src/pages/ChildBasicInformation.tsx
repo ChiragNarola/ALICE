@@ -142,7 +142,7 @@ if(!finalData.topics){
               name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
-              things_to_keep_in_mind: child.thingsToKeepInMind || "",
+              things_to_keep_in_mind: child.things_to_keep_in_mind || "",
               area_of_interest: finalData.topics[index] || [],
               concerns: finalData.concerns[index] || []
             });
@@ -152,7 +152,7 @@ if(!finalData.topics){
               name: [child.firstName, child.middleName, child.lastName].filter(Boolean).join(" "),
               date_of_birth: child.dob || "",
               gender: child.gender || "",
-              things_to_keep_in_mind: child.thingsToKeepInMind || "",
+              things_to_keep_in_mind: child.things_to_keep_in_mind || "",
               area_of_interest: finalData.topics[index] || [],
               concerns: finalData.concerns[index] || []
             });
@@ -271,6 +271,7 @@ if(!finalData.topics){
                 lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
                 gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
                 dob: child.date_of_birth,
+                things_to_keep_in_mind:child.things_to_keep_in_mind,
                 topics: (child.area_of_interest || []).map((a: any) => a.id),
                 concerns: (child.concerns || []).map((a: any) => a.id),
               };

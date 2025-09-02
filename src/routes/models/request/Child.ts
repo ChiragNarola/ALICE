@@ -3,12 +3,13 @@ export interface ChildInfo {
   topics: number[];
   concerns: number[];
   firstName: string;
-  middleName?: string;
+  middleName: string;
   lastName: string;
   gender: 'Boy' | 'Girl' | 'Prefer not to say';
   // years: string;
   // months: string;
   dob: string;
+  things_to_keep_in_mind?:string;
 }
 
 export interface ChatInputRM {

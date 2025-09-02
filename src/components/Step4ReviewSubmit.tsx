@@ -121,7 +121,6 @@ const Step4ReviewSubmit = forwardRef<
           control={control}
           render={({ field: { value, onChange } }) => {
             // Always derive from RHF value
-            console.log(value)
             const [min, max] = value.split("-").map(Number);
 
             return (

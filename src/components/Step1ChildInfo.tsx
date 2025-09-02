@@ -23,6 +23,7 @@ const childSchema = z.object({
     .nonempty("Last name is required"),
   gender: z.enum(['Boy', 'Girl', 'Prefer not to say']),
   dob: z.string().min(1, "Date of Birth is required"),
+  things_to_keep_in_mind: z.string().optional(),
   topics: z.array(z.number()).optional(),
   concerns: z.array(z.number()).optional(),
 });
@@ -146,6 +147,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
               lastName: '',
               gender: 'Boy',
               dob: '',
+              things_to_keep_in_mind: '',
               topics: [],
               concerns: [],
             });
@@ -342,7 +344,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
         </div>
 
         {/* Date of Birth */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 lg:mb-9">
           <div className="flex-1 min-w-[120px]">
             <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
               <span className="bg-[#FEFCF8] px-[5px]">
@@ -371,6 +373,30 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
             )}
           </div>
         </div>
+        {/* Additional Important Information */}
+           <div className="flex-1 min-w-[180px]">
+            <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+              <span className="bg-[#FEFCF8] px-[5px]">
+                Additional Important Information
+              </span>
+            </label>
+
+            <Controller
+              name={`children.${idx}.things_to_keep_in_mind`}
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  placeholder="Additional Important Information"
+                  className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] bg-white placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal outline-[.2px] focus:outline-alice-teal ${
+                    errors?.children?.[idx]?.things_to_keep_in_mind
+                      ? "border-red-500"
+                      : "border-alice-gray"
+                  }`}
+                />
+              )}
+            />
+          </div>
       </div>
     ))}
   </>
