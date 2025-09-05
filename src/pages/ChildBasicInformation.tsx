@@ -122,7 +122,7 @@ if(!finalData.topics){
       const buildStaffForm = (): FormData => {
         const formData = new FormData();
         formData.append("age_group", finalData.age_group);
-        formData.append("role_in_organisation", finalData.role_in_organisation);
+      formData.append("role_in_organisation", finalData.role_in_organisation =='Other' ? finalData.other_role : finalData.role_in_organisation);
         formData.append("qualification", finalData.qualification);
         return formData;
       };
@@ -267,9 +267,9 @@ if(!finalData.topics){
               const childData = {
                 id: child.id,
                 firstName: nameParts[0] || "",
-                middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : nameParts[1] || "",
+                middleName: nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "",
                 lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
-                gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
+                gender: child.gender as "Male" | "Female" | "Prefer not to say",
                 dob: child.date_of_birth,
                 things_to_keep_in_mind:child.things_to_keep_in_mind,
                 topics: (child.area_of_interest || []).map((a: any) => a.id),
@@ -311,6 +311,7 @@ if(!finalData.topics){
               role_in_organisation: staff_response.Data.role_in_organisation || "",
               qualification: staff_response.Data.qualification || "",
               age_group: staff_response.Data.age_group || "1-5",
+              // other_role: staff_response.Data.
             });
           }
         }
@@ -353,8 +354,8 @@ if(!finalData.topics){
       <main className="flex flex-1 flex-col lg:flex-row px-4 sm:px-6 md:px-[30px] pt-4 sm:pt-6 md:pt-[30px] pb-4 sm:pb-6 gap-4 lg:gap-6">
         {/* Sidebar Wizard Navigation */}
         <aside className="lg:max-w-[320px] xl:max-w-[447px] w-full bg-white rounded-2xl border border-alice-gray p-4 lg:p-6 flex flex-col">
-          <h2 className="text-2xl font-bold mb-[5px] text-alice-black">Child’s Profile</h2>
-          <p className="text-sm text-alice-darkgray font-normal">Provide your child’s details to recieve personalized guidence and Support</p>
+          <h2 className="text-2xl font-bold mb-[5px] text-alice-black"> {(currentStep === 3 && userDetails !== 2) ? 'Staff Setup' : `Child's Profile`}</h2>
+          <p className="text-sm text-alice-darkgray font-normal">{(currentStep === 3 && userDetails !== 2) ? `Add staff details to set up profiles and manage access.`:`Provide your child’s details to recieve personalized guidence and Support`}</p>
           <div className="border-t border-alice-gray my-4 md:my-6"></div>
           <ol className="relative">
             {steps.map((stepObj, idx) => {

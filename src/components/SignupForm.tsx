@@ -171,25 +171,36 @@ const SignupForm = () => {
         </div>
 
         {/* Pincode Field */}
-        <div className="flex-1">
-          <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
-            <span className="bg-[#FEFCF8] px-[5px]">Pincode <span className="text-red-500">*</span></span>
-          </label>
-          <input
-            {...register('location', {
-              required: 'Postal code is required',
-              pattern: {
-                // UK postcode regex
-                value: /^([A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}|GIR 0AA)$/i,
-                message: 'Enter a valid UK postal code',
-              },
-            })}
-            type="text"
-            placeholder="Postal Code"
-            className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
-          />
-          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
-        </div>
+    <div className="flex-1">
+  <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+    <span className="bg-[#FEFCF8] px-[5px]">Pincode</span>
+  </label>
+
+  <input
+    {...register('location', {
+      validate: (value) => {
+        // ✅ Allow empty value (field is optional)
+        if (!value || value.trim() === '') {
+          return true; // no error when field is empty
+        }
+
+        // ✅ Validate only when there is a value
+        const ukPostcodeRegex = /^([A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}|GIR\s?0AA)$/i;
+        return ukPostcodeRegex.test(value) || 'Enter a valid UK postal code';
+      },
+    })}
+    type="text"
+    placeholder="Postal Code"
+    className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+  />
+
+  {/* Show error message only when invalid */}
+  {errors.location && (
+    <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
+  )}
+</div>
+
+
       </div>
 
 

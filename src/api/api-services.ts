@@ -86,6 +86,31 @@ export const fetchCountries = async () => {
 
 
 //Staff details APIs
+
+export const staffJobRole = async (): Promise<APIResponse<ConcernDTO[]>> => {
+    try {
+        const res = await axiosInstance.get<APIResponse<ConcernDTO[]>>("users/organization_roles");
+
+        // Validate
+        if (!res.data?.Data) {
+            throw new Error("Invalid concernData data structure");
+        }
+
+        return res.data;
+    } catch (err) {
+        console.error("Failed to fetch area of concerns:", err);
+
+        // Return fallback response in consistent shape
+        return {
+            IsSuccess: false,
+            Data: [],
+            Message: "Failed to fetch area of concerns",
+        };
+    }
+};
+
+
+
 export const submitStaffDetails = async (
     formData: FormData
 ): Promise<APIResponse<StaffDetails>> => {
@@ -114,6 +139,7 @@ export const submitStaffDetails = async (
         };
     }
 };
+
 
 export const getStaffDetailsForLoginUser = async (): Promise<APIResponse<staffDTO>> => {
     try {

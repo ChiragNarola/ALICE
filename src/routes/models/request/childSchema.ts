@@ -5,7 +5,7 @@ export const childSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   middleName: z.string().optional(),
   lastName: z.string().min(1, 'Last name is required'),
-  gender: z.enum(['Boy', 'Girl', 'Prefer not to say']),
+  gender: z.enum(['Male', 'Female', 'Prefer not to say']),
   dob: z.string().min(1, 'Date of birth is required'),
   topics: z.array(z.string()),
   concerns: z.array(z.string()),

@@ -14,14 +14,16 @@ const childSchema = z.object({
     .string()
     .min(2, "First name must be at least 2 letters")
     .nonempty("First name is required"),
-  middleName: z
-    .string()
-    .nonempty("Middle name is required"),
+  middleName:  z.string().optional(),
   lastName: z
     .string()
     .min(2, "Last name must be at least 2 letters")
     .nonempty("Last name is required"),
-  gender: z.enum(['Boy', 'Girl', 'Prefer not to say']),
+ gender: z
+    .enum(['Male', 'Female', 'Prefer not to say', ''])
+    .refine((val) => val !== '', {
+      message: "Gender selection is required",
+    }),
   dob: z.string().min(1, "Date of Birth is required"),
   things_to_keep_in_mind: z.string().optional(),
   topics: z.array(z.number()).optional(),
@@ -51,7 +53,7 @@ const Step1ChildInfo = forwardRef<{ validateAndSubmit: () => Promise<boolean>; s
           firstName: "",
           middleName: "",
           lastName: "",
-          gender: "Boy",
+          gender: "",
           dob: "",
           topics: [],
           concerns: [],
@@ -98,7 +100,7 @@ useEffect(() => {
       return getValues();
     },
     setFormValues: (data:any) => {
-    // console.log("Step1 data from setFormValues----->",data)
+    console.log("Step1 data from setFormValues----->",data)
     // reset(data, { keepErrors: true }); 
      setisloading(data.isloading)
     },
@@ -145,7 +147,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
               firstName: '',
               middleName: '',
               lastName: '',
-              gender: 'Boy',
+              gender: 'Male',
               dob: '',
               things_to_keep_in_mind: '',
               topics: [],
@@ -254,7 +256,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
           <div className="flex-1 min-w-[180px]">
             <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
               <span className="bg-[#FEFCF8] px-[5px]">
-                Child’s Middle Name <span className="text-red-500">*</span>
+                Child’s Middle Name
               </span>
             </label>
             <Controller
@@ -316,7 +318,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
             Gender
           </label>
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-12 lg:gap-24 mt-1">
-            {["Boy", "Girl", "Prefer not to say"].map((option) => (
+            {["Male", "Female", "Prefer not to say"].map((option) => (
               <Controller
                 key={option}
                 name={`children.${idx}.gender`}

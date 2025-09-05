@@ -54,7 +54,7 @@ const ChatChildInfo: React.FC = () => {
                 middleName:
                   nameParts.length > 2
                     ? nameParts.slice(1, -1).join(" ")
-                    : nameParts[1] || "",
+                    : "",
                 lastName:
                   nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
                 gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
