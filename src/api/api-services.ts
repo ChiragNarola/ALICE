@@ -659,7 +659,7 @@ export const getFeedbackRatings = async (
 interface CostEstimateDTO {
   modelName: string;
   totalTokens: number;
-  cost: number; // in euros
+  cost: number; 
 }
 
 export const getCostEstimate = async (
@@ -682,6 +682,94 @@ export const getCostEstimate = async (
       IsSuccess: false,
       Data: null,
       Message: "Failed to fetch cost estimate",
+    };
+  }
+};
+
+export const getHourlyActivityTrend = async (
+  params: DateParams
+): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`admin/activityTrend`, {
+      params: {
+        start_date: params.start_date,
+        end_date: params.end_date,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch hourly activity trend",
+    };
+  }
+};
+
+
+export const getAverageSessionLength = async (): Promise< APIResponse<any> >=> {
+  try {
+    const response = await axiosInstance.get(`admin/averageSessionLength`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch average session length",
+    };
+  }
+};
+
+
+export const getDailyUserRegistration = async (
+  params: DateParams
+): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`admin/daily_user_registration`, {
+      params: {
+        start_date: params.start_date,
+        end_date: params.end_date,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch daily user registration",
+    };
+  }
+};
+
+
+export const getUserRolesCount = async (): Promise<
+APIResponse<any>
+> => {
+  try {
+    const response = await axiosInstance.get(`admin/user_roles_count`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch user roles count",
+    };
+  }
+};
+
+export const getTopCategories = async (): Promise<
+APIResponse<any>
+> => {
+  try {
+    const response = await axiosInstance.get(`admin/topCategories`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch user roles count",
     };
   }
 };

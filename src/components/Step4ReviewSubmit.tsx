@@ -48,7 +48,7 @@ const Step4ReviewSubmit = forwardRef<
     formState: { errors },
   } = useForm<ReviewFormValues>({
     defaultValues: {
-      role_in_organisation: "",
+      role_in_organisation: "Manager",
       other_role: "",
       qualification: "",
       age_group: "1-5",
@@ -153,7 +153,6 @@ const Step4ReviewSubmit = forwardRef<
                 errors.role_in_organisation ? "border-red-500" : "border-alice-gray"
               } ${field.value === "" ? "text-alice-darkgray" : "text-alice-black"}`}
             >
-              <option value="">Select Job Title</option>
               {jobTitle.map((title, index) => (
                 <option key={index} value={title}>
                   {title}
