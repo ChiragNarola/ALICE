@@ -64,7 +64,9 @@ const ChildBasicInformation: React.FC = () => {
       if (newData) {
         // Merge new data into state
         setFormSubmit((prev: any) => {
+
           const finalData = { ...prev, ...newData };
+          console.log(finalData)
           return finalData;
         });
       }
@@ -88,29 +90,39 @@ const ChildBasicInformation: React.FC = () => {
 
     const newData = activeRef.current?.getValues?.();
     const finalData = { ...formSubmit, ...newData };
-if(!finalData.children){
-  let childrens : any[] =[]
-  children.map(child =>{
-   childrens.push(child)
-  })
-  finalData.children=childrens
-}
+    if (!finalData.children) {
+      let childrens: any[] = []
+      children.map(child => {
+        childrens.push(child)
+      })
+      finalData.children = childrens
+    }
 
-if(!finalData.concerns){
-  let concern : number[][] =[]
-  children.map(child =>{
-   return concern.push(child.concerns);
-  })
-  finalData.concerns=concern
-}
+    if (finalData.children) {
+      let childrens: any[] = []
+      children.map(child => {
+        childrens.push(child)
+      })
+      finalData.children = childrens
+    }
 
-if(!finalData.topics){
-  let topic : number[][] =[]
-  children.map(child =>{
-   return topic.push(child.topics);
-  })
-  finalData.topics=topic
-}
+    if (!finalData.concerns) {
+      let concern: number[][] = []
+      children.map(child => {
+        return concern.push(child.concerns);
+      })
+      finalData.concerns = concern
+    }
+
+    if (!finalData.topics) {
+      let topic: number[][] = []
+      children.map(child => {
+        return topic.push(child.topics);
+      })
+      console.log("children", children)
+      finalData.topics = topic
+    }
+
     console.log("Submitting final form data:", finalData);
     setisloading(true);
     try {
@@ -122,7 +134,7 @@ if(!finalData.topics){
       const buildStaffForm = (): FormData => {
         const formData = new FormData();
         formData.append("age_group", finalData.age_group);
-      formData.append("role_in_organisation", finalData.role_in_organisation =='Other' ? finalData.other_role : finalData.role_in_organisation);
+        formData.append("role_in_organisation", finalData.role_in_organisation == 'Other' ? finalData.other_role : finalData.role_in_organisation);
         formData.append("qualification", finalData.qualification);
         return formData;
       };
@@ -136,6 +148,7 @@ if(!finalData.topics){
         const updateChildren: any[] = [];
 
         for (const [index, child] of finalData.children.entries()) {
+          console.log("child--------------==>", child)
           if (child.id && child.id > 0) {
             updateChildren.push({
               id: child.id,
@@ -143,6 +156,8 @@ if(!finalData.topics){
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.things_to_keep_in_mind || "",
+              other_concern: child.other_concern || "",
+              other_interest: child.other_interest || "",
               area_of_interest: finalData.topics[index] || [],
               concerns: finalData.concerns[index] || []
             });
@@ -153,6 +168,8 @@ if(!finalData.topics){
               date_of_birth: child.dob || "",
               gender: child.gender || "",
               things_to_keep_in_mind: child.things_to_keep_in_mind || "",
+              other_concern: child.other_concern || "",
+              other_interests: child.other_interests || "",
               area_of_interest: finalData.topics[index] || [],
               concerns: finalData.concerns[index] || []
             });
@@ -263,6 +280,7 @@ if(!finalData.topics){
           children
             .filter(child => !child.is_deleted)
             .map(child => {
+              console.log("child.concerns--->", child.concerns)
               const nameParts = (child.name || "").trim().split(" ");
               const childData = {
                 id: child.id,
@@ -271,9 +289,15 @@ if(!finalData.topics){
                 lastName: nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
                 gender: child.gender as "Male" | "Female" | "Prefer not to say",
                 dob: child.date_of_birth,
-                things_to_keep_in_mind:child.things_to_keep_in_mind,
+                things_to_keep_in_mind: child.things_to_keep_in_mind,
                 topics: (child.area_of_interest || []).map((a: any) => a.id),
                 concerns: (child.concerns || []).map((a: any) => a.id),
+                other_concern: Array.isArray(child.concerns)
+                  ? (child.concerns.find((a: any) => a.id === -1)?.concern || "")
+                  : "",
+                other_interest: Array.isArray(child.area_of_interest)
+                  ? (child.area_of_interest.find((a: any) => a.id === -1)?.interest || "")
+                  : "",
               };
               addChilddata(childData);
               stepRef.current?.setFormValues({ isloading: false });
@@ -284,7 +308,7 @@ if(!finalData.topics){
         if (isParent) {
           stepRef.current?.setFormValues({ isloading: true });
           const response = await getChildDetailsForLoginUser();
-          if (response.IsSuccess && Array.isArray(response.Data)) {
+          if (response.IsSuccess && Array.isArray(response.Data) && response.Data.length !== 0) {
             clearChild()
             setSteps(prevSteps =>
               prevSteps.map(step =>
@@ -292,7 +316,7 @@ if(!finalData.topics){
               )
             );
             const apiChildren = mapChildDetails(response.Data);
-            console.log("Data is setting in children State :",apiChildren)
+            console.log("Data is setting in children State :", apiChildren)
             // stepRef.current?.setFormValues({ children: apiChildren });
           } else {
             stepRef.current?.setFormValues({ isloading: false });
@@ -355,7 +379,7 @@ if(!finalData.topics){
         {/* Sidebar Wizard Navigation */}
         <aside className="lg:max-w-[320px] xl:max-w-[447px] w-full bg-white rounded-2xl border border-alice-gray p-4 lg:p-6 flex flex-col">
           <h2 className="text-2xl font-bold mb-[5px] text-alice-black"> {(currentStep === 3 && userDetails !== 2) ? 'Staff Setup' : `Child's Profile`}</h2>
-          <p className="text-sm text-alice-darkgray font-normal">{(currentStep === 3 && userDetails !== 2) ? `Add staff details to set up profiles and manage access.`:`Provide your child’s details to recieve personalized guidence and Support`}</p>
+          <p className="text-sm text-alice-darkgray font-normal">{(currentStep === 3 && userDetails !== 2) ? `Add staff details to set up profiles and manage access.` : `Provide your child’s details to recieve personalized guidence and Support`}</p>
           <div className="border-t border-alice-gray my-4 md:my-6"></div>
           <ol className="relative">
             {steps.map((stepObj, idx) => {

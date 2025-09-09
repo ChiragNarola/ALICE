@@ -5,11 +5,13 @@ export interface ChildInfo {
   firstName: string;
   middleName: string;
   lastName: string;
-  gender: 'Male' | 'Female' | 'Prefer not to say';
+  gender: 'Male' | 'Female' | 'Prefer not to say' | '';
   // years: string;
   // months: string;
   dob: string;
   things_to_keep_in_mind?:string;
+  other_interest?:string;
+  other_concern?:string;
 }
 
 export interface ChatInputRM {

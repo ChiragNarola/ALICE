@@ -19,7 +19,7 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
     const newErrors = children.map((child) => {
       const hasNoTopicSelected = !child.topics || child.topics.length === 0;
       const isOtherSelected = child.topics.includes(-1);
-      const isOtherInvalid = isOtherSelected && !child.otherTopicText?.trim();
+      const isOtherInvalid = isOtherSelected && !child.other_interest?.trim();
 
       return hasNoTopicSelected || isOtherInvalid;
     });
@@ -46,7 +46,7 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
     const isOtherSelected = child.topics.includes(-1);
 
     return isOtherSelected
-      ? [...child.topics.filter((t) => t !== -1), child.otherTopicText?.trim() || '']
+      ? [...child.topics.filter((t) => t !== -1), child.other_interest?.trim() || '']
       : child.topics;
   });
 },
@@ -71,7 +71,7 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
   };
 
   const handleOtherTextChange = (idx: number, value: string) => {
-    updateChild(idx, { otherTopicText: value });
+    updateChild(idx, { other_interest: value });
   };
 
   return (
@@ -173,7 +173,7 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
               <div className="mt-4">
                 <input
                   type="text"
-                  value={child.otherTopicText || ''}
+                  value={child.other_interest || ''}
                   onChange={(e) => handleOtherTextChange(idx, e.target.value)}
                   placeholder="Things to keep in mind"
                   className="w-full px-4 py-3 border border-alice-gray rounded-xl focus:outline-none focus:border-alice-teal text-base"
@@ -183,7 +183,7 @@ const Step2GuidanceTopics = forwardRef<StepRefType>((_, ref) => {
 
             {hasError ? (
               <p className="text-red-500 text-sm mt-2">
-                {isOtherSelected && !child.otherTopicText?.trim()
+                {isOtherSelected && !child.other_interest?.trim()
                   ? 'Please specify the topic for "Other".'
                   : 'Please select at least one topic for this child.'}
               </p>

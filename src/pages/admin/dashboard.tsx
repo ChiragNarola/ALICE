@@ -34,11 +34,16 @@ import {
   getTopCategories,
   getAverageSessionLength,
   getHourlyActivityTrend,
+  uploadDocuments,
 } from "../../api/api-services";
 import type {
   DateParams,
   FeedbackRatingDTO,
   CostEstimateDTO,
+  DailyRegistrationDTO,
+  UserRolesDTO,
+  TopCategoryDTO,
+  HourlyTrendDTO,
 } from "../../routes/models/request/AdminRequest";
 
 type CountUpNumberProps = { end: number; duration?: number };
@@ -46,9 +51,7 @@ type CountUpNumberProps = { end: number; duration?: number };
 const CountUpNumber = ({ end, duration = 1 }: CountUpNumberProps) => {
   const [value, setValue] = useState<number>(0);
   const startTimeRef = useRef<number | null>(null);
-
-
-
+  
   useEffect(() => {
     const startValue = 0;
     const targetValue = isNaN(end) ? 0 : end;
@@ -73,29 +76,6 @@ const CountUpNumber = ({ end, duration = 1 }: CountUpNumberProps) => {
   return <span>{value.toLocaleString()}</span>;
 };
 
-type DailyRegistrationDTO = {
-  date: string;
-  new_registrations: number;
-};
-
-type UserRolesDTO = {
-  all_user: any;
-  parent: number;
-  staff: number;
-  admin: number;
-};
-
-type TopCategoryDTO = {
-  percentage: number;
-  category: string;
-  count: number;
-};
-
-type HourlyTrendDTO = {
-  time_label: string;
-  message_count: number;
-};
-
 const AdminDashboard = () => {
   const today = new Date();
   const currentYear = today.getFullYear();
@@ -105,6 +85,7 @@ const AdminDashboard = () => {
     end_date: formatDate(today),
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+      const [loading, setLoading] = useState(false);
   const [dailyRegistration, setDailyRegistration] = useState<DailyRegistrationDTO[]>([]);
   const [userRoles, setUserRoles] = useState<UserRolesDTO>({ parent: 0, staff: 0, admin: 0, all_user: 0 });
   const [topCategories, setTopCategories] = useState<TopCategoryDTO[]>([]);
@@ -225,88 +206,116 @@ const AdminDashboard = () => {
     }
     return { input, output };
   };
+
+ const handleSubmitFile = async (file: File) => {
+    if (!file) return;
+
+    try {
+      setLoading(true);
+
+      const response= await uploadDocuments([file]);
+
+      if (response.IsSuccess) {
+        alert("File uploaded successfully!");
+        console.log("Upload response:", response);
+        setUploadedFile(null); // clear the selected file after upload
+      } else {
+        alert(response.Message || "Failed to upload file");
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      alert(error?.Message || "An error occurred while uploading");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    // <div className="p-6 space-y-8 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
+
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header + Date Filter */}
-<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 pb-6">
-  <div className="flex items-center space-x-3">
-    <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
-      <LayoutDashboard className="w-7 h-7 text-teal-600" />
-    </div>
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-      <p className="text-sm text-gray-500 mt-0.5">
-        Monitor usage, performance, and costs with real-time insights.
-      </p>
-    </div>
-  </div>
-
-  {/* Date Filter */}
-  <div className="flex items-center gap-2.5 w-full md:w-auto mt-4 md:mt-0">
-    <DateRangePicker value={dateRange} onChange={setDateRange} />
-    <Button
-      onClick={fetchData}
-      className="bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white px-4 py-2 rounded-xl shadow-sm transition-all"
-    >
-      Apply
-    </Button>
-  </div>
-</div>
-
-{/* File Upload Section - separate card */}
-{/* File Upload Section - styled like dashboard card */}
-<div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col md:flex-row md:items-center gap-6">
-  {/* Left: Title & Description */}
-  <div className="flex items-start space-x-3 md:flex-1">
-    <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
-      <Upload className="w-6 h-6 text-indigo-600" />
-    </div>
-    <div className="flex flex-col">
-      <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
-      <p className="text-sm text-gray-500 mt-1">
-        Select a file to upload. You can review it before submitting.
-      </p>
-    </div>
-  </div>
-
-  {/* Right: Upload Button & Preview */}
-  <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:flex-1 w-full">
-    <label className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-xl shadow-sm cursor-pointer transition-all">
-      Select File
-      <input
-        type="file"
-        className="hidden"
-        onChange={(e) => {
-          if (e.target.files?.length) {
-            setUploadedFile(e.target.files[0]);
-          }
-        }}
-      />
-    </label>
-
-    {/* File Preview */}
-    {uploadedFile && (
-      <div className="mt-3 md:mt-0 p-3 border border-gray-200 rounded-xl bg-gray-50 flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-        <div className="flex-1">
-          <p className="text-sm text-gray-700 font-medium">{uploadedFile.name}</p>
-          <p className="text-xs text-gray-500">{(uploadedFile.size / 1024).toFixed(2)} KB</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 pb-6">
+        <div className="flex items-center space-x-3">
+          <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
+            <LayoutDashboard className="w-7 h-7 text-teal-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Monitor usage, performance, and costs with real-time insights.
+            </p>
+          </div>
         </div>
-        <Button
-          onClick={() => setUploadedFile(null)}
-          className="text-sm text-red-500 hover:underline px-2 py-1 bg-transparent shadow-none"
-        >
-          Remove
-        </Button>
+
+        {/* Date Filter */}
+        <div className="flex items-center gap-2.5 w-full md:w-auto mt-4 md:mt-0">
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
+          <Button
+            onClick={fetchData}
+            className="bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white px-4 py-2 rounded-xl shadow-sm transition-all"
+          >
+            Apply
+          </Button>
+        </div>
       </div>
-    )}
-  </div>
-</div>
 
+      {/* File Upload Section - separate card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col gap-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-3">
+            <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
+              <Upload className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div className="flex flex-col">
+              <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Select a file to upload. You can review it before submitting.
+              </p>
+            </div>
+          </div>
 
+          {!uploadedFile ? (
+            <label className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-xl shadow-sm mt-1 cursor-pointer transition-all">
+              Select File
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files?.length) {
+                    setUploadedFile(e.target.files[0]);
+                  }
+                }}
+              />
+            </label>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center w-[42%] gap-3 border border-gray-200 rounded-xl bg-gray-50 p-3">
+              {/* File Info */}
+              <div className="flex-1 text-center md:text-left">
+                <p className="text-sm text-gray-700 font-medium">{uploadedFile.name}</p>
+                <p className="text-xs text-gray-500">
+                  {(uploadedFile.size / 1024).toFixed(2)} KB
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setUploadedFile(null)}
+                  className="px-3 py-1 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all"
+                >
+                  Remove
+                </button>
+                <button
+                  onClick={() => handleSubmitFile(uploadedFile)}
+                  className="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Top Stats - simplified cards without heading */}
-      {/* <div className="bg-white rounded-2xl shadow p-5 border border-gray-100"> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
           {
@@ -411,8 +420,6 @@ const AdminDashboard = () => {
           </Card>
         ))}
       </div>
-
-      {/* </div> */}
 
       {/* Feedback Ratings Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -81,21 +81,50 @@ useEffect(() => {
   });
 
   useImperativeHandle(ref, () => ({
-    validateAndSubmit: () => {
-      return trigger().then((isValid) => {
-        if (isValid) {
-          const formValues = getValues();
-          formValues.children.forEach((child:any, idx) => {
-            if (children[idx]) {
-              updateChild(idx, child);
-            } else {
-              addChilddata(child);
-            }
-          });
-        }
-        return isValid;
-      });
-    },
+validateAndSubmit: () => {
+    return trigger("children").then((isValid) => {
+      const currentValues = getValues();
+
+      if (!isValid) {
+        console.log("❌ Validation failed!");
+
+        // Full errors object
+        console.log("Errors object:", errors);
+
+        // Detailed logging per child
+        currentValues.children.forEach((child, childIndex) => {
+          const childErrors = errors.children?.[childIndex];
+
+          if (childErrors) {
+            console.group(`🚸 Child ${childIndex + 1} Validation Errors`);
+
+            Object.entries(childErrors).forEach(([fieldName, fieldError]: any) => {
+              const fieldValue = (child as any)[fieldName];
+              console.log(`Field: ${fieldName}`);
+              console.log("  ❌ Error Message:", fieldError.message);
+              console.log("  📝 Current Value:", fieldValue);
+            });
+
+            console.groupEnd();
+          }
+        });
+      }
+
+      if (isValid) {
+        const formValues = getValues();
+
+        formValues.children.forEach((child: any, idx) => {
+          if (children[idx]) {
+            updateChild(idx, child);
+          } else {
+            addChilddata(child);
+          }
+        });
+      }
+
+      return isValid;
+    });
+  },
     getValues: () => {
       return getValues();
     },
@@ -147,7 +176,7 @@ function handleDelete(idx: number, child_id: string | number | undefined) {
               firstName: '',
               middleName: '',
               lastName: '',
-              gender: 'Male',
+              gender: '',
               dob: '',
               things_to_keep_in_mind: '',
               topics: [],

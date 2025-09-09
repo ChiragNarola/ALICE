@@ -29,11 +29,13 @@ export const ChildrenProvider = ({ children: node }: { children: ReactNode }) =>
         firstName: '',
         middleName: '',
         lastName: '',
-        gender: 'Boy',
+        gender: '',
         dob: '',
         things_to_keep_in_mind: '',
         topics: [],
         concerns: [],
+        other_concern:'',
+        other_interest:'',
       },
     ]);
   };

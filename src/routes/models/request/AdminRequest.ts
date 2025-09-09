@@ -13,3 +13,25 @@ export interface CostEstimateDTO {
     totalTokens: number;
     cost: number; // in euros
 }
+export interface DailyRegistrationDTO  {
+  date: string;
+  new_registrations: number;
+};
+
+export interface UserRolesDTO  {
+  all_user: any;
+  parent: number;
+  staff: number;
+  admin: number;
+};
+
+export interface TopCategoryDTO  {
+  percentage: number;
+  category: string;
+  count: number;
+};
+
+export interface HourlyTrendDTO  {
+  time_label: string;
+  message_count: number;
+};

@@ -20,10 +20,17 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
 
   /** Validate and Submit */
   const validateAndSubmit = async (): Promise<boolean> => {
-    const newErrors = children.map((child) => !child.concerns || child.concerns.length === 0);
+    const newErrors = children.map((child) => {
+      const hasNoConcernsSelected = !child.concerns || child.concerns.length === 0;
+      const isOtherSelected = child.concerns.includes(OTHER_OPTION_ID);
+      const isOtherInvalid = isOtherSelected && !child.other_concern?.trim();
+
+      return hasNoConcernsSelected || isOtherInvalid;
+    });
+
     setErrors(newErrors);
-    return !newErrors.includes(true);
-  };
+    return !newErrors.includes(true)
+      };
 
   /** Expose methods to parent */
   useImperativeHandle(ref, () => ({
@@ -33,7 +40,7 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
         const isOtherSelected = child.concerns?.includes(OTHER_OPTION_ID);
 
         return isOtherSelected
-          ? [...child.concerns.filter((c) => c !== OTHER_OPTION_ID), child.otherConcernText?.trim() || ""]
+          ? [...child.concerns.filter((c) => c !== OTHER_OPTION_ID), child.other_concern?.trim() || ""]
           : child.concerns || [];
       });
     },
@@ -69,7 +76,7 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
 
   /** Handle text input for Other */
   const handleOtherTextChange = (idx: number, value: string) => {
-    updateChild(idx, { otherConcernText: value });
+    updateChild(idx, { other_concern: value });
   };
 
   /** Delete child */
@@ -223,15 +230,17 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
               <input
                 type="text"
                 placeholder="Thing to keep in mind"
-                value={child.otherConcernText || ""}
+                value={child.other_concern || ""}
                 onChange={(e) => handleOtherTextChange(idx, e.target.value)}
                 className="mt-4 w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-alice-teal text-base"
               />
             )}
 
-            {hasError ? (
+             {hasError ? (
               <p className="text-red-500 text-sm mt-2">
-                Please select at least one concern for this child.
+                {isOtherSelected && !child.other_concern?.trim()
+                  ? 'Please specify the topic for "Other".'
+                  : 'Please select at least one topic for this child.'}
               </p>
             ) : (
               <p className="text-white text-sm mt-2">.</p>

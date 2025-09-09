@@ -773,3 +773,24 @@ APIResponse<any>
     };
   }
 };
+export const uploadDocuments = async (files: File[]): Promise<APIResponse<any>> => {
+  try {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("files", file); 
+    });
+    const response = await axiosInstance.post(`/api/v1/upload/`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to upload documents",
+    };
+  }
+};
