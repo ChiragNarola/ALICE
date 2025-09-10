@@ -43,7 +43,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         const parsedUser = JSON.parse(storedUser);
         setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`);
       } catch {
-        // fallback if data is corrupted
         setUserName("");
       }
     }

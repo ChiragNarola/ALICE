@@ -66,7 +66,6 @@ const ChildBasicInformation: React.FC = () => {
         setFormSubmit((prev: any) => {
 
           const finalData = { ...prev, ...newData };
-          console.log(finalData)
           return finalData;
         });
       }
@@ -119,7 +118,6 @@ const ChildBasicInformation: React.FC = () => {
       children.map(child => {
         return topic.push(child.topics);
       })
-      console.log("children", children)
       finalData.topics = topic
     }
 
@@ -148,7 +146,6 @@ const ChildBasicInformation: React.FC = () => {
         const updateChildren: any[] = [];
 
         for (const [index, child] of finalData.children.entries()) {
-          console.log("child--------------==>", child)
           if (child.id && child.id > 0) {
             updateChildren.push({
               id: child.id,
@@ -169,7 +166,7 @@ const ChildBasicInformation: React.FC = () => {
               gender: child.gender || "",
               things_to_keep_in_mind: child.things_to_keep_in_mind || "",
               other_concern: child.other_concern || "",
-              other_interests: child.other_interests || "",
+              other_interest: child.other_interest || "",
               area_of_interest: finalData.topics[index] || [],
               concerns: finalData.concerns[index] || []
             });
@@ -280,7 +277,6 @@ const ChildBasicInformation: React.FC = () => {
           children
             .filter(child => !child.is_deleted)
             .map(child => {
-              console.log("child.concerns--->", child.concerns)
               const nameParts = (child.name || "").trim().split(" ");
               const childData = {
                 id: child.id,

@@ -34,6 +34,7 @@ export interface AuthContextType {
 }
 
 export interface APIResponse<T> {
+  status: string;
   totalCost?: number;
   models?: never[];
   IsSuccess: boolean;

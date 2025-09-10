@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { useLocation } from "react-router-dom";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import ChatChildInfo from "../components/ChatChildInfo";
@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 import StaffInfo from "../components/StaffInfo";
+import { useChatActivity } from "../contexts/ChatActivityContext";
 
 type Message = {
   id?: number;
@@ -25,6 +26,7 @@ const ChatPage: React.FC = () => {
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
+  const { startTracking, stopTracking, incrementChatCount,chatCount ,timeSpent } = useChatActivity();
   const [activeTab, setActiveTab] = useState<'parent' | 'staff'>('parent');
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
@@ -49,6 +51,31 @@ const ChatPage: React.FC = () => {
   };
 
   useEffect(() => {
+  
+console.log("TimeSpent ----->",timeSpent)
+console.log("ChatCount ----->",chatCount)
+  }, )
+  
+
+
+ useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden || location.pathname !== "/chat") {
+        stopTracking();
+      } else {
+        startTracking(); 
+      }
+    };
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      stopTracking();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [location.pathname, startTracking, stopTracking]);
+
+
+  useEffect(() => {
     handleGenerate();
   }, [searchParams]);
 
@@ -56,7 +83,6 @@ const ChatPage: React.FC = () => {
     if (!messages || messages.length === 0) return;
     setChatMessages(messages);
   }, [messages]);
-
 
   const handleToggle = () => {
     setIsSidebarOpen(prev => !prev);
@@ -81,6 +107,8 @@ const ChatPage: React.FC = () => {
       },
     ]);
 
+    // Increment chat count whenever a message is sent
+    incrementChatCount();
     // Add a placeholder bot message
     const botIndex = chatMessages.length + 1;
     setChatMessages((prev) => [

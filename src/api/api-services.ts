@@ -721,7 +721,6 @@ export const getAverageSessionLength = async (): Promise< APIResponse<any> >=> {
   }
 };
 
-
 export const getDailyUserRegistration = async (
   params: DateParams
 ): Promise<APIResponse<any>> => {
@@ -780,7 +779,7 @@ export const uploadDocuments = async (files: File[]): Promise<APIResponse<any>> 
     files.forEach((file) => {
       formData.append("files", file); 
     });
-    const response = await axiosInstance.post(`/api/v1/upload/`, formData, {
+    const response = await axiosInstance.post(`upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

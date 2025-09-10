@@ -83,33 +83,6 @@ useEffect(() => {
   useImperativeHandle(ref, () => ({
 validateAndSubmit: () => {
     return trigger("children").then((isValid) => {
-      const currentValues = getValues();
-
-      if (!isValid) {
-        console.log("❌ Validation failed!");
-
-        // Full errors object
-        console.log("Errors object:", errors);
-
-        // Detailed logging per child
-        currentValues.children.forEach((child, childIndex) => {
-          const childErrors = errors.children?.[childIndex];
-
-          if (childErrors) {
-            console.group(`🚸 Child ${childIndex + 1} Validation Errors`);
-
-            Object.entries(childErrors).forEach(([fieldName, fieldError]: any) => {
-              const fieldValue = (child as any)[fieldName];
-              console.log(`Field: ${fieldName}`);
-              console.log("  ❌ Error Message:", fieldError.message);
-              console.log("  📝 Current Value:", fieldValue);
-            });
-
-            console.groupEnd();
-          }
-        });
-      }
-
       if (isValid) {
         const formValues = getValues();
 
@@ -121,7 +94,6 @@ validateAndSubmit: () => {
           }
         });
       }
-
       return isValid;
     });
   },
@@ -129,7 +101,7 @@ validateAndSubmit: () => {
       return getValues();
     },
     setFormValues: (data:any) => {
-    console.log("Step1 data from setFormValues----->",data)
+    // console.log("Step1 data from setFormValues----->",data)
     // reset(data, { keepErrors: true }); 
      setisloading(data.isloading)
     },

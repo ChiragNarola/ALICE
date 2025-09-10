@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../components/ui/card";
 import { DateRangePicker } from "../../components/ui/date-range-picker";
+import { toast } from "react-toastify";
+import Tippy from "@tippyjs/react";
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -46,6 +48,8 @@ import type {
   HourlyTrendDTO,
 } from "../../routes/models/request/AdminRequest";
 
+const allowedExtensions = ["pdf", "docx", "txt", "ppt", "xlsx"];
+
 type CountUpNumberProps = { end: number; duration?: number };
 
 const CountUpNumber = ({ end, duration = 1 }: CountUpNumberProps) => {
@@ -84,6 +88,7 @@ const AdminDashboard = () => {
     start_date: `${currentYear}-01-01`,
     end_date: formatDate(today),
   });
+   const [errorMsg, setErrorMsg] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
       const [loading, setLoading] = useState(false);
   const [dailyRegistration, setDailyRegistration] = useState<DailyRegistrationDTO[]>([]);
@@ -207,29 +212,61 @@ const AdminDashboard = () => {
     return { input, output };
   };
 
- const handleSubmitFile = async (file: File) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+
+    const file = e.target.files[0];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      setUploadedFile(null);
+      setErrorMsg("Invalid file type! Please select a PDF, DOCX, TXT, PPT, or XLSX file.");
+      toast.error("Invalid file type! Allowed types: PDF, DOCX, TXT, PPT, XLSX", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      e.target.value = ""; 
+      return;
+    }
+
+    setErrorMsg(""); 
+    setUploadedFile(file);
+  };
+
+  const handleSubmitFile = async (file: File) => {
     if (!file) return;
+
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      setErrorMsg("Invalid file type! Please select a valid file before submitting.");
+      return;
+    }
 
     try {
       setLoading(true);
-
-      const response= await uploadDocuments([file]);
-
-      if (response.IsSuccess) {
-        alert("File uploaded successfully!");
-        console.log("Upload response:", response);
-        setUploadedFile(null); // clear the selected file after upload
+      const response = await uploadDocuments([file]);
+      if (response.status =="success") {
+        toast.success("File uploaded successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setUploadedFile(null);
       } else {
-        alert(response.Message || "Failed to upload file");
+        toast.error(response.Message || "Failed to upload file", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     } catch (error: any) {
       console.error("Upload error:", error);
-      alert(error?.Message || "An error occurred while uploading");
+      toast.error(error?.Message || "An error occurred while uploading", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
   };
-
   return (
 
     <div className="max-w-7xl mx-auto space-y-8">
@@ -260,60 +297,91 @@ const AdminDashboard = () => {
       </div>
 
       {/* File Upload Section - separate card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col gap-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-3">
-            <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
-              <Upload className="w-6 h-6 text-indigo-600" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Select a file to upload. You can review it before submitting.
-              </p>
-            </div>
+     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col gap-6">
+      <div className="flex items-start justify-between">
+        {/* Left section - title and description */}
+        <div className="flex items-start space-x-3">
+          <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
+            <Upload className="w-6 h-6 text-indigo-600" />
           </div>
+          <div className="flex flex-col">
+            <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Select a file to upload. You can review it before submitting.
+            </p>
+          </div>
+        </div>
 
-          {!uploadedFile ? (
+        {/* File selection or upload preview */}
+        {!uploadedFile ? (
+          <div className="flex flex-col items-end">
             <label className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-xl shadow-sm mt-1 cursor-pointer transition-all">
               Select File
               <input
                 type="file"
                 className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.length) {
-                    setUploadedFile(e.target.files[0]);
-                  }
-                }}
+                accept=".pdf,.docx,.txt,.ppt,.xlsx"
+                onChange={handleFileSelect}
               />
             </label>
-          ) : (
-            <div className="flex flex-col md:flex-row items-center w-[42%] gap-3 border border-gray-200 rounded-xl bg-gray-50 p-3">
-              {/* File Info */}
-              <div className="flex-1 text-center md:text-left">
-                <p className="text-sm text-gray-700 font-medium">{uploadedFile.name}</p>
-                <p className="text-xs text-gray-500">
-                  {(uploadedFile.size / 1024).toFixed(2)} KB
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setUploadedFile(null)}
-                  className="px-3 py-1 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all"
-                >
-                  Remove
-                </button>
-                <button
-                  onClick={() => handleSubmitFile(uploadedFile)}
-                  className="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all"
-                >
-                  Submit
-                </button>
-              </div>
+
+            {/* Inline error message */}
+            {errorMsg && (
+              <p className="mt-2 text-sm text-red-600 font-medium">{errorMsg}</p>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col md:flex-row items-center w-[42%] gap-3 border border-gray-200 rounded-xl bg-gray-50 p-3">
+            {/* File Info */}
+
+
+                          
+                       
+
+            <div className="flex-1 text-center md:text-left">
+                <Tippy content={uploadedFile.name} placement="bottom">
+              <p className="text-sm text-gray-700 font-medium truncate overflow-hidden cursor-default whitespace-nowrap max-w-[180px]">{uploadedFile.name}</p>
+                 </Tippy>
+              <p className="text-xs text-gray-500">
+                {(uploadedFile.size / 1024).toFixed(2)} KB
+              </p>
             </div>
-          )}
-        </div>
+
+            <div className="flex items-center gap-4">
+              {/* Remove Button */}
+              <button
+                onClick={() => setUploadedFile(null)}
+                className={`px-3 py-1 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all ${loading && 'hidden'}`}
+              >
+                Remove
+              </button>
+              {/* Submit Button */}
+          <button
+  onClick={() => handleSubmitFile(uploadedFile)}
+  disabled={loading}
+  className={`px-4 py-2 text-sm text-white rounded-lg transition-all flex items-center justify-center gap-2
+    ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}
+  `}
+>
+  {loading ? (
+    <div className="flex items-center gap-1">
+      <span>Uploading</span>
+      <span className="flex gap-1 mt-1">
+        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce"></span>
+        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+      </span>
+    </div>
+  ) : (
+    "Submit"
+  )}
+</button>
+
+            </div>
+          </div>
+        )}
       </div>
+    </div>
 
       {/* Top Stats - simplified cards without heading */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

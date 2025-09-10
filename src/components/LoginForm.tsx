@@ -29,7 +29,7 @@ const LoginForm = () => {
       formData.append("username", data.username);
       formData.append("password", data.password);
 
-      const response = await login(formData, rememberMe); // pass rememberMe flag ✅
+      const response = await login(formData, rememberMe);
 
       if (response?.IsSuccess) {
         clearChild();

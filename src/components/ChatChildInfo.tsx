@@ -35,6 +35,7 @@ const ChatChildInfo: React.FC = () => {
               const topicNames =
                 (child.area_of_interest || [])
                   .map((a: any) => {
+                    if (a.id === -1) { return a.interest }
                     const topicObj = (interestList.Data || []).find((t: any) => t.id === a.id);
                     return topicObj ? topicObj.interest : null;
                   })
@@ -43,6 +44,7 @@ const ChatChildInfo: React.FC = () => {
               const concernNames =
                 (child.concerns || [])
                   .map((a: any) => {
+                    if (a.id === -1) { return a.concern }
                     const concernObj = (concernList.Data || []).find((c: any) => c.id === a.id);
                     return concernObj ? concernObj.concern : null;
                   })
@@ -57,7 +59,7 @@ const ChatChildInfo: React.FC = () => {
                     : "",
                 lastName:
                   nameParts.length > 1 ? nameParts[nameParts.length - 1] : "",
-                gender: child.gender as "Boy" | "Girl" | "Prefer not to say",
+                gender: child.gender as "Male" | "Female" | "Prefer not to say",
                 dob: child.date_of_birth,
                 topics: topicNames,
                 concerns: concernNames,
@@ -163,6 +165,7 @@ const ChatChildInfo: React.FC = () => {
             </div>
           ) : (
             <div className="p-3 space-y-3">
+
               {childrens.map((child) => (
                 <div
                   key={child.id}
@@ -238,6 +241,7 @@ const ChatChildInfo: React.FC = () => {
                   {/* Divider */}
                   <div className="border-t border-gray-200 my-2"></div>
                   {/* Topics of Interest */}
+
                   {child.topics.length > 0 && (
                     <div className="mb-3">
                       <div className="flex items-center gap-1.5 mb-2">
@@ -250,12 +254,17 @@ const ChatChildInfo: React.FC = () => {
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {child.topics.map((topic: any, i: any) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full bg-green-50 text-green-700 border border-green-200"
-                          >
-                            {topic}
-                          </span>
+                          <Tippy content={topic} placement="bottom">
+                            <span
+                              key={i}
+                              className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full
+               bg-green-50 text-green-700 border border-green-200
+               max-w-[100px] cursor-default">
+                              <span className="truncate overflow-hidden whitespace-nowrap block w-full">
+                                {topic}
+                              </span>
+                            </span>
+                          </Tippy>
                         ))}
                       </div>
                     </div>
@@ -274,12 +283,17 @@ const ChatChildInfo: React.FC = () => {
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {child.concerns.map((concern: any, i: any) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full bg-orange-50 text-orange-700 border border-orange-200"
-                          >
-                            {concern}
-                          </span>
+                          <Tippy content={concern} placement="bottom">
+                            <span
+                              key={i}
+                              className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full
+               bg-orange-50 text-orange-700 border border-orange-200
+               max-w-[100px] cursor-default">
+                              <span className="truncate overflow-hidden whitespace-nowrap block w-full">
+                                {concern}
+                              </span>
+                            </span>
+                          </Tippy>
                         ))}
                       </div>
                     </div>
