@@ -1,6 +1,7 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
 import type { ConversationDTO } from '../routes/models/request/Chat';
 import type { ChatInputRM } from '../routes/models/request/Child';
+import type { TrackEventParams } from '../routes/models/request/analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
 import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
@@ -33,6 +34,30 @@ export const loginUser = async (formData: FormData): Promise<APIResponse<LoginRe
         };
     }
 };
+
+
+export const logoutUser = async (sessionUUID: string): Promise<APIResponse<null>> => {
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      `/users/logout?session_uuid=${encodeURIComponent(sessionUUID)}`,
+      {}, // Empty body since session_uuid goes in query
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Logout failed",
+    };
+  }
+};
+
 
 export const registerUser = async (
     data: SignupFormInputs
@@ -569,6 +594,36 @@ export const getConversationMessageByUUId = async (UUID: string | undefined): Pr
     }
 };
 
+export const verifyEmailCode = async (
+  verificationCode: string
+): Promise<APIResponse<null>> => {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("verification_code", verificationCode);
+
+    const res = await axiosInstance.post(
+      "users/verify_email_code",
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Email verification failed",
+      }
+    );
+  }
+};
+
+
 //Admin Dashboard Page:- 
 
 interface DateParams {
@@ -772,6 +827,69 @@ APIResponse<any>
     };
   }
 };
+
+
+export const generateHeatmap = async (
+  startDate: string,
+  endDate: string
+): Promise<APIResponse<any[]>> => {
+  try {
+    // Using URLSearchParams to send query parameters
+    const params = new URLSearchParams();
+    params.append("start_date", startDate);
+    params.append("end_date", endDate);
+
+    const res = await axiosInstance.post(
+      "admin/generate-heatmap",
+      {}, // POST body is empty, as params are sent in query
+      { params } // query params
+    );
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Generating heatmap failed",
+      }
+    );
+  }
+};
+
+
+export const countOthers = async (): Promise<APIResponse<string>> => {
+  try {
+    const res = await axiosInstance.get("admin/countOthers");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching count of other areas/concerns failed",
+      }
+    );
+  }
+};
+
+
+export const listDocuments = async (): Promise<APIResponse<string[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/listDocuments");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching document list failed",
+      }
+    );
+  }
+};
+
+
 export const uploadDocuments = async (files: File[]): Promise<APIResponse<any>> => {
   try {
     const formData = new FormData();
@@ -790,6 +908,35 @@ export const uploadDocuments = async (files: File[]): Promise<APIResponse<any>> 
       IsSuccess: false,
       Data: null,
       Message: "Failed to upload documents",
+    };
+  }
+};
+
+
+//analytics
+export const trackEvent = async (
+  params: TrackEventParams
+): Promise<APIResponse<null>> => {
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/analytics/track-event",
+      null, // no body
+      {
+        params: {
+          session_id: params.session_id,
+          page_screen: params.page_screen,
+          event_type: params.event_type || "page_view",
+          time_spent: params.time_spent ?? null,
+          interaction_data: params.interaction_data ?? null,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Tracking event failed",
     };
   }
 };

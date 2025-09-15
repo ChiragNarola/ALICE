@@ -179,12 +179,9 @@ const SignupForm = () => {
   <input
     {...register('location', {
       validate: (value) => {
-        // ✅ Allow empty value (field is optional)
         if (!value || value.trim() === '') {
           return true; // no error when field is empty
         }
-
-        // ✅ Validate only when there is a value
         const ukPostcodeRegex = /^([A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}|GIR\s?0AA)$/i;
         return ukPostcodeRegex.test(value) || 'Enter a valid UK postal code';
       },

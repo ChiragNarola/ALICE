@@ -1,6 +1,7 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
-import { loginUser } from "../api/api-services";
+import { loginUser, logoutUser } from "../api/api-services";
+import {useChatActivity } from "./ChatActivityContext";
 import type {
   AuthContextType,
   AuthUser,
@@ -10,7 +11,6 @@ import type {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Utility: try both storages
 const getStoredItem = (key: string): string | null => {
   return sessionStorage.getItem(key) || localStorage.getItem(key);
 };
@@ -18,7 +18,7 @@ const getStoredItem = (key: string): string | null => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+const { resetActivityTimer } = useChatActivity(); 
   useEffect(() => {
     const storedUser = getStoredItem("auth_user");
     if (storedUser) {
@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const parsedUser: AuthUser = JSON.parse(storedUser);
         setUser(parsedUser);
       } catch {
-        // If corrupted data, clean everything
         sessionStorage.removeItem("auth_user");
         localStorage.removeItem("auth_user");
       }
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const result = await loginUser(formData);
 
     if (result?.IsSuccess) {
-      const { user: u, access_token, token_type } = result.Data;
+      const { user: u, access_token, token_type, session_uuid } = result.Data;
 
       const userData: AuthUser = {
         id: u.id,
@@ -53,29 +52,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isStaffDetailAdded: result.Data.is_staff_detail_added,
         token: access_token,
         tokenType: token_type,
+        sessionUUID: session_uuid,
       };
 
       setUser(userData);
 
-      sessionStorage.removeItem("auth_user");
-      sessionStorage.removeItem("auth_token");
-      localStorage.removeItem("auth_user");
-      localStorage.removeItem("auth_token");
+      sessionStorage.clear();
+      localStorage.clear();
 
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("auth_user", JSON.stringify(userData));
       storage.setItem("auth_token", access_token);
+      storage.setItem("session_uuid", session_uuid);
     }
     return result;
   };
 
-  const logout = () => {
+
+
+const logout = async () => {
+  try {
+    const sessionUUID: string | null = getStoredItem("session_uuid") || user?.sessionUUID || null;
+    if (sessionUUID) {
+      await logoutUser(sessionUUID);
+    }
+  } catch (error) {
+    console.error("Logout API call failed", error);
+  } finally {
+    resetActivityTimer(); // reset chat count and timer
     setUser(null);
-    sessionStorage.removeItem("auth_user");
-    sessionStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
-    localStorage.removeItem("auth_token");
-  };
+    sessionStorage.clear();
+    localStorage.clear();
+  }
+};
+
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isLoading }}>
