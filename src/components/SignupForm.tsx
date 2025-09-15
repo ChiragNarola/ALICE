@@ -29,22 +29,23 @@ const SignupForm = () => {
     defaultValues: { role: [] },
   });
 
-  const onSubmit = async (data: SignupFormInputs) => {
-    setLoading(true);
-    try {
-      const response = await registerUser(data);
-      if (response.IsSuccess) {
-        toast.success("Registration successful!");
-        navigate("/login");
-      } else {
-        toast.error(response.Message || "Registered, but please check your email.");
-      }
-    } catch (err: any) {
-      toast.error(err.detail || "Registration failed");
-    } finally {
-      setLoading(false);
+const onSubmit = async (data: SignupFormInputs) => {
+  setLoading(true);
+  try {
+    const response = await registerUser(data);
+    if (response.IsSuccess) {
+      toast.success("Validation mail has been sent to your email!");
+      navigate(`/email-verification?email=${encodeURIComponent(data.email)}`);
+    } else {
+      toast.error(response.Message || "Registration completed, please check your email.");
     }
-  };
+  } catch (err: any) {
+    toast.error(err.detail || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleRoleChange = (role: string) => {
     const updatedRoles = roles.includes(role)

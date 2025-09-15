@@ -12,6 +12,7 @@ import AdminLogin from "../pages/admin/AdminLogin";
 import DefaultRoute from "./DefaultRoute";
 import RoleBasedRoute from "./RoleBasedRoute";
 import UserList from "../components/admin/users/UserList";
+import EmailVerification from "../components/emailValidation";
 import StaffList from "../components/admin/users/StaffList";
 import ConcernList from "../components/admin/concern/ConcernList";
 import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInterestList";
@@ -24,6 +25,7 @@ export default function AppRouter() {
             <Route element={<WelcomeSection />}>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                 <Route path="/email-verification" element={<EmailVerification />} />
             </Route>
 
             {/* Parent & Staff routes */}
