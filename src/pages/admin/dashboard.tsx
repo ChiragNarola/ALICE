@@ -104,7 +104,7 @@ const AdminDashboard = () => {
   const [averageSession, setAverageSession] = useState<any>({});
   const [hourlyTrend, setHourlyTrend] = useState<HourlyTrendDTO[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
-  const [loadingHeatmap, setLoadingHeatmap] = useState<boolean>(false);
+  const [loadingHeatmap, _setLoadingHeatmap] = useState<boolean>(false);
   const [loadingApply, setLoadingApply] = useState<boolean>(false);
 
   const [stats, setStats] = useState<{
