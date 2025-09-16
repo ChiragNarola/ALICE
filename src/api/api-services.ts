@@ -127,6 +127,7 @@ export const staffJobRole = async (): Promise<APIResponse<ConcernDTO[]>> => {
 
         // Return fallback response in consistent shape
         return {
+            status: "error",
             IsSuccess: false,
             Data: [],
             Message: "Failed to fetch area of concerns",
@@ -380,6 +381,7 @@ export const area_of_concerns = async (): Promise<APIResponse<ConcernDTO[]>> => 
 
         // Return fallback response in consistent shape
         return {
+            status: "error",
             IsSuccess: false,
             Data: [],
             Message: "Failed to fetch area of concerns",
@@ -459,6 +461,7 @@ export const area_of_interests = async (): Promise<APIResponse<AreaOfInterestDTO
 
         // Return fallback response in consistent shape
         return {
+            status: "error",
             IsSuccess: false,
             Data: [],
             Message: "Failed to fetch area of interests",
