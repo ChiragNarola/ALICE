@@ -15,6 +15,7 @@ export interface DisplayUser {
 }
 
 export interface ConcernDTO {
+    isOther: any;
     id: number;
     concern: string;
 }

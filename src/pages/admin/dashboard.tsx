@@ -15,7 +15,9 @@ import {
   LineChart,
   Line,
   Area,
-  AreaChart
+  AreaChart,
+  BarChart,
+  Bar,
 } from "recharts";
 import Button from "../../components/ui/Button";
 import {
@@ -37,6 +39,7 @@ import {
   getAverageSessionLength,
   getHourlyActivityTrend,
   uploadDocuments,
+  generateHeatmap,
 } from "../../api/api-services";
 import type {
   DateParams,
@@ -49,13 +52,14 @@ import type {
 } from "../../routes/models/request/AdminRequest";
 
 const allowedExtensions = ["pdf", "docx", "txt", "ppt", "xlsx"];
+const MAX_FILE_SIZE_MB = 10;
 
 type CountUpNumberProps = { end: number; duration?: number };
 
 const CountUpNumber = ({ end, duration = 1 }: CountUpNumberProps) => {
   const [value, setValue] = useState<number>(0);
   const startTimeRef = useRef<number | null>(null);
-  
+
   useEffect(() => {
     const startValue = 0;
     const targetValue = isNaN(end) ? 0 : end;
@@ -84,19 +88,25 @@ const AdminDashboard = () => {
   const today = new Date();
   const currentYear = today.getFullYear();
   const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
   const [dateRange, setDateRange] = useState<DateParams>({
     start_date: `${currentYear}-01-01`,
     end_date: formatDate(today),
   });
-   const [errorMsg, setErrorMsg] = useState("");
+
+  const [errorMsg, setErrorMsg] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-      const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingCharts, setLoadingCharts] = useState<boolean>(true);
   const [dailyRegistration, setDailyRegistration] = useState<DailyRegistrationDTO[]>([]);
   const [userRoles, setUserRoles] = useState<UserRolesDTO>({ parent: 0, staff: 0, admin: 0, all_user: 0 });
   const [topCategories, setTopCategories] = useState<TopCategoryDTO[]>([]);
   const [averageSession, setAverageSession] = useState<any>({});
   const [hourlyTrend, setHourlyTrend] = useState<HourlyTrendDTO[]>([]);
-  const [loadingCharts, setLoadingCharts] = useState<boolean>(true);
+  const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [loadingHeatmap, setLoadingHeatmap] = useState<boolean>(false);
+  const [loadingApply, setLoadingApply] = useState<boolean>(false);
+
   const [stats, setStats] = useState<{
     users: number;
     chats: number;
@@ -113,24 +123,65 @@ const AdminDashboard = () => {
     cost: [],
   });
 
+  // ======== File Handling ========
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+
+    const file = e.target.files[0];
+    const ext = file.name.split(".").pop()?.toLowerCase();
+
+    if (!ext || !allowedExtensions.includes(ext)) {
+      setUploadedFile(null);
+      setErrorMsg("Invalid file type! Allowed: PDF, DOCX, TXT, PPT, XLSX.");
+      toast.error("Invalid file type! Allowed: PDF, DOCX, TXT, PPT, XLSX", { autoClose: 3000 });
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size / (1024 * 1024) > MAX_FILE_SIZE_MB) {
+      setUploadedFile(null);
+      setErrorMsg(`File too large! Max size ${MAX_FILE_SIZE_MB}MB.`);
+      toast.error(`File too large! Max size ${MAX_FILE_SIZE_MB}MB.`, { autoClose: 3000 });
+      e.target.value = "";
+      return;
+    }
+
+    setErrorMsg("");
+    setUploadedFile(file);
+  };
+
+  const handleSubmitFile = async (file: File | null) => {
+    if (!file) {
+      setErrorMsg("No file selected!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await uploadDocuments([file]);
+
+      if (response.status === "success") {
+        toast.success("File uploaded successfully!", { autoClose: 3000 });
+        setUploadedFile(null);
+      } else {
+        toast.error(response.Message || "Failed to upload file", { autoClose: 3000 });
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error?.Message || "An error occurred during upload", { autoClose: 3000 });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ======== Dashboard Fetch ========
   const fetchData = async () => {
     try {
+      setLoadingApply(true);
       setLoadingCharts(true);
-      const dateParams = {
-        start_date: dateRange.start_date,
-        end_date: dateRange.end_date,
-      };
-      const [
-        signUps,
-        costEstimate,
-        feedbackRatings,
-        totalChats,
-        dailyRes,
-        rolesRes,
-        topCatRes,
-        avgSessionRes,
-        hourlyRes,
-      ] = await Promise.all([
+      const dateParams = { start_date: dateRange.start_date, end_date: dateRange.end_date };
+
+      const results = await Promise.allSettled([
         getNewSignUps(dateRange),
         getCostEstimate(dateRange),
         getFeedbackRatings(dateRange),
@@ -140,67 +191,73 @@ const AdminDashboard = () => {
         getTopCategories(),
         getAverageSessionLength(),
         getHourlyActivityTrend(dateParams),
+        generateHeatmap(dateRange.start_date, dateRange.end_date),
       ]);
-      const totalRevenue = costEstimate?.Data
-        ? costEstimate.Data.reduce(
-          (sum: number, item: any) => sum + (item.cost ?? 0),
-          0
-        )
-        : 0;
+
+      const [
+        signUpsRes,
+        costRes,
+        feedbackRes,
+        chatsRes,
+        dailyRes,
+        rolesRes,
+        topCatRes,
+        avgSessionRes,
+        hourlyRes,
+        heatmapRes,
+      ] = results.map(r => r.status === "fulfilled" ? r.value?.Data ?? [] : []);
+
+      const totalRevenue = costRes?.reduce((sum: number, item: any) => sum + (item.cost ?? 0), 0) || 0;
+
       setStats({
-        users: signUps?.Data?.length ?? 0,
-        signups: signUps?.Data?.length ?? 0,
-        chats: (totalChats?.Data as unknown as number) ?? 0,
+        users: signUpsRes.length,
+        signups: signUpsRes.length,
+        chats: Number(chatsRes) || 0,
         revenue: totalRevenue,
-        feedback: feedbackRatings?.Data
-          ? feedbackRatings.Data.map((f: any) => ({
-            label: f.label.toUpperCase() as FeedbackRatingDTO["label"],
-            count: f.count,
-          }))
-          : [],
-        cost: costEstimate?.Data ?? [],
+        feedback: feedbackRes?.map((f: any) => ({
+          label: f.label?.toUpperCase(),
+          count: f.count ?? 0
+        })) || [],
+        cost: costRes || []
       });
-      setDailyRegistration(dailyRes?.Data || []);
-      setUserRoles(rolesRes?.Data || { parent: 0, staff: 0, admin: 0 });
-      setTopCategories(topCatRes?.Data || []);
-      setAverageSession(avgSessionRes?.Data || {});
-      setHourlyTrend(hourlyRes?.Data?.hourly_data || []);
+
+      setDailyRegistration(dailyRes || []);
+      setUserRoles(rolesRes || { parent: 0, staff: 0, admin: 0, all_user: 0 });
+      setTopCategories(topCatRes || []);
+      setAverageSession(avgSessionRes || {});
+      setHourlyTrend(hourlyRes?.hourly_data || []);
+      setHeatmapData(heatmapRes || []);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      console.error("Unexpected error fetching dashboard data:", error);
+      toast.error("Failed to load dashboard data", { autoClose: 3000 });
     } finally {
       setLoadingCharts(false);
+      setLoadingApply(false);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  // ======== Utility: Cost Parts ========
   const deriveCostParts = (items: any[]) => {
     let input = 0;
     let output = 0;
     let hasExplicit = false;
+
     for (const item of items || []) {
-      const inputLike =
-        typeof item.input_cost === "number"
-          ? item.input_cost
-          : typeof item.prompt_cost === "number"
-            ? item.prompt_cost
-            : null;
-      const outputLike =
-        typeof item.output_cost === "number"
-          ? item.output_cost
-          : typeof item.completion_cost === "number"
-            ? item.completion_cost
-            : null;
-      if (inputLike !== null) {
-        input += inputLike;
-        hasExplicit = true;
-      }
-      if (outputLike !== null) {
-        output += outputLike;
-        hasExplicit = true;
-      }
+      const inputLike = typeof item.input_cost === "number" ? item.input_cost
+        : typeof item.prompt_cost === "number" ? item.prompt_cost : null;
+      const outputLike = typeof item.output_cost === "number" ? item.output_cost
+        : typeof item.completion_cost === "number" ? item.completion_cost : null;
+
+      if (inputLike !== null) { input += inputLike; hasExplicit = true; }
+      if (outputLike !== null) { output += outputLike; hasExplicit = true; }
+
       const promptTokens = Number(item.prompt_tokens ?? item["prompt tokens"]);
       const completionTokens = Number(item.completion_tokens ?? item["completion tokens"]);
+
       if (!hasExplicit && !Number.isNaN(promptTokens) && !Number.isNaN(completionTokens)) {
         const totalTokens = promptTokens + completionTokens;
         if (totalTokens > 0 && typeof item.cost === "number") {
@@ -209,63 +266,8 @@ const AdminDashboard = () => {
         }
       }
     }
+
     return { input, output };
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-
-    const file = e.target.files[0];
-    const fileExtension = file.name.split(".").pop()?.toLowerCase();
-
-    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-      setUploadedFile(null);
-      setErrorMsg("Invalid file type! Please select a PDF, DOCX, TXT, PPT, or XLSX file.");
-      toast.error("Invalid file type! Allowed types: PDF, DOCX, TXT, PPT, XLSX", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      e.target.value = ""; 
-      return;
-    }
-
-    setErrorMsg(""); 
-    setUploadedFile(file);
-  };
-
-  const handleSubmitFile = async (file: File) => {
-    if (!file) return;
-
-    const fileExtension = file.name.split(".").pop()?.toLowerCase();
-    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-      setErrorMsg("Invalid file type! Please select a valid file before submitting.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await uploadDocuments([file]);
-      if (response.status =="success") {
-        toast.success("File uploaded successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        setUploadedFile(null);
-      } else {
-        toast.error(response.Message || "Failed to upload file", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      }
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error(error?.Message || "An error occurred while uploading", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
   };
   return (
 
@@ -289,9 +291,9 @@ const AdminDashboard = () => {
           <DateRangePicker value={dateRange} onChange={setDateRange} />
           <Button
             onClick={fetchData}
-            className="bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white px-4 py-2 rounded-xl shadow-sm transition-all"
+            className="bg-gradient-to-r  from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white px-4 py-2 rounded-xl shadow-sm transition-all"
           >
-            Apply
+          {loadingApply ?  <div className="w-5 h-5 border-2 mx-[10px] my-[1px] border-white border-t-transparent rounded-full animate-spin" /> : "Apply"}  
           </Button>
         </div>
       </div>
@@ -959,6 +961,98 @@ const AdminDashboard = () => {
         </div>
 
       </div>
+
+{/* Heatmap / User Drop-off Graph */}
+<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+  {/* Header */}
+  <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
+    <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-indigo-800 via-indigo-600 to-indigo-500"></span>
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900">User Drop-off Heatmap</h3>
+      <p className="text-xs text-gray-400">Screen-wise visits, exits and drop-off rates</p>
+    </div>
+  </div>
+
+  {/* Chart */}
+  <div className="mt-2 h-72 w-full">
+    {loadingHeatmap ? (
+      <div className="h-full flex items-center justify-center text-gray-400">
+        Loading heatmap...
+      </div>
+    ) : heatmapData.length > 0 ? (
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={heatmapData.map((item) => ({
+            ...item,
+            drop_off_rate: Number(item.drop_off_rate) || 0,
+            total_visits: Number(item.total_visits) || 0,
+            total_exits: Number(item.total_exits) || 0,
+            avg_time_spent: Number(item.avg_time_spent) || 0,
+          }))}
+          margin={{ top: 20, right: 20, left: 0, bottom: 30 }}
+          layout="vertical"
+        >
+          <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
+
+          <XAxis
+            type="number"
+            tick={{ fontSize: 12, fill: '#4b5563' }}
+            domain={[0, 100]}
+            tickFormatter={(value) => `${value}%`}
+          />
+          <YAxis
+            dataKey="screen_name"
+            type="category"
+            tick={{ fontSize: 12, fill: '#4b5563' }}
+            width={140}
+          />
+
+          <Tooltip
+            formatter={(value, name) => {
+              if (name === "drop_off_rate") return [`${value}%`, "Drop-off Rate"];
+              if (name === "total_visits") return [value, "Total Visits"];
+              if (name === "total_exits") return [value, "Total Exits"];
+              if (name === "avg_time_spent") return [`${((value as number) / 60).toFixed(2)} min`, "Avg Time Spent"];
+              return [value, name];
+            }}
+            contentStyle={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              fontSize: '12px',
+            }}
+          />
+
+          {/* Drop-off Rate Bars */}
+          <Bar
+            dataKey="drop_off_rate"
+            fill="url(#dropOffGradient)"
+            maxBarSize={20}
+            radius={[4, 4, 4, 4]}
+          />
+
+          <defs>
+            <linearGradient id="dropOffGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.9} /> {/* indigo-800 */}
+              <stop offset="50%" stopColor="#4F46E5" stopOpacity={0.7} /> {/* indigo-600 */}
+              <stop offset="100%" stopColor="#6366F1" stopOpacity={0.5} /> {/* indigo-500 */}
+            </linearGradient>
+          </defs>
+        </BarChart>
+      </ResponsiveContainer>
+    ) : (
+      <p className="text-gray-400 text-sm text-center mt-6">
+        No heatmap data available
+      </p>
+    )}
+  </div>
+
+  <p className="text-xs text-gray-400 mt-3">
+    Insights: Higher drop-off rates indicate screens where users are abandoning the flow.
+  </p>
+</div>
+
+
     </div>
   );
 };

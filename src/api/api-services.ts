@@ -1,7 +1,7 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
 import type { ConversationDTO } from '../routes/models/request/Chat';
 import type { ChatInputRM } from '../routes/models/request/Child';
-import type { TrackEventParams } from '../routes/models/request/analytics';
+import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
 import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
@@ -295,8 +295,6 @@ export const getUserList = async (
         });
 
         const res = await axiosInstance.get("users/list");
-
-        // console.log(res);
         return res.data;
     } catch (error: any) {
         throw (
@@ -859,7 +857,7 @@ export const generateHeatmap = async (
     );
   }
 };
-
+  
 
 export const countOthers = async (): Promise<APIResponse<string>> => {
   try {
