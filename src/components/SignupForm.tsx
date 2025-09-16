@@ -29,22 +29,23 @@ const SignupForm = () => {
     defaultValues: { role: [] },
   });
 
-  const onSubmit = async (data: SignupFormInputs) => {
-    setLoading(true);
-    try {
-      const response = await registerUser(data);
-      if (response.IsSuccess) {
-        toast.success("Registration successful!");
-        navigate("/login");
-      } else {
-        toast.error(response.Message || "Registered, but please check your email.");
-      }
-    } catch (err: any) {
-      toast.error(err.detail || "Registration failed");
-    } finally {
-      setLoading(false);
+const onSubmit = async (data: SignupFormInputs) => {
+  setLoading(true);
+  try {
+    const response = await registerUser(data);
+    if (response.IsSuccess) {
+      toast.success("Validation mail has been sent to your email!");
+      navigate(`/email-verification?email=${encodeURIComponent(data.email)}`);
+    } else {
+      toast.error(response.Message || "Registration completed, please check your email.");
     }
-  };
+  } catch (err: any) {
+    toast.error(err.detail || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleRoleChange = (role: string) => {
     const updatedRoles = roles.includes(role)
@@ -179,12 +180,9 @@ const SignupForm = () => {
   <input
     {...register('location', {
       validate: (value) => {
-        // ✅ Allow empty value (field is optional)
         if (!value || value.trim() === '') {
           return true; // no error when field is empty
         }
-
-        // ✅ Validate only when there is a value
         const ukPostcodeRegex = /^([A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}|GIR\s?0AA)$/i;
         return ukPostcodeRegex.test(value) || 'Enter a valid UK postal code';
       },
