@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation, NavLink } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { verifyEmailCode } from "../api/api-services";
 
@@ -82,8 +82,8 @@ const EmailVerification = () => {
         {/* Resend & Go Back Links */}
 <div className="text-[14px] lg:text-base text-alice-darkgray font-medium mt-4">
   <p>
-    A verification code has been sent to <strong>{email}</strong>.{" "}
-    If the code is expired, a new one will be sent automatically (managed by backend).
+   Verification code has been sent to your register email <strong>{email}</strong>.{" "}
+    If the code is expired, a new one will be sent automatically.
   </p>
 </div>
 
