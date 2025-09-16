@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-// import { useLocation } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import ChatChildInfo from "../components/ChatChildInfo";
@@ -10,6 +10,8 @@ import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 import StaffInfo from "../components/StaffInfo";
 import { useChatActivity } from "../contexts/ChatActivityContext";
+import { trackEvent } from "../api/api-services"; // adjust the path if needed
+
 
 type Message = {
   id?: number;
@@ -23,6 +25,7 @@ const ChatPage: React.FC = () => {
   const { messages, refreshChatList } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
+  const location = useLocation();
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
@@ -37,25 +40,82 @@ const ChatPage: React.FC = () => {
       user_response: null,
     },
   ]);
+const sessionUUID = user?.sessionUUID || sessionStorage.getItem("session_uuid") || localStorage.getItem("session_uuid");
+
+const sendChatAnalytics = (pageScreen: "chat_start" | "chat_mid", isExit: boolean = false) => {
+  if (!sessionUUID) return;
+
+  const lastMessage = chatMessages[chatMessages.length - 1];
+  let interaction_data = ""; // default blank
+
+  if (lastMessage) {
+    if (lastMessage.from === "user") {
+      interaction_data = chatCount > 1 ? "asked follow up question" : "asked question";
+    } else if (lastMessage.from === "alice") {
+      interaction_data = "responded";
+    }
+  }
+
+  const event_type = isExit
+    ? "exit"
+    : lastMessage?.actions
+    ? "button_click"
+    : "page_view";
+
+  trackEvent({
+    session_id: sessionUUID,
+    page_screen: pageScreen,
+    event_type,
+    time_spent: timeSpent,
+    interaction_data,
+  }).catch((err) => console.error("Tracking failed:", err));
+};
+
+const chatStartSent = useRef(false);
+const chatMidSent = useRef(false);
+const chatExitSent = useRef(false);
+
+// Chat start - only once
+useEffect(() => {
+  if (!chatStartSent.current && chatCount === 0) {
+    sendChatAnalytics("chat_start"); 
+    chatStartSent.current = true;
+  }
+}, [chatCount]);
+
+
+useEffect(() => {
+  if ((location.pathname !== "/chat" || document.hidden) && chatCount > 0 && !chatMidSent.current) {
+    sendChatAnalytics("chat_mid");
+    chatMidSent.current = true;
+  }
+}, [location.pathname, chatCount]);
+
+useEffect(() => {
+  const handleBeforeUnload = () => {
+    if (chatCount > 0 && !chatExitSent.current) {
+      sendChatAnalytics(chatCount > 0 ? "chat_mid" : "chat_start", true);
+      chatExitSent.current = true;
+    }
+  };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+}, [chatCount]);
+
+
+
   const [searchParams] = useSearchParams();
   const handleGenerate = () => {
     const conversationUUID = searchParams.get("v");
-    // console.log("conversation UUID:", conversationUUID);
     if (conversationUUID) {
       setChatboardUniqueId(conversationUUID);
     } else {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
-      // console.log("Generated UUID:", uniqueId);
     }
   };
 
-  useEffect(() => {
-  
-console.log("TimeSpent ----->",timeSpent)
-console.log("ChatCount ----->",chatCount)
-  }, )
-  
 
 
  useEffect(() => {
@@ -107,9 +167,7 @@ console.log("ChatCount ----->",chatCount)
       },
     ]);
 
-    // Increment chat count whenever a message is sent
     incrementChatCount();
-    // Add a placeholder bot message
     const botIndex = chatMessages.length + 1;
     setChatMessages((prev) => [
       ...prev,
@@ -133,20 +191,14 @@ console.log("ChatCount ----->",chatCount)
       const headerMessageId = response.headers.get("x-message-id");
       const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
       setMessage("");
-      // console.log("x-message-id:", newMessageId);
-
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-
       let accumulatedText = "";
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         accumulatedText += chunk;
-
         setChatMessages((prev) => {
           const copy = [...prev];
           copy[botIndex] = {
@@ -159,7 +211,6 @@ console.log("ChatCount ----->",chatCount)
       }
     } catch (err: any) {
       console.error("Chat API error:", err);
-      // toast.error("Something went wrong. Please try again.");
       setChatMessages((prev) => {
         const copy = [...prev];
         if (copy[botIndex]) {
@@ -178,7 +229,6 @@ console.log("ChatCount ----->",chatCount)
     }
   };
 
-
   return (
     <>
       <main className="flex-1 flex px-2 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">
@@ -191,9 +241,7 @@ console.log("ChatCount ----->",chatCount)
           </span>
         )}
 
-        {/* Reserve space for sidebar */}
         <section className="w-[220px] shrink-0 overflow-hidden">
-          {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
         </section>
 
         {/* Chat Section */}

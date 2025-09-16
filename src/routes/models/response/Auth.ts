@@ -11,6 +11,7 @@ export interface AuthUser {
   tokenType?: string;
   isChildrenAdded: boolean;
   isStaffDetailAdded: boolean;
+  sessionUUID:string;
 
   // Optional raw values (sometimes API gives snake_case)
   first_name?: string;
@@ -34,7 +35,7 @@ export interface AuthContextType {
 }
 
 export interface APIResponse<T> {
-  status: string;
+  status?: string;
   totalCost?: number;
   models?: never[];
   IsSuccess: boolean;
@@ -45,6 +46,7 @@ export interface APIResponse<T> {
 export interface LoginResponseDTO {
   access_token: string;
   token_type: string;
+  session_uuid: string;
   user: {
     id: number;
     email: string;
