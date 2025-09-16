@@ -40,21 +40,28 @@ const ChatPage: React.FC = () => {
       user_response: null,
     },
   ]);
-const sessionUUID = user?.sessionUUID || sessionStorage.getItem("session_uuid") || localStorage.getItem("session_uuid");
+const sessionUUID =
+  user?.sessionUUID ||
+  sessionStorage.getItem("session_uuid") ||
+  localStorage.getItem("session_uuid");
 
-const sendChatAnalytics = (pageScreen: "chat_start" | "chat_mid", isExit: boolean = false) => {
+const sendChatAnalytics = (
+  pageScreen: "chat_start" | "chat_mid",
+  isExit: boolean = false
+) => {
   if (!sessionUUID) return;
 
-  const lastMessage = chatMessages[chatMessages.length - 1];
-  let interaction_data = ""; // default blank
+const lastMessage = chatMessages[chatMessages.length - 1];
+const secondLastMessage = chatMessages[chatMessages.length - 2];
+let interaction_data = "";
 
-  if (lastMessage) {
-    if (lastMessage.from === "user") {
-      interaction_data = chatCount > 1 ? "asked follow up question" : "asked question";
-    } else if (lastMessage.from === "alice") {
-      interaction_data = "responded";
-    }
+if (chatCount > 0) {
+  if (secondLastMessage?.from === "user") {
+    interaction_data = chatCount > 1 ? "asked follow up question" : "asked question";
+  } else if (lastMessage?.from === "alice") {
+    interaction_data = "responded";
   }
+}
 
   const event_type = isExit
     ? "exit"
@@ -68,28 +75,45 @@ const sendChatAnalytics = (pageScreen: "chat_start" | "chat_mid", isExit: boolea
     event_type,
     time_spent: timeSpent,
     interaction_data,
-  }).catch((err) => console.error("Tracking failed:", err));
+  })
 };
 
 const chatStartSent = useRef(false);
 const chatMidSent = useRef(false);
 const chatExitSent = useRef(false);
+const lastMessageCount = useRef(0);
 
-// Chat start - only once
 useEffect(() => {
-  if (!chatStartSent.current && chatCount === 0) {
-    sendChatAnalytics("chat_start"); 
+  if (location.pathname === "/chat") {
+    sendChatAnalytics("chat_start");
     chatStartSent.current = true;
   }
-}, [chatCount]);
-
+}, [location.pathname]);
 
 useEffect(() => {
-  if ((location.pathname !== "/chat" || document.hidden) && chatCount > 0 && !chatMidSent.current) {
+  if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
     sendChatAnalytics("chat_mid");
-    chatMidSent.current = true;
+    lastMessageCount.current = chatCount;
   }
+}, [chatCount, location.pathname]);
+
+useEffect(() => {
+  const checkView = () => {
+    const view =
+      location.pathname === "/chat" && !document.hidden
+        ? "in_view"
+        : "out_of_view";
+
+    if (view === "out_of_view" && chatCount > 0 && !chatMidSent.current) {
+      sendChatAnalytics("chat_mid");
+      chatMidSent.current = true;
+    }
+  };
+
+  const timeout = setTimeout(checkView, 50);
+  return () => clearTimeout(timeout);
 }, [location.pathname, chatCount]);
+
 
 useEffect(() => {
   const handleBeforeUnload = () => {
@@ -98,12 +122,9 @@ useEffect(() => {
       chatExitSent.current = true;
     }
   };
-
   window.addEventListener("beforeunload", handleBeforeUnload);
   return () => window.removeEventListener("beforeunload", handleBeforeUnload);
 }, [chatCount]);
-
-
 
   const [searchParams] = useSearchParams();
   const handleGenerate = () => {
