@@ -16,6 +16,7 @@ import EmailVerification from "../components/emailValidation";
 import StaffList from "../components/admin/users/StaffList";
 import ConcernList from "../components/admin/concern/ConcernList";
 import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInterestList";
+import UploadedDocsList from "../components/admin/uploadDocument";
 
 export default function AppRouter() {
     return (
@@ -49,6 +50,7 @@ export default function AppRouter() {
                     <Route path="staff" element={<StaffList />} />
                     <Route path="concerns" element={<ConcernList />} />
                     <Route path="area-of-interest" element={<AreaofinterestList />} />
+                    <Route path="documents" element={<UploadedDocsList />} />
                 </Route>
             </Route>
 

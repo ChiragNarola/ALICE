@@ -2,7 +2,8 @@ import {
   LayoutDashboard,
   Users,
   Laptop2,
-  ClipboardCheck
+  ClipboardCheck,
+  FileText
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -54,11 +55,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: Laptop2,
       href: "/admin/area-of-interest",
     },
-    // {
-    //   title: "Timetable",
-    //   icon: CalendarClock,
-    //   href: "/admin/timetable",
-    // },
+    {
+      title: "Documents",
+      icon: FileText,
+      href: "/admin/documents",
+    },
     // {
     //   title: "Settings",
     //   icon: Settings,

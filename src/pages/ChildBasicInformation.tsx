@@ -360,7 +360,6 @@ const ChildBasicInformation: React.FC = () => {
         setShowUserDropdown(false);
       }
     }
-
     if (showMessageDropdown || showUserDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -386,10 +385,7 @@ const ChildBasicInformation: React.FC = () => {
               if (userDetails == 2) {
                 if (idx == 3) return null;
               }
-              // const isCompleted = idx < currentStep;
               const isCurrent = idx === currentStep;
-              // const isUpcoming = idx > currentStep; // Not needed, but for clarity
-
               return (
                 <li key={stepObj.id} className="flex items-center relative min-h-[30px] lg:min-h-[50px] mb-[24px] lg:mb-[50px] last:mb-0">
                   {/* Vertical line */}
