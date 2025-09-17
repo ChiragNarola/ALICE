@@ -104,7 +104,7 @@ const AdminDashboard = () => {
   const [averageSession, setAverageSession] = useState<any>({});
   const [hourlyTrend, setHourlyTrend] = useState<HourlyTrendDTO[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
-  const [loadingHeatmap, setLoadingHeatmap] = useState<boolean>(false);
+  const [loadingHeatmap] = useState<boolean>(false);
   const [loadingApply, setLoadingApply] = useState<boolean>(false);
 
   const [stats, setStats] = useState<{
@@ -271,16 +271,13 @@ const AdminDashboard = () => {
   };
   return (
 
-    <div className="max-w-7xl mt-3 ml-2 mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Header + Date Filter */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 pb-6">
         <div className="flex items-center space-x-3">
-          {/* <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
-            <LayoutDashboard className="w-6 h-6 text-indigo-600" />
-          </div> */}
-             <div className="p-2 bg-indigo-100 rounded-lg">
-                    <LayoutDashboard className="w-6 h-6 text-indigo-600" />
-                  </div>
+          <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
+            <LayoutDashboard className="w-7 h-7 text-teal-600" />
+          </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -496,134 +493,120 @@ const AdminDashboard = () => {
 
       {/* Feedback Ratings Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-  {/* Header */}
-  <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-    <div className="flex items-center gap-3">
-      <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900">Feedback Ratings</h3>
-        <p className="text-xs text-gray-400">Distribution of user responses</p>
-      </div>
-    </div>
-  </div>
-
-  {/* Chart Area */}
-  {loadingCharts ? (
-    // Skeleton Loader
-    <div className="h-64 flex flex-col items-center justify-center gap-6 animate-pulse">
-      {/* Circular Skeleton for Pie Chart */}
-      <div className="w-32 h-32 rounded-full bg-gray-200"></div>
-
-      {/* Legend Skeletons */}
-      <div className="flex gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-          <div className="w-12 h-3 bg-gray-200 rounded"></div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-          <div className="w-12 h-3 bg-gray-200 rounded"></div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-          <div className="w-12 h-3 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    </div>
-  ) : stats.feedback.length > 0 ? (
-    <>
-      {/* Actual Chart */}
-      <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie
-            data={stats.feedback}
-            dataKey="count"
-            nameKey="label"
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={110}
-            paddingAngle={3}
-            cornerRadius={6}
-            labelLine={false}
-            label={({ percent }) => `${(percent as number * 100).toFixed(0)}%`}
-          >
-            {stats.feedback.map((entry, index) => {
-              const label = entry.label?.trim().toLowerCase();
-
-              const colorMap: Record<string, string> = {
-                like: "#10B981", // emerald-500
-                neutral: "#F59E0B", // amber-500
-                dislike: "#EF4444", // red-500
-                blue: "#3B82F6",
-                teal: "#14B8A6",
-                gray: "#6B7280",
-              };
-
-              return (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={colorMap[label || ""] || "#9CA3AF"}
-                  stroke="#fff"
-                  strokeWidth={2}
-                />
-              );
-            })}
-          </Pie>
-
-          {/* Tooltip */}
-          <Tooltip
-            formatter={(value, name) => [`${value} responses`, name]}
-            contentStyle={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              fontSize: '12px',
-              boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
-
-      {/* Custom Legend */}
-      <div className="flex justify-center gap-5 mt-5 flex-wrap">
-        {stats.feedback.map((item, idx) => {
-          const label = item.label?.trim().toLowerCase();
-          const colorMap: Record<string, string> = {
-            like: "bg-emerald-500",
-            neutral: "bg-amber-500",
-            dislike: "bg-red-500",
-            blue: "bg-blue-500",
-            teal: "bg-teal-500",
-            gray: "bg-gray-500",
-          };
-
-          return (
-            <div key={idx} className="flex items-center gap-1.5">
-              <span
-                className={`w-3 h-3 rounded-full ${colorMap[label || ""] || "bg-gray-400"}`}
-              />
-              <span className="text-xs text-gray-700">
-                {item.label} ({item.count})
-              </span>
+        <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
+          <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">Feedback Ratings</h3>
+                <p className="text-xs text-gray-500">Distribution of user responses</p>
+              </div>
             </div>
-          );
-        })}
-      </div>
-    </>
-  ) : (
-    <p className="text-gray-400 text-sm text-center mt-6">
-      No feedback data available
-    </p>
-  )}
+          </div>
+          {loadingApply ? (
+            <div className="flex flex-col items-center justify-center h-[350px]">
+              {/* Donut skeleton */}
+              <div className="relative w-40 h-40">
+                {/* Outer pulsing ring */}
+                <div className="absolute inset-0 rounded-full border-[50px] border-gray-200 animate-pulse"></div>
+                {/* Inner white hole */}
+                <div className="absolute inset-8 rounded-full bg-white"></div>
+              </div>
 
-  {/* Footer Note */}
-  <p className="text-xs text-gray-400 mt-3">
-    Insights: Helps track user sentiment over time and guide improvements.
-  </p>
-</div>
+              {/* Legend skeleton */}
+              <div className="flex justify-center gap-5 mt-5 flex-wrap">
+                {[...Array(3)].map((_, idx) => (
+                  <div key={idx} className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-gray-200 animate-pulse" />
+                    <span className="w-10 h-3 rounded bg-gray-200 animate-pulse"></span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              {stats.feedback.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie
+                        data={stats.feedback}
+                        dataKey="count"
+                        nameKey="label"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={110}
+                        paddingAngle={3}
+                        cornerRadius={6}
+                        labelLine={false}
+                        label={({ percent }) => `${(percent as number * 100).toFixed(0)}%`}
+                      >
+                        {stats.feedback.map((entry, index) => {
+                          const label = entry.label?.trim().toLowerCase();
 
+                          const colorMap: Record<string, string> = {
+                            like: "#10B981",
+                            neutral: "#F59E0B",
+                            dislike: "#EF4444",
+                            blue: "#3B82F6",
+                            teal: "#14B8A6",
+                            gray: "#6B7280",
+                          };
+
+                          return (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={colorMap[label || ""] || "#9CA3AF"}
+                              stroke="#fff"
+                              strokeWidth={2}
+                            />
+                          );
+                        })}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value, name) => [`${value} responses`, name]}
+                        contentStyle={{
+                          borderRadius: "10px",
+                          border: "none",
+                          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  {/* Custom Legend */}
+                  <div className="flex justify-center gap-5 mt-5 flex-wrap">
+                    {stats.feedback.map((item, idx) => {
+                      const label = item.label?.trim().toLowerCase();
+                      const colorMap: Record<string, string> = {
+                        like: "bg-emerald-500",
+                        neutral: "bg-amber-500",
+                        dislike: "bg-red-500",
+                        blue: "bg-blue-500",
+                        teal: "bg-teal-500",
+                        gray: "bg-gray-500",
+                      };
+                      return (
+                        <div key={idx} className="flex items-center gap-1.5">
+                          <span
+                            className={`w-3 h-3 rounded-full ${colorMap[label || ""] || "bg-gray-400"
+                              }`}
+                          />
+                          <span className="text-xs text-gray-700">
+                            {item.label} ({item.count})
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">No feedback data available</p>
+              )}
+            </>
+          )}
+        </div>
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
@@ -696,237 +679,397 @@ const AdminDashboard = () => {
 
       {/* Additional Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  {/* Average Session Length */}
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-    {/* Header */}
-    <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-      <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-blue-500 to-indigo-400"></span>
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900">Average Session Length</h3>
-        <p className="text-xs text-gray-400">Distribution of conversation duration</p>
-      </div>
-    </div>
 
-    {/* Metrics */}
-    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
-      <p className="text-3xl font-bold text-gray-900 mt-2">
-        {loadingCharts ? "..." : `${Math.round(averageSession.average_session_duration / 60)} min`}
-      </p>
-      <p className="text-gray-500 text-sm mt-1">
-        Avg messages per session: {averageSession.average_session_messages || 0}
-      </p>
-    </div>
-
-    {/* Area Chart */}
-    <div className="mt-2 h-64 w-full">
-      {loadingCharts ? (
-        <div className="flex flex-col items-center justify-center h-full">
-          <div className="w-40 h-40 relative">
-            <div className="absolute inset-0 rounded-full border-[50px] border-gray-200 animate-pulse"></div>
-            <div className="absolute inset-8 rounded-full bg-white"></div>
+        {/* Average Session Length*/}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
+            <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-blue-500 to-indigo-400"></span>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Average Session Length</h3>
+              <p className="text-xs text-gray-400">Distribution of conversation duration</p>
+            </div>
           </div>
-          <div className="flex justify-center gap-3 mt-5">
-            {[...Array(3)].map((_, idx) => (
-              <div key={idx} className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-gray-200 animate-pulse"></span>
-                <span className="text-xs text-gray-400 animate-pulse">•••</span>
+          {loadingApply ? (
+            <>
+              <div className="w-full h-72 flex flex-col justify-between animate-pulse">
+                {/* Chart skeleton */}
+                <div className="relative flex-1">
+                  {/* Y-axis labels */}
+                  <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-gray-300 text-xs">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="w-6 h-3 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+
+                  {/* Grid lines */}
+                  <div className="absolute inset-0 flex flex-col justify-between pl-8">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="w-full h-px bg-gray-200"></div>
+                    ))}
+                  </div>
+
+                  {/* Fake line/area shape */}
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 400 200"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0,20 C50,80 100,150 200,120 C300,90 350,160 400,100 L400,200 L0,200 Z"
+                      fill="#e5e7eb"
+                      className="animate-pulse"
+                    />
+                    <path
+                      d="M0,20 C50,80 100,150 200,120 C300,90 350,160 400,100"
+                      stroke="#d1d5db"
+                      strokeWidth="3"
+                      fill="none"
+                      className="animate-pulse"
+                    />
+                  </svg>
+                </div>
+
+                {/* X-axis labels */}
+                <div className="flex justify-between text-xs text-gray-300 mt-3">
+                  {["0-5 min", "5-30", "30-60", "1-4h", "4-24h", ">1d"].map(( i) => (
+                    <div key={i} className="w-10 h-3 bg-gray-200 rounded"></div>
+                  ))}
+                </div>
+
+                {/* Note placeholder */}
+                <div className="mt-4 w-3/4 h-3 bg-gray-200 rounded"></div>
               </div>
-            ))}
+
+            </>
+          ) : (
+            <>
+              {/* Metrics */}
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {loadingCharts ? "..." : `${Math.round(averageSession.average_session_duration / 60)} min`}
+                </p>
+                <p className="text-gray-500 text-sm mt-1">
+                  Avg messages per session: {averageSession.average_session_messages || 0}
+                </p>
+              </div>
+
+              {/* Area Chart */}
+              <div className="mt-2 h-64 w-full">
+                {averageSession.duration_distribution?.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={averageSession.duration_distribution}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
+                    >
+                      <defs>
+                        <linearGradient id="avgSessionGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.7} />
+                          <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.2} />
+                        </linearGradient>
+                      </defs>
+
+                      <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
+
+                      <XAxis
+                        dataKey="duration_range"
+                        tick={{ fontSize: 12, fill: '#4b5563' }}
+                        angle={-20}
+                        textAnchor="end"
+                        interval={0}
+                      />
+
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 12, fill: '#4b5563' }}
+                        width={50}
+                        label={{
+                          value: 'Sessions',
+                          angle: -90,
+                          position: 'insideLeft',
+                          fill: '#4b5563',
+                          fontSize: 12,
+                        }}
+                      />
+
+                      <Tooltip
+                        formatter={(value) => [`${value} sessions`, 'Conversation Count']}
+                        contentStyle={{
+                          backgroundColor: '#fff',
+                          borderRadius: '8px',
+                          border: '1px solid #e5e7eb',
+                          fontSize: '12px',
+                        }}
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="conversation_count"
+                        stroke="#3B82F6"
+                        strokeWidth={2.5}
+                        fill="url(#avgSessionGradient)"
+                        activeDot={{ r: 5, fill: '#1E40AF' }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="text-gray-400 text-sm text-center mt-6">
+                    No session distribution data available
+                  </p>
+                )}
+              </div>
+
+            </>
+          )}
+          <p className="text-xs text-gray-400 mt-2">
+            Note: Monitor session trends to identify peak user engagement hours.
+          </p>
+        </div>
+
+        {/* Hourly Activity Trend  */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+            <div className="flex items-center gap-3">
+              <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Hourly Activity Trend</h3>
+                <p className="text-xs text-gray-400">User activity by hour (messages sent)</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500">Last 24 hours</p>
           </div>
-        </div>
-      ) : averageSession.duration_distribution?.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={averageSession.duration_distribution}
-            margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
-          >
-            <defs>
-              <linearGradient id="avgSessionGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.7} />
-                <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.2} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="duration_range"
-              tick={{ fontSize: 12, fill: '#4b5563' }}
-              angle={-20}
-              textAnchor="end"
-              interval={0}
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fontSize: 12, fill: '#4b5563' }}
-              width={50}
-              label={{
-                value: 'Sessions',
-                angle: -90,
-                position: 'insideLeft',
-                fill: '#4b5563',
-                fontSize: 12,
-              }}
-            />
-            <Tooltip
-              formatter={(value) => [`${value} sessions`, 'Conversation Count']}
-              contentStyle={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: '1px solid #e5e7eb',
-                fontSize: '12px',
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="conversation_count"
-              stroke="#3B82F6"
-              strokeWidth={2.5}
-              fill="url(#avgSessionGradient)"
-              activeDot={{ r: 5, fill: '#1E40AF' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      ) : (
-        <p className="text-gray-400 text-sm text-center mt-6">
-          No session distribution data available
-        </p>
-      )}
-    </div>
-    <p className="text-xs text-gray-400 mt-2">
-      Note: Monitor session trends to identify peak user engagement hours.
-    </p>
-  </div>
 
-  {/* Hourly Activity Trend */}
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-    {/* Header */}
-    <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Hourly Activity Trend</h3>
-          <p className="text-xs text-gray-400">User activity by hour (messages sent)</p>
-        </div>
-      </div>
-      <p className="text-sm text-gray-500">Last 24 hours</p>
-    </div>
+          {/* Chart */}
+          <div className="mt-4 h-64 w-full">
+            {loadingCharts ? (
+              // <div className="h-full flex items-center justify-center text-gray-400">
+              //   Loading chart...
+              // </div>
+              <>
+                <div className="w-full h-72 flex flex-col justify-between animate-pulse">
+                  {/* Chart skeleton */}
+                  <div className="relative flex-1">
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-gray-300 text-xs">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="w-6 h-3 bg-gray-200 rounded"></div>
+                      ))}
+                    </div>
 
-    {/* Chart */}
-    <div className="mt-4 h-64 w-full">
-      {loadingCharts ? (
-        <div className="space-y-3">
-          {[...Array(6)].map((_, idx) => (
-            <div key={idx} className="h-6 bg-gray-200 rounded-full animate-pulse"></div>
-          ))}
-        </div>
-      ) : hourlyTrend.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={hourlyTrend} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-            <defs>
-              <linearGradient id="hourlyAreaGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.4} />
-                <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.15} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
-            <XAxis
-              dataKey="time_label"
-              tick={{ fontSize: 12, fill: '#6b7280' }}
-              interval={2}
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fontSize: 12, fill: '#6b7280' }}
-              width={50}
-              label={{
-                value: 'Messages',
-                angle: -90,
-                position: 'insideLeft',
-                fill: '#6b7280',
-                fontSize: 12,
-              }}
-            />
-            <Tooltip
-              formatter={(value) => [`${value} messages`, 'Messages']}
-              contentStyle={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: '1px solid #e5e7eb',
-                fontSize: '12px',
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="message_count"
-              stroke="#0d9488"
-              strokeWidth={2.5}
-              fill="url(#hourlyAreaGradient)"
-              activeDot={{ r: 5, fill: '#0f766e' }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      ) : (
-        <p className="text-gray-400 text-sm text-center mt-6">
-          No hourly activity data available
-        </p>
-      )}
-    </div>
-    <p className="text-xs text-gray-400 mt-3">
-      Insights: Peaks indicate the hours when users are most active. Use this to optimize notifications and engagement strategies.
-    </p>
-  </div>
+                    {/* Grid lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pl-8">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="w-full h-px bg-gray-200"></div>
+                      ))}
+                    </div>
 
-  {/* Daily Registrations */}
-  <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
-    <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Daily Registrations</h3>
-          <p className="text-xs text-gray-500">New users registered over time</p>
-        </div>
-      </div>
-    </div>
+                    {/* Fake line/area shape */}
+                    <svg
+                      className="absolute inset-0 w-full h-full"
+                      viewBox="0 0 400 200"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M0,20 C50,80 100,150 200,120 C300,90 350,160 400,100 L400,200 L0,200 Z"
+                        fill="#e5e7eb"
+                        className="animate-pulse"
+                      />
+                      <path
+                        d="M0,20 C50,80 100,150 200,120 C300,90 350,160 400,100"
+                        stroke="#d1d5db"
+                        strokeWidth="3"
+                        fill="none"
+                        className="animate-pulse"
+                      />
+                    </svg>
+                  </div>
 
-    {loadingCharts ? (
-      <div className="space-y-3">
-        {[...Array(6)].map((_, idx) => (
-          <div key={idx} className="h-6 bg-gray-200 rounded-full animate-pulse"></div>
-        ))}
-      </div>
-    ) : dailyRegistration.length > 0 ? (
-      <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={dailyRegistration} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="dailyLine" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.7} />
-              <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.2} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#4b5563' }} />
-          <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#4b5563' }} />
-          <Tooltip
-            formatter={(value) => [`${value} users`, 'Registrations']}
-            contentStyle={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              fontSize: '12px'
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="new_registrations"
-            stroke="url(#dailyLine)"
-            strokeWidth={3}
-            dot={{ r: 4, fill: '#0d9488' }}
-            activeDot={{ r: 6, fill: '#0f766e' }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    ) : (
-      <p className="text-gray-500 text-sm">No daily registration data available</p>
-    )}
-  </div>
+                  {/* X-axis labels */}
+                  <div className="flex justify-between text-xs text-gray-300 mt-3">
+                    {["0-5 min", "5-30", "30-60", "1-4h", "4-24h", ">1d"].map(( i) => (
+                      <div key={i} className="w-10 h-3 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+
+                  {/* Note placeholder */}
+                  <div className="mt-4 w-3/4 h-3 bg-gray-200 rounded"></div>
+                </div>
+              </>
+            ) : hourlyTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={hourlyTrend} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                  {/* Subtle Teal Gradient */}
+                  <defs>
+                    <linearGradient id="hourlyAreaGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.4} />  {/* teal-500 */}
+                      <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.15} /> {/* teal-400 */}
+                    </linearGradient>
+                  </defs>
+
+                  <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
+
+                  <XAxis
+                    dataKey="time_label"
+                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    interval={2}
+                    tickFormatter={(value) => {
+                      return value;
+                    }}
+                  />
+
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    width={50}
+                    label={{
+                      value: 'Messages',
+                      angle: -90,
+                      position: 'insideLeft',
+                      fill: '#6b7280',
+                      fontSize: 12,
+                    }}
+                  />
+
+                  <Tooltip
+                    formatter={(value) => [`${value} messages`, 'Messages']}
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                      fontSize: '12px',
+                    }}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="message_count"
+                    stroke="#0d9488" // teal-600
+                    strokeWidth={2.5}
+                    fill="url(#hourlyAreaGradient)"
+                    activeDot={{ r: 5, fill: '#0f766e' }} // teal-700
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-400 text-sm text-center mt-6">
+                No hourly activity data available
+              </p>
+            )}
+          </div>
+
+          {/* Footer */}
+          <p className="text-xs text-gray-400 mt-3">
+            Insights: Peaks indicate the hours when users are most active. Use this to optimize notifications and engagement strategies.
+          </p>
+        </div>
+
+        {/* Daily Registrations */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+            <div className="flex items-center gap-3">
+              <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Daily Registrations</h3>
+                <p className="text-xs text-gray-500">New users registered over time</p>
+              </div>
+            </div>
+            <Users className="w-6 h-6 text-teal-500" />
+          </div>
+
+          {loadingCharts ? (
+            // <div className="h-64 flex items-center justify-center text-gray-400">
+            //   Loading chart...
+            // </div>
+            <div className="w-full h-72 flex flex-col justify-between animate-pulse">
+              {/* Chart area */}
+              <div className="relative flex-1">
+                {/* Grid lines */}
+                <div className="absolute inset-0 flex flex-col justify-between">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="w-full h-px bg-gray-200" />
+                  ))}
+                </div>
+
+                {/* Fake line with dots */}
+                <svg
+                  className="absolute inset-0 w-full h-full"
+                  viewBox="0 0 400 200"
+                  preserveAspectRatio="none"
+                >
+                  {/* Grey line path (manual curve based on values) */}
+                  <polyline
+                    fill="none"
+                    stroke="#d1d5db"
+                    strokeWidth="3"
+                    points="
+          0,150 
+          60,180 
+          120,163 
+          180,185 
+          240,180 
+          300,140 
+          360,110
+        "
+                  />
+
+                  {/* Grey dots for [50,20,37,15,20,60,90] */}
+                  {[150, 180, 163, 185, 180, 140, 110].map((y, i) => (
+                    <circle
+                      key={i}
+                      cx={i * 60}
+                      cy={y}
+                      r="5"
+                      className="fill-gray-300"
+                    />
+                  ))}
+                </svg>
+              </div>
+
+              {/* X-axis placeholders */}
+              <div className="flex justify-between mt-3">
+                {["50", "20", "37", "15", "20", "60", "90"].map(( i) => (
+                  <div key={i} className="w-10 h-3 bg-gray-200 rounded" />
+                ))}
+              </div>
+            </div>
+          ) : dailyRegistration.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={dailyRegistration} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dailyLine" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.7} /> {/* teal-500 */}
+                    <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.2} /> {/* teal-400 */}
+                  </linearGradient>
+                </defs>
+
+                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#4b5563' }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#4b5563' }} />
+
+                <Tooltip
+                  formatter={(value) => [`${value} users`, 'Registrations']}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    fontSize: '12px'
+                  }}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="new_registrations"
+                  stroke="url(#dailyLine)"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#0d9488' }}
+                  activeDot={{ r: 6, fill: '#0f766e' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-gray-500 text-sm">No daily registration data available</p>
+          )}
+        </div>
 
         {/* User Roles  */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
@@ -1014,9 +1157,24 @@ const AdminDashboard = () => {
         {/* Chart */}
         <div className="mt-2 h-72 w-full">
           {loadingHeatmap ? (
-            <div className="h-full flex items-center justify-center text-gray-400">
-              Loading heatmap...
+            // <div className="h-full flex items-center justify-center text-gray-400">
+            //   Loading heatmap...
+            // </div>
+            <div className="h-fullw-full space-y-4 animate-pulse">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  {/* Label placeholder */}
+                  <div className="w-16 h-3 bg-gray-200 rounded" />
+
+                  {/* Bar placeholder */}
+                  <div
+                    className="h-4 bg-gray-300 rounded"
+                    style={{ width: `${40 + i * 10}%` }} // different widths
+                  />
+                </div>
+              ))}
             </div>
+
           ) : heatmapData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
