@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../components/ui/card";
 import { DateRangePicker } from "../../components/ui/date-range-picker";
 import { toast } from "react-toastify";
-import Tippy from "@tippyjs/react";
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -26,7 +25,6 @@ import {
   UserPlus,
   MessageCircle,
   Euro,
-  Upload
 } from "lucide-react";
 import {
   getNewSignUps,
@@ -38,7 +36,7 @@ import {
   getTopCategories,
   getAverageSessionLength,
   getHourlyActivityTrend,
-  uploadDocuments,
+
   generateHeatmap,
 } from "../../api/api-services";
 import type {
@@ -50,9 +48,6 @@ import type {
   TopCategoryDTO,
   HourlyTrendDTO,
 } from "../../routes/models/request/AdminRequest";
-
-const allowedExtensions = ["pdf", "docx", "txt", "ppt", "xlsx"];
-const MAX_FILE_SIZE_MB = 10;
 
 type CountUpNumberProps = { end: number; duration?: number };
 
@@ -93,10 +88,6 @@ const AdminDashboard = () => {
     start_date: `${currentYear}-01-01`,
     end_date: formatDate(today),
   });
-
-  const [errorMsg, setErrorMsg] = useState("");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
   const [loadingCharts, setLoadingCharts] = useState<boolean>(true);
   const [dailyRegistration, setDailyRegistration] = useState<DailyRegistrationDTO[]>([]);
   const [userRoles, setUserRoles] = useState<UserRolesDTO>({ parent: 0, staff: 0, admin: 0, all_user: 0 });
@@ -123,56 +114,7 @@ const AdminDashboard = () => {
     cost: [],
   });
 
-  // ======== File Handling ========
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
 
-    const file = e.target.files[0];
-    const ext = file.name.split(".").pop()?.toLowerCase();
-
-    if (!ext || !allowedExtensions.includes(ext)) {
-      setUploadedFile(null);
-      setErrorMsg("Invalid file type! Allowed: PDF, DOCX, TXT, PPT, XLSX.");
-      toast.error("Invalid file type! Allowed: PDF, DOCX, TXT, PPT, XLSX", { autoClose: 3000 });
-      e.target.value = "";
-      return;
-    }
-
-    if (file.size / (1024 * 1024) > MAX_FILE_SIZE_MB) {
-      setUploadedFile(null);
-      setErrorMsg(`File too large! Max size ${MAX_FILE_SIZE_MB}MB.`);
-      toast.error(`File too large! Max size ${MAX_FILE_SIZE_MB}MB.`, { autoClose: 3000 });
-      e.target.value = "";
-      return;
-    }
-
-    setErrorMsg("");
-    setUploadedFile(file);
-  };
-
-  const handleSubmitFile = async (file: File | null) => {
-    if (!file) {
-      setErrorMsg("No file selected!");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await uploadDocuments([file]);
-
-      if (response.status === "success") {
-        toast.success("File uploaded successfully!", { autoClose: 3000 });
-        setUploadedFile(null);
-      } else {
-        toast.error(response.Message || "Failed to upload file", { autoClose: 3000 });
-      }
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error(error?.Message || "An error occurred during upload", { autoClose: 3000 });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ======== Dashboard Fetch ========
   const fetchData = async () => {
@@ -295,93 +237,6 @@ const AdminDashboard = () => {
           >
             {loadingApply ? <div className="w-5 h-5 border-2 mx-[10px] my-[1px] border-white border-t-transparent rounded-full animate-spin" /> : "Apply"}
           </Button>
-        </div>
-      </div>
-
-      {/* File Upload Section - separate card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col gap-6">
-        <div className="flex items-start justify-between">
-          {/* Left section - title and description */}
-          <div className="flex items-start space-x-3">
-            <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
-              <Upload className="w-6 h-6 text-indigo-600" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Select a file to upload. You can review it before submitting.
-              </p>
-            </div>
-          </div>
-
-          {/* File selection or upload preview */}
-          {!uploadedFile ? (
-            <div className="flex flex-col items-end">
-              <label className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-xl shadow-sm mt-1 cursor-pointer transition-all">
-                Select File
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.docx,.txt,.ppt,.xlsx"
-                  onChange={handleFileSelect}
-                />
-              </label>
-
-              {/* Inline error message */}
-              {errorMsg && (
-                <p className="mt-2 text-sm text-red-600 font-medium">{errorMsg}</p>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col md:flex-row items-center w-[42%] gap-3 border border-gray-200 rounded-xl bg-gray-50 p-3">
-              {/* File Info */}
-
-
-
-
-
-              <div className="flex-1 text-center md:text-left">
-                <Tippy content={uploadedFile.name} placement="bottom">
-                  <p className="text-sm text-gray-700 font-medium truncate overflow-hidden cursor-default whitespace-nowrap max-w-[180px]">{uploadedFile.name}</p>
-                </Tippy>
-                <p className="text-xs text-gray-500">
-                  {(uploadedFile.size / 1024).toFixed(2)} KB
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                {/* Remove Button */}
-                <button
-                  onClick={() => setUploadedFile(null)}
-                  className={`px-3 py-1 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all ${loading && 'hidden'}`}
-                >
-                  Remove
-                </button>
-                {/* Submit Button */}
-                <button
-                  onClick={() => handleSubmitFile(uploadedFile)}
-                  disabled={loading}
-                  className={`px-4 py-2 text-sm text-white rounded-lg transition-all flex items-center justify-center gap-2
-    ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}
-  `}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-1">
-                      <span>Uploading</span>
-                      <span className="flex gap-1 mt-1">
-                        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce"></span>
-                        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                      </span>
-                    </div>
-                  ) : (
-                    "Submit"
-                  )}
-                </button>
-
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
