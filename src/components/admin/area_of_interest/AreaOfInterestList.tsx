@@ -22,9 +22,11 @@ export default function AreaOfInterestList() {
   const [otherAreas, setOtherAreas] = useState<AreaOfInterestDTO[]>([]);
   const [activeTab, setActiveTab] = useState<"normal" | "other">("normal");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Fetch normal + other areas
   const fetchAreas = async () => {
+    setLoading(true);
     try {
       const [normalRes, otherRes] = await Promise.all([
         getAreasOfInterestList(new FormData()),
@@ -36,19 +38,21 @@ export default function AreaOfInterestList() {
       const other: AreaOfInterestDTO[] =
         otherRes?.IsSuccess && otherRes?.Data
           ? (otherRes.Data as any).other_interests
-              .filter((c: any) => c.interest.trim() !== "")
-              .map((c: any, index: number) => ({
-                id: index + 1,
-                interest: c.interest,
-                count: c.count,
-                isOther: true
-              }))
+            .filter((c: any) => c.interest.trim() !== "")
+            .map((c: any, index: number) => ({
+              id: index + 1,
+              interest: c.interest,
+              count: c.count,
+              isOther: true
+            }))
           : [];
 
       setNormalAreas(normal);
       setOtherAreas(other);
     } catch (err) {
       console.error("Failed to fetch areas of interest", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,17 +134,15 @@ export default function AreaOfInterestList() {
       {/* Tabs */}
       <div className="flex space-x-2 border-b">
         <button
-          className={`px-4 py-2 -mb-px border-b-2 font-medium ${
-            activeTab === "normal" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === "normal" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
+            }`}
           onClick={() => { setActiveTab("normal"); setCurrentPage(1); }}
         >
-           Interests
+          Interests
         </button>
         <button
-          className={`px-4 py-2 -mb-px border-b-2 font-medium ${
-            activeTab === "other" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === "other" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
+            }`}
           onClick={() => { setActiveTab("other"); setCurrentPage(1); }}
         >
           Other Interests
@@ -185,34 +187,47 @@ export default function AreaOfInterestList() {
             </tr>
           </thead>
           <tbody>
-            {paginatedAreas.length === 0 ? (
+            {loading ? (
               <tr>
-                <Td colSpan={3} className="text-center text-gray-500 py-4">
-                  {search ? "No Areas match your search." : "No Areas of Interest found."}
-                </Td>
+                <td colSpan={4} className="text-center py-6">
+                  <div className="flex justify-center items-center py-6">
+                    <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
+                    <span className="text-gray-600 px-1">Loading...</span>
+                  </div>
+                </td>
               </tr>
             ) : (
-              paginatedAreas.map((area, index) => (
-                <tr key={area.id} className="border-b hover:bg-gray-50 transition">
-                  <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
-                  <Td className="font-medium text-gray-900">{area.interest}</Td>
-                  <Td>
-                    {activeTab === "normal" ? (
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="danger"
-                          onClick={() => handleDelete(area.id)}
-                          title="delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-gray-700">{(area as any).count}</span>
-                    )}
-                  </Td>
-                </tr>
-              ))
+              <>
+                {paginatedAreas.length === 0 ? (
+                  <tr>
+                    <Td colSpan={3} className="text-center text-gray-500 py-4">
+                      {search ? "No Areas match your search." : "No Areas of Interest found."}
+                    </Td>
+                  </tr>
+                ) : (
+                  paginatedAreas.map((area, index) => (
+                    <tr key={area.id} className="border-b hover:bg-gray-50 transition">
+                      <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
+                      <Td className="font-medium text-gray-900">{area.interest}</Td>
+                      <Td>
+                        {activeTab === "normal" ? (
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="danger"
+                              onClick={() => handleDelete(area.id)}
+                              title="delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-gray-700">{(area as any).count}</span>
+                        )}
+                      </Td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </Table>

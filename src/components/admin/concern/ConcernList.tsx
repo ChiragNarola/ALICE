@@ -17,6 +17,7 @@ export default function ConcernList() {
   const [otherConcerns, setOtherConcerns] = useState<ConcernDTO[]>([]);
   const [activeTab, setActiveTab] = useState<"normal" | "other">("normal");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Add normal concern
   const handleAddConcern = async (concern: string) => {
@@ -45,6 +46,7 @@ export default function ConcernList() {
 
   // Fetch normal + other concerns
   const fetchConcerns = async () => {
+    setLoading(true);
     try {
       const [normalRes, otherRes] = await Promise.all([
         getConcernsList(new FormData()),
@@ -56,19 +58,21 @@ export default function ConcernList() {
       const other: ConcernDTO[] =
         otherRes?.IsSuccess && otherRes?.Data
           ? (otherRes.Data as any).other_concerns
-              .filter((c: any) => c.concern.trim() !== "")
-              .map((c: any, index: number) => ({
-                id: index + 1,
-                concern: c.concern,
-                count: c.count,
-                isOther: true
-              }))
+            .filter((c: any) => c.concern.trim() !== "")
+            .map((c: any, index: number) => ({
+              id: index + 1,
+              concern: c.concern,
+              count: c.count,
+              isOther: true
+            }))
           : [];
 
       setNormalConcerns(normal);
       setOtherConcerns(other);
     } catch (err) {
       console.error("Failed to fetch concerns", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,17 +130,15 @@ export default function ConcernList() {
       {/* Tabs */}
       <div className="flex space-x-2 border-b">
         <button
-          className={`px-4 py-2 -mb-px border-b-2 font-medium ${
-            activeTab === "normal" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === "normal" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
+            }`}
           onClick={() => { setActiveTab("normal"); setCurrentPage(1); }}
         >
-         Concerns
+          Concerns
         </button>
         <button
-          className={`px-4 py-2 -mb-px border-b-2 font-medium ${
-            activeTab === "other" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === "other" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500"
+            }`}
           onClick={() => { setActiveTab("other"); setCurrentPage(1); }}
         >
           Other Concerns
@@ -181,34 +183,47 @@ export default function ConcernList() {
             </tr>
           </thead>
           <tbody>
-            {paginatedConcerns.length === 0 ? (
+            {loading ? (
               <tr>
-                <Td colSpan={3} className="text-center text-gray-500 py-4">
-                  No concerns found.
-                </Td>
+                <td colSpan={4} className="text-center py-6">
+                  <div className="flex justify-center items-center py-6">
+                    <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
+                    <span className="text-gray-600 px-1">Loading...</span>
+                  </div>
+                </td>
               </tr>
             ) : (
-              paginatedConcerns.map((concern, index) => (
-                <tr key={concern.id} className="border-b hover:bg-gray-50 transition">
-                  <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
-                  <Td className="font-medium text-gray-900">{concern.concern}</Td>
-                  <Td>
-                    {activeTab === "normal" ? (
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="danger"
-                          onClick={() => handleDelete(concern.id)}
-                          title="delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-gray-700">{(concern as any).count}</span>
-                    )}
-                  </Td>
-                </tr>
-              ))
+              <>
+                {paginatedConcerns.length === 0 ? (
+                  <tr>
+                    <Td colSpan={3} className="text-center text-gray-500 py-4">
+                      No concerns found.
+                    </Td>
+                  </tr>
+                ) : (
+                  paginatedConcerns.map((concern, index) => (
+                    <tr key={concern.id} className="border-b hover:bg-gray-50 transition">
+                      <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
+                      <Td className="font-medium text-gray-900">{concern.concern}</Td>
+                      <Td>
+                        {activeTab === "normal" ? (
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="danger"
+                              onClick={() => handleDelete(concern.id)}
+                              title="delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-gray-700">{(concern as any).count}</span>
+                        )}
+                      </Td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </Table>

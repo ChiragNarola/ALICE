@@ -11,10 +11,12 @@ export default function UserList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const [users, setUsers] = useState<DisplayUser[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
+                setLoading(true);
                 const formData = new FormData();
                 const response = await getUserList(formData);
 
@@ -31,6 +33,8 @@ export default function UserList() {
                 }
             } catch (err) {
                 console.error("Failed to fetch users", err);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -130,29 +134,42 @@ export default function UserList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedUsers.map((user, index) => (
-                            <tr key={user.id} className="border-b hover:bg-gray-50 transition">
-                                <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
-                                <Td className="font-medium text-gray-900">{user.name}</Td>
-                                <Td className="text-gray-600">{user.email}</Td>
-                                <Td>
-                                    <span
-                                        className={`px-2 py-1 rounded-full text-xs font-medium ${user.roles.length === 0
-                                            ? "bg-red-500 text-white"
-                                            : user.roles.includes("parent")
-                                                ? "bg-blue-100 text-blue-700"
-                                                : user.roles.includes("admin")
-                                                    ? "bg-green-100 text-green-700"
-                                                    : user.roles.includes("staff")
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : "bg-gray-100 text-gray-700"
-                                            }`}
-                                    >
-                                        {user.roles.length === 0 ? "Unknown" : user.roles.join(", ")}
-                                    </span>
-                                </Td>
+                        {loading ? (
+                            <tr>
+                                <td colSpan={4} className="text-center py-6">
+                                    <div className="flex justify-center items-center py-6">
+                                        <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
+                                        <span className="text-gray-600 px-1">Loading...</span>
+                                    </div>
+                                </td>
                             </tr>
-                        ))}
+                        ) : (
+                            <>
+                                {paginatedUsers.map((user, index) => (
+                                    <tr key={user.id} className="border-b hover:bg-gray-50 transition">
+                                        <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
+                                        <Td className="font-medium text-gray-900">{user.name}</Td>
+                                        <Td className="text-gray-600">{user.email}</Td>
+                                        <Td>
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-xs font-medium ${user.roles.length === 0
+                                                    ? "bg-red-500 text-white"
+                                                    : user.roles.includes("parent")
+                                                        ? "bg-blue-100 text-blue-700"
+                                                        : user.roles.includes("admin")
+                                                            ? "bg-green-100 text-green-700"
+                                                            : user.roles.includes("staff")
+                                                                ? "bg-yellow-100 text-yellow-700"
+                                                                : "bg-gray-100 text-gray-700"
+                                                    }`}
+                                            >
+                                                {user.roles.length === 0 ? "Unknown" : user.roles.join(", ")}
+                                            </span>
+                                        </Td>
+                                    </tr>
+                                ))}
+                            </>
+                        )}
                     </tbody>
                 </Table>
             </div>
@@ -169,6 +186,6 @@ export default function UserList() {
                     setCurrentPage(1);
                 }}
             />
-        </div>
+        </div >
     );
 }

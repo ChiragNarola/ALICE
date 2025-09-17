@@ -271,13 +271,16 @@ const AdminDashboard = () => {
   };
   return (
 
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mt-3 ml-2 mx-auto space-y-8">
       {/* Header + Date Filter */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-200 pb-6">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
-            <LayoutDashboard className="w-7 h-7 text-teal-600" />
-          </div>
+          {/* <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-xl shadow-sm">
+            <LayoutDashboard className="w-6 h-6 text-indigo-600" />
+          </div> */}
+             <div className="p-2 bg-indigo-100 rounded-lg">
+                    <LayoutDashboard className="w-6 h-6 text-indigo-600" />
+                  </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -293,97 +296,97 @@ const AdminDashboard = () => {
             onClick={fetchData}
             className="bg-gradient-to-r  from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 text-white px-4 py-2 rounded-xl shadow-sm transition-all"
           >
-          {loadingApply ?  <div className="w-5 h-5 border-2 mx-[10px] my-[1px] border-white border-t-transparent rounded-full animate-spin" /> : "Apply"}  
+            {loadingApply ? <div className="w-5 h-5 border-2 mx-[10px] my-[1px] border-white border-t-transparent rounded-full animate-spin" /> : "Apply"}
           </Button>
         </div>
       </div>
 
       {/* File Upload Section - separate card */}
-     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col gap-6">
-      <div className="flex items-start justify-between">
-        {/* Left section - title and description */}
-        <div className="flex items-start space-x-3">
-          <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
-            <Upload className="w-6 h-6 text-indigo-600" />
-          </div>
-          <div className="flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Select a file to upload. You can review it before submitting.
-            </p>
-          </div>
-        </div>
-
-        {/* File selection or upload preview */}
-        {!uploadedFile ? (
-          <div className="flex flex-col items-end">
-            <label className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-xl shadow-sm mt-1 cursor-pointer transition-all">
-              Select File
-              <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.docx,.txt,.ppt,.xlsx"
-                onChange={handleFileSelect}
-              />
-            </label>
-
-            {/* Inline error message */}
-            {errorMsg && (
-              <p className="mt-2 text-sm text-red-600 font-medium">{errorMsg}</p>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row items-center w-[42%] gap-3 border border-gray-200 rounded-xl bg-gray-50 p-3">
-            {/* File Info */}
-
-
-                          
-                       
-
-            <div className="flex-1 text-center md:text-left">
-                <Tippy content={uploadedFile.name} placement="bottom">
-              <p className="text-sm text-gray-700 font-medium truncate overflow-hidden cursor-default whitespace-nowrap max-w-[180px]">{uploadedFile.name}</p>
-                 </Tippy>
-              <p className="text-xs text-gray-500">
-                {(uploadedFile.size / 1024).toFixed(2)} KB
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mt-6 flex flex-col gap-6">
+        <div className="flex items-start justify-between">
+          {/* Left section - title and description */}
+          <div className="flex items-start space-x-3">
+            <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-xl shadow-sm flex items-center justify-center">
+              <Upload className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div className="flex flex-col">
+              <h2 className="text-lg font-semibold text-gray-900">Upload File</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Select a file to upload. You can review it before submitting.
               </p>
             </div>
+          </div>
 
-            <div className="flex items-center gap-4">
-              {/* Remove Button */}
-              <button
-                onClick={() => setUploadedFile(null)}
-                className={`px-3 py-1 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all ${loading && 'hidden'}`}
-              >
-                Remove
-              </button>
-              {/* Submit Button */}
-          <button
-  onClick={() => handleSubmitFile(uploadedFile)}
-  disabled={loading}
-  className={`px-4 py-2 text-sm text-white rounded-lg transition-all flex items-center justify-center gap-2
+          {/* File selection or upload preview */}
+          {!uploadedFile ? (
+            <div className="flex flex-col items-end">
+              <label className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-xl shadow-sm mt-1 cursor-pointer transition-all">
+                Select File
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.docx,.txt,.ppt,.xlsx"
+                  onChange={handleFileSelect}
+                />
+              </label>
+
+              {/* Inline error message */}
+              {errorMsg && (
+                <p className="mt-2 text-sm text-red-600 font-medium">{errorMsg}</p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center w-[42%] gap-3 border border-gray-200 rounded-xl bg-gray-50 p-3">
+              {/* File Info */}
+
+
+
+
+
+              <div className="flex-1 text-center md:text-left">
+                <Tippy content={uploadedFile.name} placement="bottom">
+                  <p className="text-sm text-gray-700 font-medium truncate overflow-hidden cursor-default whitespace-nowrap max-w-[180px]">{uploadedFile.name}</p>
+                </Tippy>
+                <p className="text-xs text-gray-500">
+                  {(uploadedFile.size / 1024).toFixed(2)} KB
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {/* Remove Button */}
+                <button
+                  onClick={() => setUploadedFile(null)}
+                  className={`px-3 py-1 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all ${loading && 'hidden'}`}
+                >
+                  Remove
+                </button>
+                {/* Submit Button */}
+                <button
+                  onClick={() => handleSubmitFile(uploadedFile)}
+                  disabled={loading}
+                  className={`px-4 py-2 text-sm text-white rounded-lg transition-all flex items-center justify-center gap-2
     ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}
   `}
->
-  {loading ? (
-    <div className="flex items-center gap-1">
-      <span>Uploading</span>
-      <span className="flex gap-1 mt-1">
-        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce"></span>
-        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-      </span>
-    </div>
-  ) : (
-    "Submit"
-  )}
-</button>
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-1">
+                      <span>Uploading</span>
+                      <span className="flex gap-1 mt-1">
+                        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce"></span>
+                        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                        <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                      </span>
+                    </div>
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
 
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
 
       {/* Top Stats - simplified cards without heading */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -493,100 +496,137 @@ const AdminDashboard = () => {
 
       {/* Feedback Ratings Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
-          <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
-            <div className="flex items-center gap-2.5">
-              <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">Feedback Ratings</h3>
-                <p className="text-xs text-gray-500">Distribution of user responses</p>
-              </div>
-            </div>
-          </div>
+<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+  {/* Header */}
+  <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+    <div className="flex items-center gap-3">
+      <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900">Feedback Ratings</h3>
+        <p className="text-xs text-gray-400">Distribution of user responses</p>
+      </div>
+    </div>
+  </div>
 
-          {stats.feedback.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={stats.feedback}
-                    dataKey="count"
-                    nameKey="label"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={110}
-                    paddingAngle={3}
-                    cornerRadius={6}
-                    labelLine={false}
-                    label={({ percent }) => `${(percent as number * 100).toFixed(0)}%`}
-                  >
-                    {stats.feedback.map((entry, index) => {
-                      const label = entry.label?.trim().toLowerCase();
+  {/* Chart Area */}
+  {loadingCharts ? (
+    // Skeleton Loader
+    <div className="h-64 flex flex-col items-center justify-center gap-6 animate-pulse">
+      {/* Circular Skeleton for Pie Chart */}
+      <div className="w-32 h-32 rounded-full bg-gray-200"></div>
 
-                      const colorMap: Record<string, string> = {
-                        like: "#10B981",
-                        neutral: "#F59E0B",
-                        dislike: "#EF4444",
-                        blue: "#3B82F6",
-                        teal: "#14B8A6",
-                        gray: "#6B7280",
-                      };
-
-                      return (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={colorMap[label || ""] || "#9CA3AF"}
-                          stroke="#fff"
-                          strokeWidth={2}
-                        />
-                      );
-                    })}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value, name) => [`${value} responses`, name]}
-                    contentStyle={{
-                      borderRadius: "10px",
-                      border: "none",
-                      boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {/* Custom Legend */}
-              <div className="flex justify-center gap-5 mt-5 flex-wrap">
-                {stats.feedback.map((item, idx) => {
-                  const label = item.label?.trim().toLowerCase();
-                  const colorMap: Record<string, string> = {
-                    like: "bg-emerald-500",
-                    neutral: "bg-amber-500",
-                    dislike: "bg-red-500",
-                    blue: "bg-blue-500",
-                    teal: "bg-teal-500",
-                    gray: "bg-gray-500",
-                  };
-                  return (
-                    <div key={idx} className="flex items-center gap-1.5">
-                      <span
-                        className={`w-3 h-3 rounded-full ${colorMap[label || ""] || "bg-gray-400"
-                          }`}
-                      />
-                      <span className="text-xs text-gray-700">
-                        {item.label} ({item.count})
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <p className="text-gray-500 text-sm">No feedback data available</p>
-          )}
+      {/* Legend Skeletons */}
+      <div className="flex gap-4">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
+          <div className="w-12 h-3 bg-gray-200 rounded"></div>
         </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
+          <div className="w-12 h-3 bg-gray-200 rounded"></div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-gray-200"></div>
+          <div className="w-12 h-3 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  ) : stats.feedback.length > 0 ? (
+    <>
+      {/* Actual Chart */}
+      <ResponsiveContainer width="100%" height={280}>
+        <PieChart>
+          <Pie
+            data={stats.feedback}
+            dataKey="count"
+            nameKey="label"
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={110}
+            paddingAngle={3}
+            cornerRadius={6}
+            labelLine={false}
+            label={({ percent }) => `${(percent as number * 100).toFixed(0)}%`}
+          >
+            {stats.feedback.map((entry, index) => {
+              const label = entry.label?.trim().toLowerCase();
+
+              const colorMap: Record<string, string> = {
+                like: "#10B981", // emerald-500
+                neutral: "#F59E0B", // amber-500
+                dislike: "#EF4444", // red-500
+                blue: "#3B82F6",
+                teal: "#14B8A6",
+                gray: "#6B7280",
+              };
+
+              return (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={colorMap[label || ""] || "#9CA3AF"}
+                  stroke="#fff"
+                  strokeWidth={2}
+                />
+              );
+            })}
+          </Pie>
+
+          {/* Tooltip */}
+          <Tooltip
+            formatter={(value, name) => [`${value} responses`, name]}
+            contentStyle={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              fontSize: '12px',
+              boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+
+      {/* Custom Legend */}
+      <div className="flex justify-center gap-5 mt-5 flex-wrap">
+        {stats.feedback.map((item, idx) => {
+          const label = item.label?.trim().toLowerCase();
+          const colorMap: Record<string, string> = {
+            like: "bg-emerald-500",
+            neutral: "bg-amber-500",
+            dislike: "bg-red-500",
+            blue: "bg-blue-500",
+            teal: "bg-teal-500",
+            gray: "bg-gray-500",
+          };
+
+          return (
+            <div key={idx} className="flex items-center gap-1.5">
+              <span
+                className={`w-3 h-3 rounded-full ${colorMap[label || ""] || "bg-gray-400"}`}
+              />
+              <span className="text-xs text-gray-700">
+                {item.label} ({item.count})
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  ) : (
+    <p className="text-gray-400 text-sm text-center mt-6">
+      No feedback data available
+    </p>
+  )}
+
+  {/* Footer Note */}
+  <p className="text-xs text-gray-400 mt-3">
+    Insights: Helps track user sentiment over time and guide improvements.
+  </p>
+</div>
+
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-blue-500 to-indigo-400"></span>
               <div>
@@ -656,243 +696,241 @@ const AdminDashboard = () => {
 
       {/* Additional Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Average Session Length */}
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+    {/* Header */}
+    <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
+      <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-blue-500 to-indigo-400"></span>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900">Average Session Length</h3>
+        <p className="text-xs text-gray-400">Distribution of conversation duration</p>
+      </div>
+    </div>
 
-        {/* Average Session Length*/}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-            <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-blue-500 to-indigo-400"></span>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Average Session Length</h3>
-              <p className="text-xs text-gray-400">Distribution of conversation duration</p>
-            </div>
+    {/* Metrics */}
+    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+      <p className="text-3xl font-bold text-gray-900 mt-2">
+        {loadingCharts ? "..." : `${Math.round(averageSession.average_session_duration / 60)} min`}
+      </p>
+      <p className="text-gray-500 text-sm mt-1">
+        Avg messages per session: {averageSession.average_session_messages || 0}
+      </p>
+    </div>
+
+    {/* Area Chart */}
+    <div className="mt-2 h-64 w-full">
+      {loadingCharts ? (
+        <div className="flex flex-col items-center justify-center h-full">
+          <div className="w-40 h-40 relative">
+            <div className="absolute inset-0 rounded-full border-[50px] border-gray-200 animate-pulse"></div>
+            <div className="absolute inset-8 rounded-full bg-white"></div>
           </div>
-
-          {/* Metrics */}
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
-            <p className="text-3xl font-bold text-gray-900 mt-2">
-              {loadingCharts ? "..." : `${Math.round(averageSession.average_session_duration / 60)} min`}
-            </p>
-            <p className="text-gray-500 text-sm mt-1">
-              Avg messages per session: {averageSession.average_session_messages || 0}
-            </p>
-          </div>
-
-          {/* Area Chart */}
-          <div className="mt-2 h-64 w-full">
-            {averageSession.duration_distribution?.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={averageSession.duration_distribution}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
-                >
-                  <defs>
-                    <linearGradient id="avgSessionGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.7} />
-                      <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.2} />
-                    </linearGradient>
-                  </defs>
-
-                  <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
-
-                  <XAxis
-                    dataKey="duration_range"
-                    tick={{ fontSize: 12, fill: '#4b5563' }}
-                    angle={-20}
-                    textAnchor="end"
-                    interval={0}
-                  />
-
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 12, fill: '#4b5563' }}
-                    width={50}
-                    label={{
-                      value: 'Sessions',
-                      angle: -90,
-                      position: 'insideLeft',
-                      fill: '#4b5563',
-                      fontSize: 12,
-                    }}
-                  />
-
-                  <Tooltip
-                    formatter={(value) => [`${value} sessions`, 'Conversation Count']}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb',
-                      fontSize: '12px',
-                    }}
-                  />
-
-                  <Area
-                    type="monotone"
-                    dataKey="conversation_count"
-                    stroke="#3B82F6"
-                    strokeWidth={2.5}
-                    fill="url(#avgSessionGradient)"
-                    activeDot={{ r: 5, fill: '#1E40AF' }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-gray-400 text-sm text-center mt-6">
-                No session distribution data available
-              </p>
-            )}
-          </div>
-          <p className="text-xs text-gray-400 mt-2">
-            Note: Monitor session trends to identify peak user engagement hours.
-          </p>
-        </div>
-
-        {/* Hourly Activity Trend  */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-            <div className="flex items-center gap-3">
-              <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Hourly Activity Trend</h3>
-                <p className="text-xs text-gray-400">User activity by hour (messages sent)</p>
+          <div className="flex justify-center gap-3 mt-5">
+            {[...Array(3)].map((_, idx) => (
+              <div key={idx} className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-gray-200 animate-pulse"></span>
+                <span className="text-xs text-gray-400 animate-pulse">•••</span>
               </div>
-            </div>
-            <p className="text-sm text-gray-500">Last 24 hours</p>
+            ))}
           </div>
-
-          {/* Chart */}
-          <div className="mt-4 h-64 w-full">
-            {loadingCharts ? (
-              <div className="h-full flex items-center justify-center text-gray-400">
-                Loading chart...
-              </div>
-            ) : hourlyTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={hourlyTrend} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                  {/* Subtle Teal Gradient */}
-                  <defs>
-                    <linearGradient id="hourlyAreaGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.4} />  {/* teal-500 */}
-                      <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.15} /> {/* teal-400 */}
-                    </linearGradient>
-                  </defs>
-
-                  <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
-
-                  <XAxis
-                    dataKey="time_label"
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                    interval={2}
-                    tickFormatter={(value) => {
-                      return value;
-                    }}
-                  />
-
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                    width={50}
-                    label={{
-                      value: 'Messages',
-                      angle: -90,
-                      position: 'insideLeft',
-                      fill: '#6b7280',
-                      fontSize: 12,
-                    }}
-                  />
-
-                  <Tooltip
-                    formatter={(value) => [`${value} messages`, 'Messages']}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb',
-                      fontSize: '12px',
-                    }}
-                  />
-
-                  <Area
-                    type="monotone"
-                    dataKey="message_count"
-                    stroke="#0d9488" // teal-600
-                    strokeWidth={2.5}
-                    fill="url(#hourlyAreaGradient)"
-                    activeDot={{ r: 5, fill: '#0f766e' }} // teal-700
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-gray-400 text-sm text-center mt-6">
-                No hourly activity data available
-              </p>
-            )}
-          </div>
-
-          {/* Footer */}
-          <p className="text-xs text-gray-400 mt-3">
-            Insights: Peaks indicate the hours when users are most active. Use this to optimize notifications and engagement strategies.
-          </p>
         </div>
+      ) : averageSession.duration_distribution?.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart
+            data={averageSession.duration_distribution}
+            margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
+          >
+            <defs>
+              <linearGradient id="avgSessionGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.7} />
+                <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0.2} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
+            <XAxis
+              dataKey="duration_range"
+              tick={{ fontSize: 12, fill: '#4b5563' }}
+              angle={-20}
+              textAnchor="end"
+              interval={0}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fontSize: 12, fill: '#4b5563' }}
+              width={50}
+              label={{
+                value: 'Sessions',
+                angle: -90,
+                position: 'insideLeft',
+                fill: '#4b5563',
+                fontSize: 12,
+              }}
+            />
+            <Tooltip
+              formatter={(value) => [`${value} sessions`, 'Conversation Count']}
+              contentStyle={{
+                backgroundColor: '#fff',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                fontSize: '12px',
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="conversation_count"
+              stroke="#3B82F6"
+              strokeWidth={2.5}
+              fill="url(#avgSessionGradient)"
+              activeDot={{ r: 5, fill: '#1E40AF' }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      ) : (
+        <p className="text-gray-400 text-sm text-center mt-6">
+          No session distribution data available
+        </p>
+      )}
+    </div>
+    <p className="text-xs text-gray-400 mt-2">
+      Note: Monitor session trends to identify peak user engagement hours.
+    </p>
+  </div>
 
-        {/* Daily Registrations */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Daily Registrations</h3>
-                <p className="text-xs text-gray-500">New users registered over time</p>
-              </div>
-            </div>
-            <Users className="w-6 h-6 text-teal-500" />
-          </div>
-
-          {loadingCharts ? (
-            <div className="h-64 flex items-center justify-center text-gray-400">
-              Loading chart...
-            </div>
-          ) : dailyRegistration.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={dailyRegistration} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="dailyLine" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.7} /> {/* teal-500 */}
-                    <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.2} /> {/* teal-400 */}
-                  </linearGradient>
-                </defs>
-
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#4b5563' }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#4b5563' }} />
-
-                <Tooltip
-                  formatter={(value) => [`${value} users`, 'Registrations']}
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb',
-                    fontSize: '12px'
-                  }}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="new_registrations"
-                  stroke="url(#dailyLine)"
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#0d9488' }}
-                  activeDot={{ r: 6, fill: '#0f766e' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-gray-500 text-sm">No daily registration data available</p>
-          )}
+  {/* Hourly Activity Trend */}
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+    {/* Header */}
+    <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+      <div className="flex items-center gap-3">
+        <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Hourly Activity Trend</h3>
+          <p className="text-xs text-gray-400">User activity by hour (messages sent)</p>
         </div>
+      </div>
+      <p className="text-sm text-gray-500">Last 24 hours</p>
+    </div>
+
+    {/* Chart */}
+    <div className="mt-4 h-64 w-full">
+      {loadingCharts ? (
+        <div className="space-y-3">
+          {[...Array(6)].map((_, idx) => (
+            <div key={idx} className="h-6 bg-gray-200 rounded-full animate-pulse"></div>
+          ))}
+        </div>
+      ) : hourlyTrend.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={hourlyTrend} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+            <defs>
+              <linearGradient id="hourlyAreaGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.15} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
+            <XAxis
+              dataKey="time_label"
+              tick={{ fontSize: 12, fill: '#6b7280' }}
+              interval={2}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fontSize: 12, fill: '#6b7280' }}
+              width={50}
+              label={{
+                value: 'Messages',
+                angle: -90,
+                position: 'insideLeft',
+                fill: '#6b7280',
+                fontSize: 12,
+              }}
+            />
+            <Tooltip
+              formatter={(value) => [`${value} messages`, 'Messages']}
+              contentStyle={{
+                backgroundColor: '#fff',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                fontSize: '12px',
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="message_count"
+              stroke="#0d9488"
+              strokeWidth={2.5}
+              fill="url(#hourlyAreaGradient)"
+              activeDot={{ r: 5, fill: '#0f766e' }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      ) : (
+        <p className="text-gray-400 text-sm text-center mt-6">
+          No hourly activity data available
+        </p>
+      )}
+    </div>
+    <p className="text-xs text-gray-400 mt-3">
+      Insights: Peaks indicate the hours when users are most active. Use this to optimize notifications and engagement strategies.
+    </p>
+  </div>
+
+  {/* Daily Registrations */}
+  <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
+    <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+      <div className="flex items-center gap-3">
+        <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-teal-500 to-emerald-400"></span>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Daily Registrations</h3>
+          <p className="text-xs text-gray-500">New users registered over time</p>
+        </div>
+      </div>
+    </div>
+
+    {loadingCharts ? (
+      <div className="space-y-3">
+        {[...Array(6)].map((_, idx) => (
+          <div key={idx} className="h-6 bg-gray-200 rounded-full animate-pulse"></div>
+        ))}
+      </div>
+    ) : dailyRegistration.length > 0 ? (
+      <ResponsiveContainer width="100%" height={250}>
+        <LineChart data={dailyRegistration} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="dailyLine" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.7} />
+              <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0.2} />
+            </linearGradient>
+          </defs>
+          <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#4b5563' }} />
+          <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#4b5563' }} />
+          <Tooltip
+            formatter={(value) => [`${value} users`, 'Registrations']}
+            contentStyle={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              fontSize: '12px'
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="new_registrations"
+            stroke="url(#dailyLine)"
+            strokeWidth={3}
+            dot={{ r: 4, fill: '#0d9488' }}
+            activeDot={{ r: 6, fill: '#0f766e' }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    ) : (
+      <p className="text-gray-500 text-sm">No daily registration data available</p>
+    )}
+  </div>
 
         {/* User Roles  */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
             <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-blue-500 to-indigo-400"></span>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">User Roles</h3>
@@ -962,95 +1000,95 @@ const AdminDashboard = () => {
 
       </div>
 
-{/* Heatmap / User Drop-off Graph */}
-<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-  {/* Header */}
-  <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-    <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-indigo-800 via-indigo-600 to-indigo-500"></span>
-    <div>
-      <h3 className="text-lg font-semibold text-gray-900">User Drop-off Heatmap</h3>
-      <p className="text-xs text-gray-400">Screen-wise visits, exits and drop-off rates</p>
-    </div>
-  </div>
+      {/* Heatmap / User Drop-off Graph */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
+          <span className="w-1.5 h-10 rounded-full bg-gradient-to-b from-indigo-800 via-indigo-600 to-indigo-500"></span>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">User Drop-off Heatmap</h3>
+            <p className="text-xs text-gray-400">Screen-wise visits, exits and drop-off rates</p>
+          </div>
+        </div>
 
-  {/* Chart */}
-  <div className="mt-2 h-72 w-full">
-    {loadingHeatmap ? (
-      <div className="h-full flex items-center justify-center text-gray-400">
-        Loading heatmap...
+        {/* Chart */}
+        <div className="mt-2 h-72 w-full">
+          {loadingHeatmap ? (
+            <div className="h-full flex items-center justify-center text-gray-400">
+              Loading heatmap...
+            </div>
+          ) : heatmapData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={heatmapData.map((item) => ({
+                  ...item,
+                  drop_off_rate: Number(item.drop_off_rate) || 0,
+                  total_visits: Number(item.total_visits) || 0,
+                  total_exits: Number(item.total_exits) || 0,
+                  avg_time_spent: Number(item.avg_time_spent) || 0,
+                }))}
+                margin={{ top: 20, right: 20, left: 0, bottom: 30 }}
+                layout="vertical"
+              >
+                <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
+
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 12, fill: '#4b5563' }}
+                  domain={[0, 100]}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <YAxis
+                  dataKey="screen_name"
+                  type="category"
+                  tick={{ fontSize: 12, fill: '#4b5563' }}
+                  width={140}
+                />
+
+                <Tooltip
+                  formatter={(value, name) => {
+                    if (name === "drop_off_rate") return [`${value}%`, "Drop-off Rate"];
+                    if (name === "total_visits") return [value, "Total Visits"];
+                    if (name === "total_exits") return [value, "Total Exits"];
+                    if (name === "avg_time_spent") return [`${((value as number) / 60).toFixed(2)} min`, "Avg Time Spent"];
+                    return [value, name];
+                  }}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    fontSize: '12px',
+                  }}
+                />
+
+                {/* Drop-off Rate Bars */}
+                <Bar
+                  dataKey="drop_off_rate"
+                  fill="url(#dropOffGradient)"
+                  maxBarSize={20}
+                  radius={[4, 4, 4, 4]}
+                />
+
+                <defs>
+                  <linearGradient id="dropOffGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.9} /> {/* indigo-800 */}
+                    <stop offset="50%" stopColor="#4F46E5" stopOpacity={0.7} /> {/* indigo-600 */}
+                    <stop offset="100%" stopColor="#6366F1" stopOpacity={0.5} /> {/* indigo-500 */}
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-gray-400 text-sm text-center mt-6">
+              No heatmap data available
+            </p>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-400 mt-3">
+          Insights: Higher drop-off rates indicate screens where users are abandoning the flow.
+        </p>
       </div>
-    ) : heatmapData.length > 0 ? (
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={heatmapData.map((item) => ({
-            ...item,
-            drop_off_rate: Number(item.drop_off_rate) || 0,
-            total_visits: Number(item.total_visits) || 0,
-            total_exits: Number(item.total_exits) || 0,
-            avg_time_spent: Number(item.avg_time_spent) || 0,
-          }))}
-          margin={{ top: 20, right: 20, left: 0, bottom: 30 }}
-          layout="vertical"
-        >
-          <CartesianGrid stroke="#f3f4f6" strokeDasharray="3 3" />
-
-          <XAxis
-            type="number"
-            tick={{ fontSize: 12, fill: '#4b5563' }}
-            domain={[0, 100]}
-            tickFormatter={(value) => `${value}%`}
-          />
-          <YAxis
-            dataKey="screen_name"
-            type="category"
-            tick={{ fontSize: 12, fill: '#4b5563' }}
-            width={140}
-          />
-
-          <Tooltip
-            formatter={(value, name) => {
-              if (name === "drop_off_rate") return [`${value}%`, "Drop-off Rate"];
-              if (name === "total_visits") return [value, "Total Visits"];
-              if (name === "total_exits") return [value, "Total Exits"];
-              if (name === "avg_time_spent") return [`${((value as number) / 60).toFixed(2)} min`, "Avg Time Spent"];
-              return [value, name];
-            }}
-            contentStyle={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              fontSize: '12px',
-            }}
-          />
-
-          {/* Drop-off Rate Bars */}
-          <Bar
-            dataKey="drop_off_rate"
-            fill="url(#dropOffGradient)"
-            maxBarSize={20}
-            radius={[4, 4, 4, 4]}
-          />
-
-          <defs>
-            <linearGradient id="dropOffGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.9} /> {/* indigo-800 */}
-              <stop offset="50%" stopColor="#4F46E5" stopOpacity={0.7} /> {/* indigo-600 */}
-              <stop offset="100%" stopColor="#6366F1" stopOpacity={0.5} /> {/* indigo-500 */}
-            </linearGradient>
-          </defs>
-        </BarChart>
-      </ResponsiveContainer>
-    ) : (
-      <p className="text-gray-400 text-sm text-center mt-6">
-        No heatmap data available
-      </p>
-    )}
-  </div>
-
-  <p className="text-xs text-gray-400 mt-3">
-    Insights: Higher drop-off rates indicate screens where users are abandoning the flow.
-  </p>
-</div>
 
 
     </div>

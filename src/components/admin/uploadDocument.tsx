@@ -53,7 +53,7 @@ export default function UploadedDocsList() {
           <FileText className="w-6 h-6 text-indigo-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Uploaded Documents</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">Documents Management</h1>
           <p className="text-sm text-gray-500">View and search all uploaded documents.</p>
         </div>
       </div>
@@ -90,9 +90,12 @@ export default function UploadedDocsList() {
           <tbody>
             {loading ? (
               <tr>
-                <Td colSpan={2} className="text-center text-gray-400 py-4">
-                  Loading documents...
-                </Td>
+                <td colSpan={2} className="text-center py-6">
+                  <div className="flex justify-center items-center py-6">
+                    <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
+                    <span className="text-gray-600 px-1">Loading...</span>
+                  </div>
+                </td>
               </tr>
             ) : paginatedDocs.length === 0 ? (
               <tr>
