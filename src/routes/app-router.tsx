@@ -37,6 +37,7 @@ export default function AppRouter() {
                 </Route>
             </Route>
 
+
             {/* Admin routes */}
             <Route path="/admin" element={<AdminWelcomeSection />}>
                 <Route index element={<Navigate to="login" replace />} />
