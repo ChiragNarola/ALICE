@@ -9,7 +9,7 @@ interface SidebarProps {
     className?: string;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ }: SidebarProps) {
 
     const [collapsed, setCollapsed] = useState(false);
     const [posExpanded, setPosExpanded] = useState(false);
