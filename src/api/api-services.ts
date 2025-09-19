@@ -891,7 +891,7 @@ export const listDocuments = async (): Promise<APIResponse<string[]>> => {
 };
 
 
-export const uploadDocuments = async (files: File[], namespace: string): Promise<APIResponse<any>> => {
+export const uploadDocuments = async (files: File[], namespace: string): Promise<any> => {
   try {
     const formData = new FormData();
     formData.append("namespace", namespace);
@@ -912,6 +912,26 @@ export const uploadDocuments = async (files: File[], namespace: string): Promise
     };
   }
 };
+
+
+export const deleteDocument = async (documentName: string, namespace: string): Promise<any> => {
+  try {
+    const response = await axiosInstance.delete(`upload`, {
+      params: { 
+        documentName, 
+        namespace,   
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to delete document",
+    };
+  }
+};
+
 
 
 //analytics

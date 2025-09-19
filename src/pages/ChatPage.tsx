@@ -262,7 +262,7 @@ useEffect(() => {
           </span>
         )}
 
-        <section className="w-[220px] shrink-0 overflow-hidden">
+        <section className="w-[0px] md:w-[50px] lg:w-[220px] shrink-0 overflow-hidden">
         </section>
 
         {/* Chat Section */}

@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { Table, Th, Td } from "../../components/ui/Table";
 import Pagination from "../../components/ui/Pagination";
-import { Search, FileText, Upload, Check } from "lucide-react";
-import { listDocuments, uploadDocuments, listNamespace } from "../../api/api-services";
+import { Search, FileText, Upload, Check, Trash2 } from "lucide-react";
+import { listDocuments, uploadDocuments, listNamespace, deleteDocument } from "../../api/api-services";
 import { toast } from "react-toastify";
 import Tippy from "@tippyjs/react";
 import Button from "../ui/Button";
@@ -13,7 +13,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex top-[-30px] items-center justify-center bg-black/40">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative">
         <button
           onClick={onClose}
@@ -40,6 +40,7 @@ export default function UploadedDocsList() {
   const [fileError, setFileError] = useState("");
   const [namespaceError, setNamespaceError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const allowedExtensions = ["pdf", "docx", "txt", "xlsx", "pptx"];
   const MAX_FILE_SIZE_MB = 10;
@@ -49,7 +50,8 @@ export default function UploadedDocsList() {
     try {
       setLoading(true);
       const response = await listDocuments();
-      if (response?.IsSuccess && response.Data) {
+      console.log("Upload file result ====>", response)
+      if (response?.Data) {
         setDocuments(response.Data);
       } else {
         toast.error(response?.Message || "Failed to fetch documents");
@@ -131,9 +133,8 @@ export default function UploadedDocsList() {
 
     try {
       setUploadLoading(true);
-      const response = await uploadDocuments([uploadedFile!], selectedNamespace); // use ! because uploadedFile is valid here
-
-      if (response.IsSuccess) {
+      const response = await uploadDocuments([uploadedFile!], selectedNamespace);
+      if (response.data.results[0].status == 'success') {
         toast.success("File uploaded successfully!", { autoClose: 3000 });
         setUploadedFile(null);
         setSelectedNamespace("");
@@ -149,6 +150,33 @@ export default function UploadedDocsList() {
       setUploadLoading(false);
     }
   };
+
+  // ======== Delete Document ========
+  const handleDelete = async (docName: string) => {
+    if (!selectedNamespace) {
+      toast.error("Please select a namespace first!");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete "${docName}"?`)) return;
+
+    try {
+      setDeleting(true);
+      const response = await deleteDocument(docName, selectedNamespace);
+      if (response?.IsSuccess) {
+        toast.success("Document deleted successfully!", { autoClose: 3000 });
+        fetchUploadedDocs();
+      } else {
+        toast.error(response?.Message || "Failed to delete document", { autoClose: 3000 });
+      }
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast.error(error?.Message || "An error occurred while deleting", { autoClose: 3000 });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
   // ======== Filter + Paginate ========
   const filteredDocs = documents.filter((doc) =>
@@ -207,12 +235,13 @@ export default function UploadedDocsList() {
             <tr>
               <Th>Sr.No</Th>
               <Th>Document Name</Th>
+              <Th className="text-center">Actions</Th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={2} className="text-center py-6">
+                <td colSpan={3} className="text-center py-6">
                   <div className="flex justify-center items-center py-6">
                     <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
                     <span className="text-gray-600 px-1">Loading...</span>
@@ -221,7 +250,7 @@ export default function UploadedDocsList() {
               </tr>
             ) : paginatedDocs.length === 0 ? (
               <tr>
-                <Td colSpan={2} className="text-center text-gray-500 py-4">
+                <Td colSpan={3} className="text-center text-gray-500 py-4">
                   No documents found.
                 </Td>
               </tr>
@@ -230,6 +259,15 @@ export default function UploadedDocsList() {
                 <tr key={index} className="border-b hover:bg-gray-50 transition">
                   <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                   <Td className="font-medium text-gray-900">{doc}</Td>
+                  <Td className="text-center">
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDelete(doc)}
+                      title="delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </Td>
                 </tr>
               ))
             )}
@@ -340,7 +378,14 @@ export default function UploadedDocsList() {
               ${uploadloading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
             >
               {uploadloading ? (
-                "Uploading..."
+                <div className="flex items-center gap-1">
+                  <span>Uploading</span>
+                  <span className="flex gap-1 mt-1">
+                    <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce"></span>
+                    <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                    <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                  </span>
+                </div>
               ) : (
                 <>
                   <Check className="w-4 h-4" />
