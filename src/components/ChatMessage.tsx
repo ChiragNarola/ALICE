@@ -92,38 +92,65 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             console.error("Error updating dislike:", error);
         }
     };
-
+    
 const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
-  // Create a temporary container
+  // Clean up text:
+  // - Remove [File:...] tags
+  // - Convert **bold** to <strong>
+  // - Ensure proper line breaks
+  const cleanText = text
+    .replace(/\[File:.*?\]/gi, "")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Markdown bold
+    .replace(/\n{2,}/g, "\n") // Multiple blank lines → single
+    .replace(/\n/g, "<br/>"); // Newlines → <br/>
+
+  // Create a temporary container for pdf content
   const container = document.createElement("div");
 
-  // Add styling similar to chat export
+  // Container Styling - ChatGPT-like export style
   container.style.width = "100%";
-  container.style.padding = "20px";
-  container.style.fontFamily = "Arial, sans-serif";
+  container.style.padding = "24px";
+  container.style.fontFamily = "'Helvetica Neue', Arial, sans-serif";
   container.style.fontSize = "14px";
-  container.style.lineHeight = "1.5";
-  container.style.background = "#f8f8f8"; // page background
+  container.style.lineHeight = "1.6";
+  container.style.background = "#ffffff"; // Clean white background
   container.style.color = "#1b1b1b";
 
-  // Add optional timestamp
-  const timeHtml = timestamp ? `<div style="font-size:12px;color:#666;margin-bottom:8px;">${timestamp}</div>` : "";
+  // Timestamp (smaller and subtle)
+  const timeHtml = timestamp
+    ? `<div style="font-size:12px;color:#666;margin-bottom:12px;">
+         ${timestamp}
+       </div>`
+    : "";
 
-  // Add system/user label
-  const sender = isAlice ? "System" : "You";
-  const labelHtml = `<div style="font-weight:bold;margin-bottom:4px;">${sender}:</div>`;
+  // Sender label (System or You)
+  const sender = isAlice ? "System Response" : "User Message";
 
-  // Render markdown safely
-  container.innerHTML = `
-    ${timeHtml}
-    ${labelHtml}
-    <div style="white-space:pre-wrap;">${text.replace(/\[File:.*?\]/gi, "").replace(/\n{2,}/g, "\n")}</div>
+  const senderHtml = `
+    <div style="
+      font-weight:600;
+      font-size:16px;
+      margin-bottom:8px;
+      color:#333;
+    ">
+      ${sender}
+    </div>
   `;
 
+  // Final HTML to render inside the container
+  container.innerHTML = `
+    ${timeHtml}
+    ${senderHtml}
+    <div style="white-space:normal;font-size:14px;color:#222;">
+      ${cleanText}
+    </div>
+  `;
+
+  // Generate the PDF
   html2pdf()
     .set({
       margin: 10,
-      filename: "response.pdf",
+      filename: `${sender.replace(/\s+/g, "_").toLowerCase()}_${Date.now()}.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -131,8 +158,6 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
     .from(container)
     .save();
 };
-
-
 
     return (
         <div
