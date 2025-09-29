@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Table, Th, Td } from "../../components/ui/Table";
 import Pagination from "../../components/ui/Pagination";
-import { Search, FileText, Upload, Check, Trash2 } from "lucide-react";
+import { Search, FileText, Upload, Check } from "lucide-react";
 import { listDocuments, uploadDocuments, listNamespace, deleteDocument } from "../../api/api-services";
 import { toast } from "react-toastify";
 import Tippy from "@tippyjs/react";
@@ -26,11 +26,22 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
     </div>
   );
 }
+interface DocumentItem {
+  id: number;
+  fileName: string;
+  namespace?: string
+}
+
+interface NamespaceItem {
+  title: string;
+  name: string;
+}
 
 export default function UploadedDocsList() {
-  const [documents, setDocuments] = useState<string[]>([]);
-  const [namespaces, setNamespaces] = useState<string[]>([]);
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [namespaces, setNamespaces] = useState<NamespaceItem[]>([]);
   const [selectedNamespace, setSelectedNamespace] = useState("");
+  const [selectedUploadNamespace, setSelectedUploadNamespace] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -40,36 +51,51 @@ export default function UploadedDocsList() {
   const [fileError, setFileError] = useState("");
   const [namespaceError, setNamespaceError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDocs, setSelectedDocs] = useState<number[]>([]);
   const [deleting, setDeleting] = useState(false);
 
   const allowedExtensions = ["pdf", "docx", "txt", "xlsx", "pptx"];
   const MAX_FILE_SIZE_MB = 10;
 
   // Fetch documents
-  const fetchUploadedDocs = async () => {
-    try {
-      setLoading(true);
-      const response = await listDocuments();
-      console.log("Upload file result ====>", response)
-      if (response?.Data) {
-        setDocuments(response.Data);
-      } else {
-        toast.error(response?.Message || "Failed to fetch documents");
-      }
-    } catch (error: any) {
-      console.error("Error fetching documents:", error);
-      toast.error(error?.Message || "Failed to fetch documents");
-    } finally {
-      setLoading(false);
+const fetchUploadedDocs = async () => {
+  try {
+    setLoading(true);
+    const response = await listDocuments();
+
+    if (response?.Data) {
+      // Filter out documents where namespace is null
+      const filteredDocs = response.Data.filter((doc: any) => doc.namespace !== null);
+
+      // Map response to match DocumentItem interface
+      const formattedDocs = filteredDocs.map((doc: any) => ({
+        id: doc.id,
+        fileName: doc.fileName,
+        namespace: doc.namespace,
+      }));
+
+      setDocuments(formattedDocs);
+    } else {
+      toast.error(response?.Message || "Failed to fetch documents");
     }
-  };
+  } catch (error: any) {
+    console.error("Error fetching documents:", error);
+    toast.error(error?.Message || "Failed to fetch documents");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   // Fetch namespaces
   const fetchNamespaces = async () => {
     try {
       const response = await listNamespace();
+
       if (response?.IsSuccess && response.Data) {
-        setNamespaces(response.Data);
+        // Ensure we store the array of objects with title & name
+        setNamespaces(response.Data as NamespaceItem[]);
       } else {
         toast.error(response?.Message || "Failed to fetch namespaces");
       }
@@ -83,6 +109,13 @@ export default function UploadedDocsList() {
     fetchUploadedDocs();
     fetchNamespaces();
   }, []);
+
+  useEffect(() => {
+  if (namespaces.length > 0 && !selectedNamespace) {
+    setSelectedNamespace(namespaces[0].name);
+    setNamespaceError("");
+  }
+}, [namespaces]);
 
   // ======== File Handling ========
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,7 +157,7 @@ export default function UploadedDocsList() {
       valid = false;
     }
 
-    if (!selectedNamespace) {
+    if (!selectedUploadNamespace) {
       setNamespaceError("Please select a namespace!");
       valid = false;
     }
@@ -133,15 +166,15 @@ export default function UploadedDocsList() {
 
     try {
       setUploadLoading(true);
-      const response = await uploadDocuments([uploadedFile!], selectedNamespace);
+      const response = await uploadDocuments([uploadedFile!], selectedUploadNamespace);
       if (response.data.results[0].status == 'success') {
         toast.success("File uploaded successfully!", { autoClose: 3000 });
         setUploadedFile(null);
-        setSelectedNamespace("");
+        setSelectedUploadNamespace("");
         setModalOpen(false);
         fetchUploadedDocs();
       } else {
-        toast.error(response.Message || "Failed to upload file", { autoClose: 3000 });
+        toast.error(response.data.results[0].error || "Failed to upload file", { autoClose: 3000 });
       }
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -152,41 +185,60 @@ export default function UploadedDocsList() {
   };
 
   // ======== Delete Document ========
-  const handleDelete = async (docName: string) => {
-    if (!selectedNamespace) {
-      toast.error("Please select a namespace first!");
-      return;
+const handleBulkDelete = async () => {
+  if (!selectedNamespace) {
+    toast.error("Please select a namespace first!");
+    return;
+  }
+
+  if (selectedDocs.length === 0) {
+    toast.error("Please select at least one document to delete!");
+    return;
+  }
+
+  try {
+    setDeleting(true);
+    const response = await deleteDocument(selectedDocs, selectedNamespace); 
+    console.log("response====>",response)
+    // Make sure your API accepts an array of IDs
+
+    if (response?.IsSuccess) {
+      toast.success("Selected documents deleted successfully!", { autoClose: 3000 });
+      setSelectedDocs([]); // Clear selection
+      fetchUploadedDocs(); // Refresh document list
+    } else {
+      toast.error(response?.Message || "Failed to delete selected documents", { autoClose: 3000 });
+      setSelectedDocs([])
     }
-
-    if (!window.confirm(`Are you sure you want to delete "${docName}"?`)) return;
-
-    try {
-      setDeleting(true);
-      const response = await deleteDocument(docName, selectedNamespace);
-      if (response?.IsSuccess) {
-        toast.success("Document deleted successfully!", { autoClose: 3000 });
-        fetchUploadedDocs();
-      } else {
-        toast.error(response?.Message || "Failed to delete document", { autoClose: 3000 });
-      }
-    } catch (error: any) {
-      console.error("Delete error:", error);
-      toast.error(error?.Message || "An error occurred while deleting", { autoClose: 3000 });
-    } finally {
-      setDeleting(false);
-    }
-  };
+  } catch (error: any) {
+    console.error("Bulk delete error:", error);
+    setSelectedDocs([])
+    toast.error(error?.Message || "An error occurred while deleting documents", { autoClose: 3000 });
+  } finally {
+    setDeleting(false);
+  }
+};
 
 
-  // ======== Filter + Paginate ========
-  const filteredDocs = documents.filter((doc) =>
-    search.trim() === "" ? true : doc.toLowerCase().includes(search.toLowerCase())
-  );
 
-  const totalRecords = filteredDocs.length;
-  const totalPages = Math.ceil(totalRecords / pageSize);
-  const start = (currentPage - 1) * pageSize;
-  const paginatedDocs = filteredDocs.slice(start, start + pageSize);
+
+// ======== Filter + Paginate ========
+// ======== Filter + Paginate ========
+const filteredDocs = documents.filter((doc) => {
+  const matchesSearch =
+    search.trim() === "" || doc.fileName.toLowerCase().includes(search.toLowerCase());
+  const matchesNamespace =
+    selectedNamespace === "" || doc.namespace === selectedNamespace;
+  return matchesSearch && matchesNamespace;
+});
+
+const totalRecords = filteredDocs.length;
+const totalPages = Math.ceil(totalRecords / pageSize);
+const start = (currentPage - 1) * pageSize;
+const paginatedDocs = filteredDocs.slice(start, start + pageSize);
+
+
+
 
   return (
     <div className="p-6 space-y-6">
@@ -203,77 +255,156 @@ export default function UploadedDocsList() {
         </div>
       </div>
 
-      {/* Search + Add Document */}
-      <div className="flex flex-wrap items-center gap-4 w-full mt-4">
-        <div className="flex w-72 flex-col">
-          <label htmlFor="doc-search" className="mb-1 text-sm font-medium text-gray-700">
-            Search by document name
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            <input
-              id="doc-search"
-              type="text"
-              placeholder="Search document..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
-            />
-          </div>
-        </div>
-        <div className="ml-auto">
-          <Button onClick={() => setModalOpen(true)} variant="teal" className="h-10">
-            + Add Document
-          </Button>
-        </div>
-      </div>
+{/* Filters Section */}
+<div className="flex flex-wrap items-center gap-4 w-full mt-4">
+  {/* Search */}
+  <div className="flex w-72 flex-col">
+    <label htmlFor="doc-search" className="mb-1 text-sm font-medium text-gray-700">
+      Search by document name
+    </label>
+    <div className="relative">
+      <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+      <input
+        id="doc-search"
+        type="text"
+        placeholder="Search document..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
+        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm"
+      />
+    </div>
+  </div>
 
-      {/* Table */}
-      <div className="overflow-hidden border rounded-lg shadow-sm mt-4">
-        <Table>
-          <thead className="bg-gray-100">
-            <tr>
-              <Th>Sr.No</Th>
-              <Th>Document Name</Th>
-              <Th className="text-center">Actions</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={3} className="text-center py-6">
-                  <div className="flex justify-center items-center py-6">
-                    <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
-                    <span className="text-gray-600 px-1">Loading...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : paginatedDocs.length === 0 ? (
-              <tr>
-                <Td colSpan={3} className="text-center text-gray-500 py-4">
-                  No documents found.
-                </Td>
-              </tr>
-            ) : (
-              paginatedDocs.map((doc, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50 transition">
-                  <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
-                  <Td className="font-medium text-gray-900">{doc}</Td>
-                  <Td className="text-center">
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDelete(doc)}
-                      title="delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </Td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </Table>
-      </div>
+  {/* Namespace Dropdown */}
+  <div className="flex flex-col">
+    <label className="text-sm font-medium text-gray-700 mb-1">
+      Namespace <span className="text-red-500">*</span>
+    </label>
+    <select
+      value={selectedNamespace}
+      onChange={(e) => {
+        setSelectedNamespace(e.target.value);
+        setNamespaceError("");
+        setCurrentPage(1); // Reset to page 1 when namespace changes
+      }}
+      disabled={namespaces.length === 0}
+      className={`border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:opacity-50
+        ${namespaceError ? "border-red-500" : "border-gray-300"}`}
+    >
+      {namespaces.map((ns, idx) => (
+        <option key={idx} value={ns.name}>
+          {ns.title}
+        </option>
+      ))}
+    </select>
+    {namespaceError && (
+      <p className="mt-1 text-sm text-red-600">{namespaceError}</p>
+    )}
+  </div>
+
+  {/* Delete Button - Visible only when docs are selected */}
+  {selectedDocs.length > 0 && (
+ <button
+  className="mt-6 px-4 py-2 rounded-lg bg-red-600 text-white font-medium shadow hover:bg-red-700 transition-all text-sm duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+  disabled={deleting || selectedDocs.length === 0}
+  onClick={handleBulkDelete}
+>
+  {deleting ? <div className="flex items-center gap-1">
+                  <span>Deleting</span>
+                  <span className="flex gap-1 mt-1">
+                    <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce"></span>
+                    <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                    <span className="w-1 h-1 bg-gray-100 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                  </span>
+                </div> : `Delete (${selectedDocs.length})`}
+</button>
+
+  )}
+
+  {/* Add Document Button */}
+  <div className="ml-auto">
+    <Button
+      onClick={() => setModalOpen(true)}
+      variant="teal"
+      className="h-10 rounded-lg shadow"
+    >
+      + Add Document
+    </Button>
+  </div>
+</div>
+
+
+{/* Table */}
+<div className="overflow-hidden border rounded-lg shadow-sm mt-4">
+  <Table>
+    <thead className="bg-gray-100">
+      <tr>
+        <Th>
+          <input
+            type="checkbox"
+            className="w-4 h-4 cursor-pointer"
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedDocs(paginatedDocs.map((doc) => doc.id)); // Select all visible
+              } else {
+                setSelectedDocs([]); // Deselect all
+              }
+            }}
+            checked={
+              paginatedDocs.length > 0 &&
+              selectedDocs.length === paginatedDocs.length
+            }
+          />
+        </Th>
+        <Th>Sr.No</Th>
+        <Th>Document Name</Th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {loading ? (
+        <tr>
+          <td colSpan={3} className="text-center py-6">
+            <div className="flex justify-center items-center py-6">
+              <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
+              <span className="text-gray-600 px-1">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      ) : paginatedDocs.length === 0 ? (
+        <tr>
+          <Td colSpan={3} className="text-center text-gray-500 py-4">
+            No documents found.
+          </Td>
+        </tr>
+      ) : (
+        paginatedDocs.map((doc, index) => (
+          <tr key={doc.id} className="border-b hover:bg-gray-50 transition">
+            <Td>
+              <input
+                type="checkbox"
+                className="w-4 h-4 cursor-pointer"
+                checked={selectedDocs.includes(doc.id)}
+                onChange={() => {
+                  if (selectedDocs.includes(doc.id)) {
+                    setSelectedDocs(selectedDocs.filter((id) => id !== doc.id));
+                  } else {
+                    setSelectedDocs([...selectedDocs, doc.id]);
+                  }
+                }}
+              />
+            </Td>
+            <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
+            <Td className="font-medium text-gray-900">{doc.fileName}</Td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </Table>
+</div>
 
       {/* Pagination */}
       <Pagination
@@ -344,22 +475,23 @@ export default function UploadedDocsList() {
               Namespace <span className="text-red-500">*</span>
             </label>
             <select
-              value={selectedNamespace}
+              value={selectedUploadNamespace}
               onChange={(e) => {
-                setSelectedNamespace(e.target.value);
+                setSelectedUploadNamespace(e.target.value);
                 setNamespaceError("");
               }}
               disabled={namespaces.length === 0}
               className={`border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:opacity-50
-              ${namespaceError ? "border-red-500" : "border-gray-300"}`}
+  ${namespaceError ? "border-red-500" : "border-gray-300"}`}
             >
               <option value="">-- Select Namespace --</option>
               {namespaces.map((ns, idx) => (
-                <option key={idx} value={ns}>
-                  {ns}
+                <option key={idx} value={ns.name}>
+                  {ns.title}
                 </option>
               ))}
             </select>
+
             {namespaceError && <p className="mt-1 text-sm text-red-600">{namespaceError}</p>}
           </div>
 

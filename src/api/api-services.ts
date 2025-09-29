@@ -913,13 +913,15 @@ export const uploadDocuments = async (files: File[], namespace: string): Promise
   }
 };
 
-
-export const deleteDocument = async (documentName: string, namespace: string): Promise<any> => {
+export const deleteDocument = async (documentIds: number[], namespace: string): Promise<any> => {
   try {
     const response = await axiosInstance.delete(`upload`, {
-      params: { 
-        documentName, 
-        namespace,   
+      data: {
+        namespace,
+        document_ids: documentIds,
+      },
+      headers: {
+        'Content-Type': 'application/json',
       },
     });
     return response.data;
@@ -927,12 +929,10 @@ export const deleteDocument = async (documentName: string, namespace: string): P
     throw error?.response?.data ?? {
       IsSuccess: false,
       Data: null,
-      Message: "Failed to delete document",
+      Message: "Failed to delete document(s)",
     };
   }
 };
-
-
 
 //analytics
 export const trackEvent = async (
