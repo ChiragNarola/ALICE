@@ -29,7 +29,7 @@ const ChatPage: React.FC = () => {
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
-  const { startTracking, stopTracking, incrementChatCount,chatCount ,timeSpent } = useChatActivity();
+  const { startTracking, stopTracking,chatCount ,timeSpent } = useChatActivity();
   const [activeTab, setActiveTab] = useState<'parent' | 'staff'>('parent');
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
@@ -137,8 +137,6 @@ useEffect(() => {
     }
   };
 
-
-
  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden || location.pathname !== "/chat") {
@@ -176,52 +174,67 @@ const handleSendMessage = async (e: React.FormEvent, file?: File | null) => {
   if (!message.trim() && !file) return;
   IsSearching(true);
 
-  // Include file name in the message if attached
+  // Display file name only for UI
   const userMessageText = file ? `${message} [File: ${file.name}]` : message;
 
   // Optimistically add user message
   setChatMessages((prev) => [
     ...prev,
-    { id: 0, from: "user", text: userMessageText, actions: true, user_response: null },
+    { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
   ]);
 
+  // Add placeholder for bot response
   const botIndex = chatMessages.length + 1;
-  setChatMessages((prev) => [...prev, { id: 0, from: "alice", text: "...", actions: true }]);
+  setChatMessages((prev) => [
+    ...prev,
+    { id: 0, from: "alice", text: "...", actions: true },
+  ]);
   setMessage("");
 
   try {
     const formData = new FormData();
-    formData.append("query", message); // keep original message for backend
+    formData.append("query", message);
     formData.append("user_id", String(user?.id));
     formData.append("conversation_id", chatBordUniqueId || "");
 
-    if (file) {
-      formData.append("file", file);
-    }
+    if (file) formData.append("file", file);
 
     const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
       method: "POST",
-      body: formData, // DO NOT set Content-Type manually
+      body: formData, // don't set content-type manually
     });
 
     if (!response.ok) throw new Error(`API error: ${response.status}`);
 
+    // 🔹 Grab headers
+    const headerConversationId = response.headers.get("x-conversation-uuid");
+    const headerMessageId = response.headers.get("x-message-id");
+    const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
+
+    if (headerConversationId) {
+      // Save conversation id for next request
+      setChatboardUniqueId(headerConversationId);
+    }
+
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No response body received.");
 
-    const headerMessageId = response.headers.get("x-message-id");
-    const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
-
     const decoder = new TextDecoder();
     let accumulatedText = "";
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
+
       accumulatedText += decoder.decode(value, { stream: true });
 
       setChatMessages((prev) => {
         const copy = [...prev];
-        copy[botIndex] = { ...copy[botIndex], id: newMessageId, text: accumulatedText };
+        copy[botIndex] = {
+          ...copy[botIndex],
+          id: newMessageId,
+          text: accumulatedText,
+        };
         return copy;
       });
     }
@@ -239,7 +252,7 @@ const handleSendMessage = async (e: React.FormEvent, file?: File | null) => {
       return copy;
     });
   } finally {
-    setMessage("");
+    // setMessage("");
     refreshChatList();
     IsSearching(false);
   }
