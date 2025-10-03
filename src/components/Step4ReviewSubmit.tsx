@@ -1,4 +1,6 @@
-import { forwardRef, useImperativeHandle, useEffect, useState, useRef } from "react";
+import { forwardRef, useImperativeHandle, useEffect, useState, useRef,Fragment } from "react";
+import { Listbox, Transition } from "@headlessui/react";
+import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/24/solid";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -143,24 +145,88 @@ const Step4ReviewSubmit = forwardRef<
           </span>
         </label>
 
-        <Controller
-          name="role_in_organisation"
-          control={control}
-          render={({ field }) => (
-            <select
-              {...field}
-              className={`w-full px-5 py-[14px] lg:py-[18px] border rounded-[12px] mt-[-10px] lg:mt-[-12px] text-[14px] lg:text-base font-normal focus:outline-none ${
-                errors.role_in_organisation ? "border-red-500" : "border-alice-gray"
-              } ${field.value === "" ? "text-alice-darkgray" : "text-alice-black"}`}
+   <Controller
+  name="role_in_organisation"
+  control={control}
+  render={({ field }) => (
+    <div className="w-full">
+      <Listbox value={field.value} onChange={field.onChange}>
+        {({ open }) => (
+          <div className="relative">
+            {/* Selected Value */}
+            <Listbox.Button
+              className={`relative w-full px-4 py-3 lg:py-4 text-left border rounded-[12px] text-[14px] sm:text-base lg:text-lg font-normal cursor-pointer focus:outline-none transition-all duration-300 ease-in-out
+                ${
+                  errors.role_in_organisation
+                    ? "border-red-500"
+                    : "border-alice-gray"
+                }
+                ${
+                  !field.value ? "text-alice-darkgray" : "text-alice-black"
+                }`}
             >
-              {jobTitle.map((title, index) => (
-                <option key={index} value={title}>
-                  {title}
-                </option>
-              ))}
-            </select>
-          )}
-        />
+              <span className="block truncate">
+                {field.value || "Select a job title"}
+              </span>
+              <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                <ChevronUpDownIcon className="w-5 h-5 text-alice-darkgray" />
+              </span>
+            </Listbox.Button>
+
+            {/* Dropdown Options */}
+            <Transition
+              as={Fragment}
+              show={open}
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Listbox.Options
+                className="absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white border border-gray-200 shadow-lg focus:outline-none"
+              >
+                {jobTitle.map((title, index) => (
+                  <Listbox.Option
+                    key={index}
+                    value={title}
+                    className={({ active }) =>
+                      `relative cursor-pointer select-none py-2 px-4 text-sm sm:text-base ${
+                        active
+                          ? "bg-alice-teal text-white"
+                          : "text-gray-700"
+                      }`
+                    }
+                  >
+                    {({ selected }) => (
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-medium" : "font-normal"
+                          }`}
+                        >
+                          {title}
+                        </span>
+                        {selected && (
+                          <CheckIcon className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+          </div>
+        )}
+      </Listbox>
+      {errors.role_in_organisation && (
+        <p className="text-red-500 text-sm mt-1">
+          {errors.role_in_organisation.message}
+        </p>
+      )}
+    </div>
+  )}
+/>
+
+
         {errors.role_in_organisation && (
           <p className="text-red-500 text-sm mt-1">{errors.role_in_organisation.message}</p>
         )}

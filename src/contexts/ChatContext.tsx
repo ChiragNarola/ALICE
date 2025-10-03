@@ -21,6 +21,9 @@ type ChatContextType = {
 
     refreshChatList: () => Promise<void>;
     isLoadingChatList: boolean;
+
+    hasAskedQuestion: boolean;
+    setHasAskedQuestion: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -39,6 +42,8 @@ export const ChatProvider = ({ children }: { children: any }) => {
     const replaceMessages = (msgs: ChatMessageUI[]) => setMessages(msgs);
     const addMessage = (msg: ChatMessageUI) => setMessages((prev) => [...prev, msg]);
     const clearMessages = () => setMessages([]);
+    const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
+
 
     const ensureAliceIntro = (text = DEFAULT_ALICE_TEXT) => {
         setMessages((prev) => {
@@ -100,6 +105,8 @@ export const ChatProvider = ({ children }: { children: any }) => {
             setChatList,
             refreshChatList,
             isLoadingChatList,
+            hasAskedQuestion,
+            setHasAskedQuestion,
         }),
         [messages, selectedConversationId, chatList, isLoadingChatList]
     );

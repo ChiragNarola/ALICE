@@ -1,6 +1,8 @@
 import { useForm } from "react-hook-form";
 import Button from "../../ui/Button";
 import Modal from "../../ui/Modal";
+import { Check } from "lucide-react";
+import { useState } from "react";
 
 interface AddAreaOfInterestModalProps {
     isOpen: boolean;
@@ -14,11 +16,23 @@ interface FormValues {
 
 export default function AddAreaOfInterestModal({ isOpen, onClose, onAdd }: AddAreaOfInterestModalProps) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
+    const [loading, setLoading] = useState(false);
 
-    const onSubmit = (data: FormValues) => {
-        onAdd(data.areaOfInterest.trim());
-        reset();
-        onClose();
+
+    const onSubmit = async (data: FormValues) => {
+        setLoading(true);
+        try {
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            onAdd(data.areaOfInterest.trim());
+            reset();
+            onClose();
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -40,10 +54,32 @@ export default function AddAreaOfInterestModal({ isOpen, onClose, onAdd }: AddAr
                 {errors.areaOfInterest && <p className="text-red-500 text-xs">{errors.areaOfInterest.message}</p>}
 
                 <div className="flex justify-end space-x-2 mt-2">
-                    <Button variant="secondary" type="button" onClick={() => { reset(); onClose(); }}>
+                    <button
+                        type="button"
+                        onClick={() => { reset(); onClose(); }}
+                        className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
+                        disabled={loading}
+                    >
                         Cancel
-                    </Button>
-                    <Button type="submit">Add</Button>
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2 ${loading ? "opacity-70 cursor-not-allowed" : ""
+                            }`}
+                    >
+                        {loading ? (
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                Submitting...
+                            </div>
+                        ) : (
+                            <>
+                                <Check className="w-4 h-4" />
+                                Submit
+                            </>
+                        )}
+                    </button>
                 </div>
             </form>
         </Modal>

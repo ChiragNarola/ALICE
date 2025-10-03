@@ -52,6 +52,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     setSelectedConversationId,
     mapApiToUI,
     chatList,
+    setHasAskedQuestion
   } = useChat();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -112,6 +113,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
     setIsSidebarOpen?.(false);
     setIsLoading(true);
+    setHasAskedQuestion(false);
 
     setTimeout(() => {
       navigate("/chat");
@@ -125,7 +127,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         <PageLoader />
       ) : (
         <aside
-          className={`w-64 bg-white border-r border-gray-200 p-4 h-screen fixed top-0 left-0 z-100
+          className={`w-64 bg-white border-r border-gray-200 p-4 h-full sm:h-screen fixed top-0 left-0 z-100
             transform transition-transform duration-300
             ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
@@ -162,6 +164,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     setSelectedChatId(chat.id);
                     setSelectedConversationId(chat.id);
                     if (chat.conversation_uuid) {
+                      setHasAskedQuestion(false);
                       navigate(`/chat?v=${chat.conversation_uuid}`);
                     }
                   }}

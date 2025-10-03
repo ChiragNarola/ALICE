@@ -10,7 +10,8 @@ import { useChat } from "../contexts/ChatContext";
 import { useSearchParams } from "react-router-dom";
 import StaffInfo from "../components/StaffInfo";
 import { useChatActivity } from "../contexts/ChatActivityContext";
-import { trackEvent } from "../api/api-services"; // adjust the path if needed
+import { trackEvent, getquestions } from "../api/api-services";
+import type { QuestionDTO } from "../routes/models/request/Chat";
 
 
 type Message = {
@@ -22,14 +23,15 @@ type Message = {
 };
 
 const ChatPage: React.FC = () => {
-  const { messages, refreshChatList } = useChat();
+
+  const { messages, refreshChatList, hasAskedQuestion, setHasAskedQuestion } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const location = useLocation();
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
-  const { startTracking, stopTracking, incrementChatCount,chatCount ,timeSpent } = useChatActivity();
+  const { startTracking, stopTracking, chatCount, timeSpent } = useChatActivity();
   const [activeTab, setActiveTab] = useState<'parent' | 'staff'>('parent');
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
@@ -40,91 +42,102 @@ const ChatPage: React.FC = () => {
       user_response: null,
     },
   ]);
-const sessionUUID =
-  user?.sessionUUID ||
-  sessionStorage.getItem("session_uuid") ||
-  localStorage.getItem("session_uuid");
 
-const sendChatAnalytics = (
-  pageScreen: "chat_start" | "chat_mid",
-  isExit: boolean = false
-) => {
-  if (!sessionUUID) return;
+  const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
 
-const lastMessage = chatMessages[chatMessages.length - 1];
-const secondLastMessage = chatMessages[chatMessages.length - 2];
-let interaction_data = "";
 
-if (chatCount > 0) {
-  if (secondLastMessage?.from === "user") {
-    interaction_data = chatCount > 1 ? "asked follow up question" : "asked question";
-  } else if (lastMessage?.from === "alice") {
-    interaction_data = "responded";
-  }
-}
+  const sessionUUID =
+    user?.sessionUUID ||
+    sessionStorage.getItem("session_uuid") ||
+    localStorage.getItem("session_uuid");
 
-  const event_type = isExit
-    ? "exit"
-    : lastMessage?.actions
-    ? "button_click"
-    : "page_view";
+  const sendChatAnalytics = (
+    pageScreen: "chat_start" | "chat_mid",
+    isExit: boolean = false
+  ) => {
+    if (!sessionUUID) return;
 
-  trackEvent({
-    session_id: sessionUUID,
-    page_screen: pageScreen,
-    event_type,
-    time_spent: timeSpent,
-    interaction_data,
-  })
-};
+    const lastMessage = chatMessages[chatMessages.length - 1];
+    const secondLastMessage = chatMessages[chatMessages.length - 2];
+    let interaction_data = "";
 
-const chatStartSent = useRef(false);
-const chatMidSent = useRef(false);
-const chatExitSent = useRef(false);
-const lastMessageCount = useRef(0);
+    if (chatCount > 0) {
+      if (secondLastMessage?.from === "user") {
+        interaction_data = chatCount > 1 ? "asked follow up question" : "asked question";
+      } else if (lastMessage?.from === "alice") {
+        interaction_data = "responded";
+      }
+    }
 
-useEffect(() => {
-  if (location.pathname === "/chat") {
-    sendChatAnalytics("chat_start");
-    chatStartSent.current = true;
-  }
-}, [location.pathname]);
+    const event_type = isExit
+      ? "exit"
+      : lastMessage?.actions
+        ? "button_click"
+        : "page_view";
 
-useEffect(() => {
-  if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
-    sendChatAnalytics("chat_mid");
-    lastMessageCount.current = chatCount;
-  }
-}, [chatCount, location.pathname]);
+    trackEvent({
+      session_id: sessionUUID,
+      page_screen: pageScreen,
+      event_type,
+      time_spent: timeSpent,
+      interaction_data,
+    })
+  };
 
-useEffect(() => {
-  const checkView = () => {
-    const view =
-      location.pathname === "/chat" && !document.hidden
-        ? "in_view"
-        : "out_of_view";
+  const chatStartSent = useRef(false);
+  const chatMidSent = useRef(false);
+  const chatExitSent = useRef(false);
+  const lastMessageCount = useRef(0);
 
-    if (view === "out_of_view" && chatCount > 0 && !chatMidSent.current) {
+  useEffect(() => {
+    if (location.pathname === "/chat") {
+      sendChatAnalytics("chat_start");
+      chatStartSent.current = true;
+      if (user) {
+        getquestions(user.id).then((response) => {
+          if (response.IsSuccess && response.Data) {
+            setRecommendedQuestions(response.Data);
+          }
+        });
+      }
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
       sendChatAnalytics("chat_mid");
-      chatMidSent.current = true;
+      lastMessageCount.current = chatCount;
     }
-  };
+  }, [chatCount, location.pathname]);
 
-  const timeout = setTimeout(checkView, 50);
-  return () => clearTimeout(timeout);
-}, [location.pathname, chatCount]);
+  useEffect(() => {
+    const checkView = () => {
+      const view =
+        location.pathname === "/chat" && !document.hidden
+          ? "in_view"
+          : "out_of_view";
+
+      if (view === "out_of_view" && chatCount > 0 && !chatMidSent.current) {
+        sendChatAnalytics("chat_mid");
+        chatMidSent.current = true;
+      }
+    };
+
+    const timeout = setTimeout(checkView, 50);
+    return () => clearTimeout(timeout);
+  }, [location.pathname, chatCount]);
 
 
-useEffect(() => {
-  const handleBeforeUnload = () => {
-    if (chatCount > 0 && !chatExitSent.current) {
-      sendChatAnalytics(chatCount > 0 ? "chat_mid" : "chat_start", true);
-      chatExitSent.current = true;
-    }
-  };
-  window.addEventListener("beforeunload", handleBeforeUnload);
-  return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-}, [chatCount]);
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (chatCount > 0 && !chatExitSent.current) {
+        sendChatAnalytics(chatCount > 0 ? "chat_mid" : "chat_start", true);
+        chatExitSent.current = true;
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [chatCount]);
 
   const [searchParams] = useSearchParams();
   const handleGenerate = () => {
@@ -135,16 +148,21 @@ useEffect(() => {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
     }
+    if (user) {
+      getquestions(user.id).then((response) => {
+        if (response.IsSuccess && response.Data) {
+          setRecommendedQuestions(response.Data);
+        }
+      });
+    }
   };
 
-
-
- useEffect(() => {
+  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden || location.pathname !== "/chat") {
         stopTracking();
       } else {
-        startTracking(); 
+        startTracking();
       }
     };
     handleVisibilityChange();
@@ -171,67 +189,79 @@ useEffect(() => {
   const { isChatVisible, setChatVisible } = useChatVisibility();
   setChatVisible(true);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent, file?: File | null) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() && !file) return;
+
     IsSearching(true);
 
-    // Add user message immediately
+    // Display file name only for UI
+    const userMessageText = file ? `${message} [File: ${file.name}]` : message;
+
+    // Optimistically add user message
     setChatMessages((prev) => [
       ...prev,
-      {
-        id: 0,
-        from: "user",
-        text: message,
-        actions: true,
-        user_response: null,
-      },
+      { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
     ]);
 
-    incrementChatCount();
+    // Add placeholder for bot response
     const botIndex = chatMessages.length + 1;
     setChatMessages((prev) => [
       ...prev,
       { id: 0, from: "alice", text: "...", actions: true },
     ]);
+    setHasAskedQuestion(true);
     setMessage("");
 
     try {
+      const formData = new FormData();
+      formData.append("query", message);
+      formData.append("user_id", String(user?.id));
+      formData.append("conversation_id", chatBordUniqueId || "");
+
+      if (file) formData.append("file", file);
+
       const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: message,
-          conversation_id: chatBordUniqueId,
-          user_id: user?.id,
-        }),
+        body: formData, // don't set content-type manually
       });
 
-      if (!response.body) throw new Error("No response body received.");
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
 
+      // 🔹 Grab headers
+      const headerConversationId = response.headers.get("x-conversation-uuid");
       const headerMessageId = response.headers.get("x-message-id");
-      const newMessageId = headerMessageId ? Number(headerMessageId) : 0;
-      setMessage("");
-      const reader = response.body.getReader();
+      const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
+
+      if (headerConversationId) {
+        // Save conversation id for next request
+        setChatboardUniqueId(headerConversationId);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body received.");
+
       const decoder = new TextDecoder();
       let accumulatedText = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedText += chunk;
+
+        accumulatedText += decoder.decode(value, { stream: true });
+
         setChatMessages((prev) => {
           const copy = [...prev];
           copy[botIndex] = {
             ...copy[botIndex],
-            id: newMessageId || 0,
+            id: newMessageId,
             text: accumulatedText,
           };
           return copy;
         });
       }
     } catch (err: any) {
-      console.error("Chat API error:", err);
+      console.error(err);
       setChatMessages((prev) => {
         const copy = [...prev];
         if (copy[botIndex]) {
@@ -244,11 +274,110 @@ useEffect(() => {
         return copy;
       });
     } finally {
-      setMessage("");
+      // setMessage("");
       refreshChatList();
       IsSearching(false);
     }
   };
+
+  const handlerecommendedMessage = async (AImessage: string) => {
+    if (!AImessage.trim()) return;
+
+    IsSearching(true);
+
+    const userMessageText = AImessage;
+
+    // Add user message + bot placeholder together in one update
+    let botIndex = -1;
+    setChatMessages((prev) => {
+      botIndex = prev.length + 1;
+      return [
+        ...prev,
+        { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
+        { id: 0, from: "alice", text: "...", actions: true },
+      ];
+    });
+    setHasAskedQuestion(true);
+    setMessage(""); // clear input
+
+    try {
+      const formData = new FormData();
+      formData.append("query", userMessageText);
+      formData.append("user_id", String(user?.id));
+      formData.append("conversation_id", chatBordUniqueId || "");
+
+      const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+      const headerConversationId = response.headers.get("x-conversation-uuid");
+      const headerMessageId = response.headers.get("x-message-id");
+      const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
+
+      if (headerConversationId) setChatboardUniqueId(headerConversationId);
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body received.");
+
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        accumulatedText += decoder.decode(value, { stream: true });
+
+        setChatMessages((prev) => {
+          const copy = [...prev];
+          if (copy[botIndex]) {
+            copy[botIndex] = {
+              ...copy[botIndex],
+              id: newMessageId,
+              text: accumulatedText,
+            };
+          }
+          return copy;
+        });
+      }
+
+    } catch (err) {
+      console.error(err);
+      setChatMessages((prev) => {
+        const copy = [...prev];
+        if (copy[botIndex]) {
+          copy[botIndex] = {
+            ...copy[botIndex],
+            text: "Something went wrong. Please try again...",
+            actions: false,
+          };
+        }
+        return copy;
+      });
+    } finally {
+      refreshChatList();
+      IsSearching(false);
+    }
+  };
+
+
+  const recommendedQuestionsList =
+    recommendedQuestions?.recommended.map((item: any, index: any) => (
+      <button
+        key={index}
+        className="recommended-question-btn"
+        onClick={() => handlerecommendedMessage(item.ai_recommended)}
+      >
+        <div>
+          <b>{item.category}</b>
+        </div>
+        <div>{item.ai_recommended}</div>
+      </button>
+    ));
+
 
   return (
     <>
@@ -262,7 +391,7 @@ useEffect(() => {
           </span>
         )}
 
-        <section className="w-[220px] shrink-0 overflow-hidden">
+        <section className="w-[0px] md:w-[50px] lg:w-[220px] shrink-0 overflow-hidden">
         </section>
 
         {/* Chat Section */}
@@ -270,11 +399,13 @@ useEffect(() => {
           {isChatVisible && (
             <>
               <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
+
               <ChatInput
                 onSend={handleSendMessage}
                 setMessage={setMessage}
                 message={message}
                 searching={searching}
+                recommendedQuestionsList={!hasAskedQuestion ? recommendedQuestionsList : null}
               />
             </>
           )}

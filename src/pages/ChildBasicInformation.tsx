@@ -441,7 +441,7 @@ const ChildBasicInformation: React.FC = () => {
           </ol>
         </aside>
         {/* Main Wizard Content */}
-        <section className="flex-1 bg-white rounded-2xl p-4 xl:p-6 border border-alice-gray">
+        <section className="flex-1 bg-white rounded-2xl p-4 xl:p-6 border h-[75vh] overflow-auto border-alice-gray">
           {/* Render step content here */}
           <div className="min-h-[200px] flex flex-col">
             {(currentStep === 0 && userDetails !== 1) && <Step1ChildInfo ref={stepRef} />}
