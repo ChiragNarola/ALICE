@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import Button from "../../ui/Button";
 import Modal from "../../ui/Modal";
 import { Check } from "lucide-react";
 import { useState } from "react";

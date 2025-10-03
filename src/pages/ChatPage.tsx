@@ -11,7 +11,6 @@ import { useSearchParams } from "react-router-dom";
 import StaffInfo from "../components/StaffInfo";
 import { useChatActivity } from "../contexts/ChatActivityContext";
 import { trackEvent, getquestions } from "../api/api-services";
-import type { QuestionDTO } from "../routes/models/request/Chat";
 
 
 type Message = {
