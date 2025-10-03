@@ -1,5 +1,5 @@
 import type { SignupFormInputs } from '../routes/models/request/Auth';
-import type { ConversationDTO } from '../routes/models/request/Chat';
+import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request/Chat';
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
@@ -969,5 +969,22 @@ export const listNamespace = async (): Promise<APIResponse<any>> => {
     return response.data;
   } catch (error: any) {
     throw error?.response?.data || { message: 'Fetch failed' };
+  }
+};
+
+export const getquestions = async (user_id: number): Promise<APIResponse<AIrecommendedDTO[]>> => {
+  try {
+    const res = await axiosInstance.get("question", {
+      params: { user_id },
+    });
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching Conversation list failed",
+      }
+    );
   }
 };

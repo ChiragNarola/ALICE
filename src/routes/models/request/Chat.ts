@@ -38,3 +38,13 @@ export interface ApiMessage {
     message: string;
     conversation_id: number;
 }
+
+export interface QuestionDTO {
+    user_id: number;
+    recommended: AIrecommendedDTO[];
+}
+
+export interface AIrecommendedDTO {
+    ai_recommended: string;
+    category: string
+}
