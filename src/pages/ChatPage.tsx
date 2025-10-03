@@ -11,6 +11,7 @@ import { useSearchParams } from "react-router-dom";
 import StaffInfo from "../components/StaffInfo";
 import { useChatActivity } from "../contexts/ChatActivityContext";
 import { trackEvent, getquestions } from "../api/api-services";
+import type { QuestionDTO } from "../routes/models/request/Chat";
 
 
 type Message = {
@@ -94,7 +95,7 @@ const ChatPage: React.FC = () => {
       chatStartSent.current = true;
       if (user) {
         getquestions(user.id).then((response) => {
-          if (response.IsSuccess) {
+          if (response.IsSuccess && response.Data) {
             setRecommendedQuestions(response.Data);
           }
         });
@@ -149,7 +150,7 @@ const ChatPage: React.FC = () => {
     }
     if (user) {
       getquestions(user.id).then((response) => {
-        if (response.IsSuccess) {
+        if (response.IsSuccess && response.Data) {
           setRecommendedQuestions(response.Data);
         }
       });
