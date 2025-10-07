@@ -17,6 +17,8 @@ import StaffList from "../components/admin/users/StaffList";
 import ConcernList from "../components/admin/concern/ConcernList";
 import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInterestList";
 import UploadedDocsList from "../components/admin/uploadDocument";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 export default function AppRouter() {
     return (
@@ -26,7 +28,10 @@ export default function AppRouter() {
             <Route element={<WelcomeSection />}>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                 <Route path="/email-verification" element={<EmailVerification />} />
+                <Route path="/email-verification" element={<EmailVerification />} />
+                <Route path="/forgotpassword" element={<ForgotPassword />} />
+                <Route path="/resetpassword" element={<ResetPassword />} />
+
             </Route>
 
             {/* Parent & Staff routes */}

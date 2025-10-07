@@ -913,6 +913,9 @@ export const uploadDocuments = async (files: File[], namespace: string): Promise
   }
 };
 
+
+
+
 export const deleteDocument = async (documentIds: number[], namespace: string): Promise<any> => {
   try {
     const response = await axiosInstance.delete(`upload`, {
@@ -988,3 +991,69 @@ export const getquestions = async (user_id: number): Promise<APIResponse<AIrecom
     );
   }
 };
+
+
+export const forgotPassword = async (
+  email: string
+): Promise<APIResponse<null>> => {
+  const urlEncoded = new URLSearchParams();
+  urlEncoded.append("email", email);
+
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/users/forget_password",
+      urlEncoded.toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Password reset failed",
+      }
+    );
+  }
+};
+
+export const resetPassword = async (
+  reset_code: string,
+  new_password: string
+
+): Promise<APIResponse<null>> => {
+  const urlEncoded = new URLSearchParams();
+  urlEncoded.append("reset_code", reset_code);
+  urlEncoded.append("new_password", new_password);
+
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/users/reset_password",
+      urlEncoded.toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Password reset failed",
+      }
+    );
+  }
+};
+
+
+
+
