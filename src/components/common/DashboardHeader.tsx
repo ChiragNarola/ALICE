@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/images/logo.svg";
 import userimg from "../../assets/images/user-img.png";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import { useChat } from "../../contexts/ChatContext";
 import { User, MessageCircle, LogOut, Lock, Eye, EyeOff } from "lucide-react";
@@ -30,7 +30,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   setIsSidebarOpen,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { clearMessages, ensureAliceIntro, setSelectedConversationId } = useChat();
   const { isChatVisible } = useChatVisibility();
 
