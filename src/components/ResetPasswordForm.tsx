@@ -101,10 +101,8 @@ const ResetPasswordForm = () => {
           placeholder="Enter your new password"
           {...register('new_password', {
             required: 'New password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters',
-            },
+            minLength: { value: 8, message: 'Password must be at least 8 characters' },
+            pattern: { value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/, message: 'Password must include uppercase, lowercase, and special character' },
           })}
           className="block w-full px-5 py-[14px] lg:py-[18px] pr-10 border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />

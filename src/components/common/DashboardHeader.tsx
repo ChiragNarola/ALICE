@@ -4,7 +4,9 @@ import userimg from "../../assets/images/user-img.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import { useChat } from "../../contexts/ChatContext";
-import { User, MessageCircle, LogOut } from "lucide-react";
+import { User, MessageCircle, LogOut, Lock, Eye, EyeOff } from "lucide-react";
+import { changePassword } from "../../api/api-services";
+import { toast } from "react-toastify";
 
 interface DashboardHeaderProps {
   showMessageDropdown: boolean;
@@ -22,22 +24,35 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   showUserDropdown,
   setShowUserDropdown,
-  // messageRef,
   userRef,
   handleLogout,
   handleToggle,
-  setIsSidebarOpen
+  setIsSidebarOpen,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearMessages, ensureAliceIntro, setSelectedConversationId } = useChat();
   const { isChatVisible } = useChatVisibility();
 
-  const [userName, setUserName] = useState<string>()
+  const [userName, setUserName] = useState<string>();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Password visibility
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Form data and validation
+  const [formData, setFormData] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
-
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -48,23 +63,18 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }
   }, []);
 
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        showUserDropdown &&
-        userRef.current &&
-        !userRef.current.contains(event.target as Node)
-      ) {
+      if (showUserDropdown && userRef.current && !userRef.current.contains(event.target as Node)) {
         setShowUserDropdown(false);
       }
     }
 
     if (showUserDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showUserDropdown, setShowUserDropdown, userRef]);
 
@@ -76,53 +86,82 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     setIsSidebarOpen(false);
   };
 
-  return (
-    <header className="sticky top-0 z-50 bg-alice-peach px-4 sm:px-6 md:px-[30px] py-3 sm:py-4 md:py-5 flex items-center justify-between border-b border-alice-gray">
-      <div className="flex items-center gap-3 sm:gap-6">
-        {/* <span
-          onClick={handleToggle}
-          className="absolute z-100 top-[5px] left-4 material-symbols-outlined text-gray-700 text-2xl cursor-pointer font-bold"
-        >
-          menu_open
-        </span> */}
+  // Validation logic
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    const { current_password, new_password, confirm_password } = formData;
 
-        {isChatVisible && <button className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors" onClick={handleToggle}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-rtl-flip=""><path d="M11.6663 12.6686L11.801 12.6823C12.1038 12.7445 12.3313 13.0125 12.3313 13.3337C12.3311 13.6547 12.1038 13.9229 11.801 13.985L11.6663 13.9987H3.33325C2.96609 13.9987 2.66839 13.7008 2.66821 13.3337C2.66821 12.9664 2.96598 12.6686 3.33325 12.6686H11.6663ZM16.6663 6.00163L16.801 6.0153C17.1038 6.07747 17.3313 6.34546 17.3313 6.66667C17.3313 6.98788 17.1038 7.25586 16.801 7.31803L16.6663 7.33171H3.33325C2.96598 7.33171 2.66821 7.03394 2.66821 6.66667C2.66821 6.2994 2.96598 6.00163 3.33325 6.00163H16.6663Z"></path></svg>
-        </button>}
-        <div className="flex items-center gap-12">
-          {/* <SlidingSideBar onSlide={isSidebarOpen} onToggle={handleToggle} /> */}
+    if (!current_password.trim()) newErrors.current_password = "Current password is required.";
+
+    if (!new_password.trim()) {
+      newErrors.new_password = "New password is required.";
+    } else if (new_password.length < 8) {
+      newErrors.new_password = "Password must be at least 8 characters.";
+    } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/.test(new_password)) {
+      newErrors.new_password =
+        "Password must include uppercase, lowercase, and special character.";
+    } else if (new_password === current_password) {
+      newErrors.new_password = "New password must be different from current password.";
+    }
+
+    if (!confirm_password.trim()) newErrors.confirm_password = "Please confirm your password.";
+    else if (confirm_password !== new_password) newErrors.confirm_password = "Passwords do not match.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle submit
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setLoading(true);
+
+    try {
+      const response = await changePassword(formData.current_password, formData.new_password);
+
+      if (response.IsSuccess) {
+        toast.success("Password changed successfully!");
+        setShowChangePassword(false);
+        setFormData({ current_password: "", new_password: "", confirm_password: "" });
+        setShowConfirm(false);
+        setShowNew(false);
+        setShowCurrent(false);
+        setErrors({});
+      } else {
+        toast.error(response.Message || "Failed to change password.");
+      }
+    } catch (error: any) {
+      toast.error(error?.Message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-alice-peach px-4 sm:px-6 md:px-[30px] py-3 sm:py-4 md:py-5 flex items-center justify-between border-b border-alice-gray">
+        <div className="flex items-center gap-3 sm:gap-6">
+          {isChatVisible && (
+            <button
+              className="sidebar_btn w-8 h-8 flex items-center justify-center rounded-lg bg-black/10 hover:!bg-black/15 transition-colors"
+              onClick={handleToggle}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M11.6663 12.6686L11.801 12.6823C12.1038 12.7445 12.3313 13.0125 12.3313 13.3337C12.3311 13.6547 12.1038 13.9229 11.801 13.985L11.6663 13.9987H3.33325C2.96609 13.9987 2.66839 13.7008 2.66821 13.3337C2.66821 12.9664 2.96598 12.6686 3.33325 12.6686H11.6663ZM16.6663 6.00163L16.801 6.0153C17.1038 6.07747 17.3313 6.34546 17.3313 6.66667C17.3313 6.98788 17.1038 7.25586 16.801 7.31803L16.6663 7.33171H3.33325C2.96598 7.33171 2.66821 7.03394 2.66821 6.66667C2.66821 6.2994 2.96598 6.00163 3.33325 6.00163H16.6663Z" />
+              </svg>
+            </button>
+          )}
           <img
             onClick={onNewChat}
             src={logo}
             alt="Logo"
             className="h-12 w-auto cursor-pointer hover:opacity-80 transition"
           />
-          {/* <span className="text-xl lg:text-2xl font-bold text-alice-black hidden md:inline-block">Welcome, {`${userName}`}</span> */}
         </div>
-      </div>
-      <div className="flex items-center gap-3 sm:gap-6 relative">
-        {/* Message Button with Badge */}
-        {/* <div className="relative" ref={messageRef}> */}
-        {/* <button
-            onClick={() => navigate("/chat")}
-            className="w-[50px] h-[50px] rounded-full bg-[#D9D9D9] flex items-center justify-center focus:outline-none"
-          >
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13.2422 1.25195C19.5969 1.37758 24.7499 6.56044 24.75 12.7715C24.7501 19.129 19.6849 24.1969 13.1797 24.292H13.1787C11.3384 24.321 9.57477 23.9417 7.93164 23.1699H7.93262C7.22389 22.8368 6.37765 22.9703 5.80859 23.5107C4.82593 24.4439 3.46331 24.8663 2.1416 24.7197C3.03754 22.3747 3.07955 19.7871 2.21875 17.373C2.2047 17.3335 2.18994 17.2959 2.1748 17.2607L1.95703 16.7197C1.4841 15.4501 1.24662 14.1158 1.25 12.7432C1.26586 6.33675 6.69 1.12413 13.2422 1.25195Z" stroke="#1B1B1B" strokeWidth="1.5" />
-              <path d="M8.8335 10.9167H14.3891" stroke="#1B1B1B" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M8.8335 16.4722H18.5557" stroke="#1B1B1B" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <span className="absolute top-2 right-2 bg-[#E94F4F] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full ">2</span>
-          </button> */}
-        {/* Message Dropdown */}
-        {/* {showMessageDropdown && (
-            <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg p-4 z-10 animate-dropdown">
-              <div className="text-sm text-gray-700">No new messages</div>
-            </div>
-          )} */}
-        {/* </div> */}
 
-        {/* User Avatar and Dropdown */}
+        {/* User Menu */}
         <div className="relative" ref={userRef}>
           <button
             onClick={() => setShowUserDropdown((prev) => !prev)}
@@ -136,13 +175,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <span className="hidden sm:inline-block text-sm sm:text-base font-semibold text-alice-black">
               {userName}
             </span>
-            <svg
-              width="10"
-              height="6"
-              viewBox="0 0 10 6"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
               <path
                 d="M9 1L5.00002 5L1 1"
                 stroke="black"
@@ -153,47 +186,43 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </svg>
           </button>
 
-          {/* User Dropdown */}
           {showUserDropdown && (
-            <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
-
-              {/* Profile */}
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
               <button
-                onClick={() => {
-                  navigate("/child-basic-info");
-                  setIsSidebarOpen(false);
-                }}
-                className={`flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 transition-colors duration-300 ${
-                  location.pathname === "/child-basic-info" 
-                    ? "text-alice-teal bg-alice-teal/10 font-semibold" 
-                    : "text-gray-700 hover:text-alice-teal hover:bg-alice-teal/10"
-                }`}
+                onClick={() => navigate("/child-basic-info")}
+                className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
               >
                 <User className="w-5 h-5" />
                 Profile
               </button>
 
-              {/* Chat */}
               <button
-                onClick={() => {
-                  onNewChat();
-                }}
-                className={`flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 transition-colors duration-300 ${
-                  location.pathname === "/chat" 
-                    ? "text-alice-teal bg-alice-teal/10 font-semibold" 
-                    : "text-gray-700 hover:text-alice-teal hover:bg-alice-teal/10"
-                }`}
+                onClick={() => onNewChat()}
+                className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
               >
                 <MessageCircle className="w-5 h-5" />
                 Chat
               </button>
 
+              <button
+                onClick={() => {
+                  setShowChangePassword(true);
+                  setFormData({ current_password: "", new_password: "", confirm_password: "" });
+                  setShowConfirm(false);
+                  setShowNew(false);
+                  setShowCurrent(false);
+                }}
+                className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
+              >
+                <Lock className="w-5 h-5" />
+                Change Password
+              </button>
+
               <hr className="my-1 border-gray-200" />
 
-              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 transition-colors duration-300 hover:bg-alice-teal/10"
+                className="flex items-center gap-2 w-full text-left text-base text-gray-700 hover:text-alice-teal rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
@@ -201,8 +230,124 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </div>
           )}
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Change Password Modal */}
+      {showChangePassword && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Change Password
+            </h3>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              {/* Current Password */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Current Password <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showCurrent ? "text" : "password"}
+                  value={formData.current_password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, current_password: e.target.value })
+                  }
+                  className={`w-full border ${errors.current_password
+                    ? "border-red-400 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-alice-teal"
+                    } rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrent(!showCurrent)}
+                  className="absolute right-3 top-8 text-gray-500 hover:text-gray-700"
+                >
+                  {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.current_password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.current_password}</p>
+                )}
+              </div>
+
+              {/* New Password */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showNew ? "text" : "password"}
+                  value={formData.new_password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, new_password: e.target.value })
+                  }
+                  className={`w-full border ${errors.new_password
+                    ? "border-red-400 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-alice-teal"
+                    } rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  className="absolute right-3 top-8 text-gray-500 hover:text-gray-700"
+                >
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.new_password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.new_password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={formData.confirm_password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, confirm_password: e.target.value })
+                  }
+                  className={`w-full border ${errors.confirm_password
+                    ? "border-red-400 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-alice-teal"
+                    } rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-8 text-gray-500 hover:text-gray-700"
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.confirm_password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.confirm_password}</p>
+                )}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowChangePassword(false)}
+                  className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`px-5 py-2 rounded-lg bg-alice-teal text-white font-semibold hover:bg-teal-700 transition ${loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                >
+                  {loading ? "Saving..." : "Change Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

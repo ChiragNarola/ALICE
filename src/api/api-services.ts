@@ -1054,6 +1054,36 @@ export const resetPassword = async (
   }
 };
 
+export const changePassword = async (
+  current_password: string,
+  new_password: string
 
+): Promise<APIResponse<null>> => {
+  const urlEncoded = new URLSearchParams();
+  urlEncoded.append("current_password", current_password);
+  urlEncoded.append("new_password", new_password);
+
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/users/change_password",
+      urlEncoded.toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Change Password reset failed.",
+      }
+    );
+  }
+};
 
 
