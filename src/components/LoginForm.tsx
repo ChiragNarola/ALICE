@@ -130,13 +130,13 @@ const LoginForm = () => {
           <input
             type="checkbox"
             checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)} 
+            onChange={(e) => setRememberMe(e.target.checked)}
             className="w-6 h-6 border border-[#1B1B1B80] rounded-[4px] bg-[#FEFCF8] accent-alice-teal focus:ring-0"
           />
           Keep me logged in
         </label>
         <a
-          href="#"
+          href="/forgotpassword"
           className="text-alice-teal font-semibold text-[14px] lg:text-base hover:underline"
         >
           Forgot Password?
