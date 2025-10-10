@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { MessagesSquare } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (e: React.FormEvent<HTMLFormElement>, file?: File | null) => void;
