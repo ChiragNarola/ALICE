@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { MessagesSquare } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (e: React.FormEvent<HTMLFormElement>, file?: File | null) => void;
@@ -47,7 +48,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <>
-      <div className="w-full flex flex-col gap-2 absolute bottom-0 px-2">
+      <div className="w-full flex flex-col gap-2 px-2">
         {/* Recommended Questions */}
         {recommendedQuestionsList?.length > 0 && (
           <div className="recommended-questions flex flex-wrap gap-2 mb-2">
