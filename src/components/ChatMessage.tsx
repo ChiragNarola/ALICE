@@ -6,8 +6,7 @@ import "tippy.js/dist/tippy.css";
 import { Copy, ThumbsDown, ThumbsUp,Download } from "lucide-react";
 import TypingIndicator from "./ui/TypingIndicator";
 import ReactMarkdown from "react-markdown";
-import html2pdf from "html2pdf.js";
-
+import { jsPDF } from "jspdf";
 
 interface ChatMessageProps {
     id?: number | undefined;
@@ -94,69 +93,50 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
     
 const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
-  // Clean up text:
-  // - Remove [File:...] tags
-  // - Convert **bold** to <strong>
-  // - Ensure proper line breaks
-  const cleanText = text
-    .replace(/\[File:.*?\]/gi, "")
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Markdown bold
-    .replace(/\n{2,}/g, "\n") // Multiple blank lines → single
-    .replace(/\n/g, "<br/>"); // Newlines → <br/>
+  const doc = new jsPDF("p", "mm", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 10;
+  const lineHeight = 7;
 
-  // Create a temporary container for pdf content
-  const container = document.createElement("div");
+  // Clean text: remove file tags, keep line breaks
+  const cleanText = text.replace(/\[File:.*?\]/gi, "").replace(/\n{2,}/g, "\n");
 
-  // Container Styling - ChatGPT-like export style
-  container.style.width = "100%";
-  container.style.padding = "24px";
-  container.style.fontFamily = "'Helvetica Neue', Arial, sans-serif";
-  container.style.fontSize = "14px";
-  container.style.lineHeight = "1.6";
-  container.style.background = "#ffffff"; // Clean white background
-  container.style.color = "#1b1b1b";
-
-  // Timestamp (smaller and subtle)
-  const timeHtml = timestamp
-    ? `<div style="font-size:12px;color:#666;margin-bottom:12px;">
-         ${timestamp}
-       </div>`
-    : "";
-
-  // Sender label (System or You)
   const sender = isAlice ? "System Response" : "User Message";
+  let y = margin;
 
-  const senderHtml = `
-    <div style="
-      font-weight:600;
-      font-size:16px;
-      margin-bottom:8px;
-      color:#333;
-    ">
-      ${sender}
-    </div>
-  `;
+  // Timestamp
+  if (timestamp) {
+    doc.setFontSize(10);
+    doc.setTextColor("#666");
+    doc.text(timestamp, margin, y);
+    y += lineHeight + 2;
+  }
 
-  // Final HTML to render inside the container
-  container.innerHTML = `
-    ${timeHtml}
-    ${senderHtml}
-    <div style="white-space:normal;font-size:14px;color:#222;">
-      ${cleanText}
-    </div>
-  `;
+  // Sender label
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor("#333");
+  doc.text(sender, margin, y);
+  y += lineHeight + 2;
 
-  // Generate the PDF
-  html2pdf()
-    .set({
-      margin: 10,
-      filename: `${sender.replace(/\s+/g, "_").toLowerCase()}_${Date.now()}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    })
-    .from(container)
-    .save();
+  // Message text (split into lines to wrap inside PDF width)
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor("#222");
+
+  const lines = doc.splitTextToSize(cleanText, pageWidth - 2 * margin);
+
+  for (let i = 0; i < lines.length; i++) {
+    if (y + lineHeight > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+    doc.text(lines[i], margin, y);
+    y += lineHeight;
+  }
+
+  doc.save(`${sender.replace(/\s+/g, "_").toLowerCase()}_${Date.now()}.pdf`);
 };
 
     return (
