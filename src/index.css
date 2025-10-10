@@ -164,7 +164,7 @@ body {
 .recommended-questions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin: 8px 0;
 }
 
