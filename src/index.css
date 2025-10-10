@@ -164,12 +164,11 @@ body {
 .recommended-questions {
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   margin: 8px 0;
 }
 
 .recommended-question-btn {
-  white-space: nowrap;
   padding: 6px 12px;
   border-radius: 16px;
   border: none;
