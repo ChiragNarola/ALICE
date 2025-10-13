@@ -367,7 +367,7 @@ const ChatPage: React.FC = () => {
     recommendedQuestions?.recommended.map((item: any, index: any) => (
       <button
         key={index}
-        className="recommended-question-btn"
+        className="recommended-question-btn text-sm"
         onClick={() => handlerecommendedMessage(item.ai_recommended)}
       >
         <div>
@@ -394,7 +394,7 @@ const ChatPage: React.FC = () => {
         </section>
 
         {/* Chat Section */}
-        <section className="flex-1 pr-5 h-[calc(100vh-140px)] relative">
+        <section className="flex-1 flex flex-col justify-between mb-1 pr-5 h-[calc(100vh-140px)] relative">
           {isChatVisible && (
             <>
               <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
