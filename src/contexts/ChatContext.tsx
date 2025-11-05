@@ -24,7 +24,7 @@ type ChatContextType = {
 
     hasAskedQuestion: boolean;
     setHasAskedQuestion: React.Dispatch<React.SetStateAction<boolean>>;
-    chatBordUniqueId: string;
+    chatBordUniqueId: string | null;
     setChatboardUniqueId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
@@ -45,7 +45,7 @@ export const ChatProvider = ({ children }: { children: any }) => {
     const addMessage = (msg: ChatMessageUI) => setMessages((prev) => [...prev, msg]);
     const clearMessages = () => setMessages([]);
     const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
-    const [chatBordUniqueId, setChatboardUniqueId] = useState("");
+    const [chatBordUniqueId, setChatboardUniqueId] = useState<string | null>("");
     
 
 

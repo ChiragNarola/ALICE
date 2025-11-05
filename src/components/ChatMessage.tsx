@@ -15,7 +15,7 @@ interface ChatMessageProps {
     actions?: boolean;
     userimg: string;
     user_response?: string | null; // "like", "dislike", or null
-    chatBordUniqueId: string;
+    chatBordUniqueId: string | null;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({

@@ -12,7 +12,7 @@ type Message = {
 
 interface ChatMessagesProps {
   messages: Message[];
-  chatBordUniqueId: string;
+  chatBordUniqueId: string | null;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId }) => {
