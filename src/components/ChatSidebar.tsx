@@ -7,6 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import PageLoader from "./common/PageLoader";
+import { v4 as uuidv4 } from "uuid";
+
 
 interface ChatSidebarProps {
   setIsSidebarOpen?: (open: boolean) => void;
@@ -52,7 +54,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     setSelectedConversationId,
     mapApiToUI,
     chatList,
-    setHasAskedQuestion
+    setHasAskedQuestion,
+    setChatboardUniqueId
   } = useChat();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -114,6 +117,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     setIsSidebarOpen?.(false);
     setIsLoading(true);
     setHasAskedQuestion(false);
+    const uniqueId = uuidv4();
+    setChatboardUniqueId(uniqueId);
 
     setTimeout(() => {
       navigate("/chat");

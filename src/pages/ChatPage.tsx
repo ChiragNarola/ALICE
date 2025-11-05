@@ -23,12 +23,12 @@ type Message = {
 
 const ChatPage: React.FC = () => {
 
-  const { messages, refreshChatList, hasAskedQuestion, setHasAskedQuestion } = useChat();
+  const { messages, refreshChatList, hasAskedQuestion, setHasAskedQuestion, setChatboardUniqueId, chatBordUniqueId } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const location = useLocation();
   const [message, setMessage] = useState("");
-  const [chatBordUniqueId, setChatboardUniqueId] = useState("");
+  // const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
   const { startTracking, stopTracking, chatCount, timeSpent } = useChatActivity();
   const [activeTab, setActiveTab] = useState<'parent' | 'staff'>('parent');
@@ -146,6 +146,7 @@ const ChatPage: React.FC = () => {
     } else {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
+      console.log("Generated new conversation UUID:", uniqueId);
     }
     if (user) {
       getquestions(user.id).then((response) => {

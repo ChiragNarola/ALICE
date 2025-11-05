@@ -977,7 +977,7 @@ export const listNamespace = async (): Promise<APIResponse<any>> => {
 
 export const getquestions = async (user_id: number): Promise<APIResponse<AIrecommendedDTO[]>> => {
   try {
-    const res = await axiosInstance.get("question", {
+    const res = await axiosInstance.get("question/", {
       params: { user_id },
     });
     return res.data;

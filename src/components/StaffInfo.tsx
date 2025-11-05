@@ -5,8 +5,8 @@ const StaffInfo: React.FC = () => {
   const [staffData, setStaffData] = useState({
     jobTitle: "",
     qualification: "",
-    childAgeMin: 1,
-    childAgeMax: 9,
+    childAgeMin: 0,
+    childAgeMax: 5,
   });
   const [loading, setLoading] = useState(true);
 
@@ -22,10 +22,10 @@ const StaffInfo: React.FC = () => {
         if (staff_response.IsSuccess && staff_response.Data) {
           const data = staff_response.Data;
 
-          // Parse age group (e.g., "1-9" -> min: 1, max: 9)
-          const ageRange = data.age_group ? data.age_group.split('-') : ['1', '9'];
-          const minAge = parseInt(ageRange[0]) || 1;
-          const maxAge = parseInt(ageRange[1]) || 9;
+          // Parse age group (e.g., "0-5" -> min: 0, max: 5)
+          const ageRange = data.age_group ? data.age_group.split('-') : ['0', '5'];
+          const minAge = parseInt(ageRange[0]) || 0;
+          const maxAge = parseInt(ageRange[1]) || 5;
 
           setStaffData({
             jobTitle: data.role_in_organisation || "",
@@ -124,18 +124,35 @@ const StaffInfo: React.FC = () => {
               </div>
 
               {/* Age Range Display */}
-              <div className="relative mb-4">
+              {/* <div className="relative mb-4">
                 <div className="relative h-3 bg-gray-200 rounded-full">
                   <div
                     className="absolute h-3 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full shadow-sm"
                     style={{
-                      left: `${((staffData.childAgeMin - 0) / (staffData.childAgeMax + 1)) * 100}%`,
+                      left: `${((staffData.childAgeMin - 0) / (staffData.childAgeMax)) * 100}%`,
                       width: `${((staffData.childAgeMax - staffData.childAgeMin) / (staffData.childAgeMax + 1)) * 100}%`
                     }}
                   ></div>
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-3">
                   {Array.from({ length: staffData.childAgeMax + 2 }, (_, i) => (
+                    <span key={i} className="font-medium">{i}</span>
+                  ))}
+                </div>
+              </div> */}
+
+              <div className="relative mb-4">
+                <div className="relative h-3 bg-gray-200 rounded-full">
+                  <div
+                    className="absolute h-3 bg-gradient-to-r from-teal-500 to-teal-600 rounded-full shadow-sm"
+                    style={{
+                      left: `${(staffData.childAgeMin / 5) * 100}%`,
+                      width: `${((staffData.childAgeMax - staffData.childAgeMin) / 5) * 100}%`
+                    }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-3">
+                  {Array.from({ length: 6 }, (_, i) => (
                     <span key={i} className="font-medium">{i}</span>
                   ))}
                 </div>

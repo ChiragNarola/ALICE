@@ -102,7 +102,7 @@ const onSubmit = async (data: SignupFormInputs) => {
       {/* Phone Input */}
       <div className="mb-6 flex-1">
         <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px] z-10">
-          <span className="bg-[#FEFCF8] px-[5px]">Mobile Number </span>
+          <span className="bg-[#FEFCF8] px-[5px]">Mobile Number <span className="text-red-500">*</span></span>
         </label>
         <Controller
           name="contact_number"

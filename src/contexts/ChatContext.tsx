@@ -24,6 +24,8 @@ type ChatContextType = {
 
     hasAskedQuestion: boolean;
     setHasAskedQuestion: React.Dispatch<React.SetStateAction<boolean>>;
+    chatBordUniqueId: string;
+    setChatboardUniqueId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -43,6 +45,8 @@ export const ChatProvider = ({ children }: { children: any }) => {
     const addMessage = (msg: ChatMessageUI) => setMessages((prev) => [...prev, msg]);
     const clearMessages = () => setMessages([]);
     const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
+    const [chatBordUniqueId, setChatboardUniqueId] = useState("");
+    
 
 
     const ensureAliceIntro = (text = DEFAULT_ALICE_TEXT) => {
@@ -107,6 +111,8 @@ export const ChatProvider = ({ children }: { children: any }) => {
             isLoadingChatList,
             hasAskedQuestion,
             setHasAskedQuestion,
+            chatBordUniqueId,
+            setChatboardUniqueId,
         }),
         [messages, selectedConversationId, chatList, isLoadingChatList]
     );
