@@ -97,7 +97,7 @@ const EmailVerification = () => {
             )}
           </div>
 
-          <p className="text-[13px] text-alice-darkgray mt-1">
+          <p className="text-[13px] text-alice-darkgray mt-1 text-center">
             Didn’t receive the code? Check your junk inbox.
           </p>
 
