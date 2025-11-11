@@ -97,6 +97,10 @@ const EmailVerification = () => {
             )}
           </div>
 
+          <p className="text-[13px] text-alice-darkgray mt-1">
+            Didn’t receive the code? Check your junk inbox.
+          </p>
+
           {/* Verify Button */}
           <button
             type="submit"
