@@ -21,11 +21,30 @@ function AppContent() {
   const roles: string[] = parsedUser?.roles || [];
   const isLockableRole = roles.includes("staff");
 
-  const [locked, setLocked] = useState<boolean>(() => {
-    return isLockableRole && localStorage.getItem("isLocked") === "true";
-  });
+  const excludedRoutes = [
+    "/login",
+    "/signup",
+    "/email-verification",
+    "/forgotpassword",
+    "/resetpassword",
+    "/admin/login",
+    "/admin/dashboard",
+    "/admin/user",
+    "/admin/staff",
+    "/admin/concerns",
+    "/admin/area-of-interest",
+    "/admin/documents"
+  ];
 
-  const publicRoutes = ["/login","/signup","/email-verification","/forgotpassword","/resetpassword"];
+  const [locked, setLocked] = useState<boolean>(() => {
+    const path = window.location.pathname;
+    const isExcluded = excludedRoutes.some((route) => path.startsWith(route));
+    return (
+      isLockableRole &&
+      localStorage.getItem("isLocked") === "true" &&
+      !isExcluded
+    );
+  });
 
   useEffect(() => {
     const checkUser = () => {
@@ -37,12 +56,12 @@ function AppContent() {
           setParsedUser(newUser);
         }
       } else if (parsedUser) {
-        setParsedUser(null); // if logged out
+        setParsedUser(null);
       }
     };
 
     window.addEventListener("storage", checkUser);
-    const interval = setInterval(checkUser, 1000); 
+    const interval = setInterval(checkUser, 1000);
     return () => {
       clearInterval(interval);
       window.removeEventListener("storage", checkUser);
@@ -51,7 +70,9 @@ function AppContent() {
 
   useAutoLock(() => {
     const path = window.location.pathname;
-    if (isLockableRole && !publicRoutes.includes(path)) {
+    const isExcluded = excludedRoutes.some((route) => path.startsWith(route));
+
+    if (isLockableRole && !isExcluded) {
       setLocked(true);
       localStorage.setItem("isLocked", "true");
     }
