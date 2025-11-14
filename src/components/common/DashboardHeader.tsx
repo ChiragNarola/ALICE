@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import { useChat } from "../../contexts/ChatContext";
 import { User, MessageCircle, LogOut, Lock, Eye, EyeOff } from "lucide-react";
-import { changePassword } from "../../api/api-services";
+import { changePassword, setPin } from "../../api/api-services";
 import { toast } from "react-toastify";
 
 interface DashboardHeaderProps {
@@ -51,14 +51,24 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  //set pin
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [showSetPin,setShowSetPin]=useState(false);
+  const [pinData, setPinData] = useState({
+    pin: "",
+    confirm_pin: "",
+  });
+
   useEffect(() => {
     const storedUser = sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUserName(`${parsedUser.firstName} ${parsedUser.lastName}`);
+        setUserRoles(parsedUser.roles || [] );
       } catch {
         setUserName("");
+        setUserRoles([]);
       }
     }
   }, []);
@@ -138,6 +148,49 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }
   };
 
+  const validateSetPin = () => {
+    const newErrors: { [key: string]: string } = {};
+    const { pin, confirm_pin } = pinData;
+
+    // if (!pin.trim()) newErrors.current_password = "Pin is required.";
+    if (!pin.trim()) {
+      newErrors.pin = "Pin is required.";
+    } else if (!/^\d{4}$/.test(pin)) {
+      newErrors.pin = "Pin must be exactly 4 digits";
+    }
+    if (!confirm_pin.trim()) newErrors.confirm_pin = "Please confirm your pin.";
+    else if (confirm_pin !== pin) newErrors.confirm_pin = "Pins do not match.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
+  const handleSetPin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateSetPin()) return;
+    setLoading(true);
+
+    try {
+      const response = await setPin(pinData.pin);
+
+      if (response.IsSuccess) {
+        toast.success("Pin set successfully!");
+        setShowSetPin(false);
+        setPinData({ pin: "", confirm_pin: ""});
+        setShowConfirm(false);
+        setShowNew(false);
+        setShowCurrent(false);
+        setErrors({});
+      } else {
+        toast.error(response.Message || "Failed to set pin.");
+      }
+    } catch (error: any) {
+      toast.error(error?.Message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Header */}
@@ -189,7 +242,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {showUserDropdown && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 px-2 z-10 animate-dropdown">
               <button
-                onClick={() => navigate("/child-basic-info")}
+                onClick={() => {navigate("/child-basic-info"); 
+                  setShowUserDropdown(false);}}
                 className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
               >
                 <User className="w-5 h-5" />
@@ -197,7 +251,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </button>
 
               <button
-                onClick={() => onNewChat()}
+                onClick={() => {onNewChat();
+                  setShowUserDropdown(false);
+                }}
                 className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
               >
                 <MessageCircle className="w-5 h-5" />
@@ -211,12 +267,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   setShowConfirm(false);
                   setShowNew(false);
                   setShowCurrent(false);
+                  setShowUserDropdown(false);
                 }}
                 className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
               >
                 <Lock className="w-5 h-5" />
                 Change Password
               </button>
+
+              {userRoles.includes("staff") && (
+              <button
+                onClick={() => setShowSetPin(true)}
+                className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
+              >
+                <Lock className="w-5 h-5" />
+                Set Pin
+              </button>
+            )}
 
               <hr className="my-1 border-gray-200" />
 
@@ -341,6 +408,95 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     }`}
                 >
                   {loading ? "Saving..." : "Change Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Set Pin Modal */}
+      {showSetPin && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Set Pin
+            </h3>
+
+            <form onSubmit={handleSetPin} className="space-y-4">
+              
+              {/* Set Pin */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pin <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showNew ? "text" : "password"}
+                  value={pinData.pin}
+                  onChange={(e) =>
+                    setPinData({ ...pinData, pin: e.target.value })
+                  }
+                  className={`w-full border ${errors.pin
+                    ? "border-red-400 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-alice-teal"
+                    } rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  className="absolute right-3 top-8 text-gray-500 hover:text-gray-700"
+                >
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.pin && (
+                  <p className="text-red-500 text-sm mt-1">{errors.pin}</p>
+                )}
+              </div>
+
+              {/* Confirm Pin */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Pin <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={pinData.confirm_pin}
+                  onChange={(e) =>
+                    setPinData({ ...pinData, confirm_pin: e.target.value })
+                  }
+                  className={`w-full border ${errors.confirm_pin
+                    ? "border-red-400 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-alice-teal"
+                    } rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-8 text-gray-500 hover:text-gray-700"
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.confirm_pin && (
+                  <p className="text-red-500 text-sm mt-1">{errors.confirm_pin}</p>
+                )}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowSetPin(false)}
+                  className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`px-5 py-2 rounded-lg bg-alice-teal text-white font-semibold hover:bg-teal-700 transition ${loading ? "opacity-70 cursor-not-allowed" : ""
+                    }`}
+                >
+                  {loading ? "Saving..." : "Set Pin"}
                 </button>
               </div>
             </form>
