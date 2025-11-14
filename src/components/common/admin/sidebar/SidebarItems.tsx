@@ -3,7 +3,9 @@ import {
   Users,
   Laptop2,
   ClipboardCheck,
-  FileText
+  FileText,
+  Origami,
+  CalendarDays
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -59,6 +61,16 @@ export const useSidebarItems = (): SidebarItem[] => {
       title: "Documents",
       icon: FileText,
       href: "/admin/documents",
+    },
+    {
+      title: "Holiday Calendar",
+      icon: CalendarDays,
+      href: "/admin/holiday-calendar",
+    },
+    {
+      title: "Nursary",
+      icon: Origami,
+      href: "/admin/nursaries",
     },
     // {
     //   title: "Settings",
