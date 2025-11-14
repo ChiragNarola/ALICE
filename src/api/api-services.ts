@@ -3,8 +3,9 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
+import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
 
 //Auth
@@ -1146,4 +1147,98 @@ export const verifyPin = async (
   }
 };
 
+export const uploadHolidayPdf = async (
+  pdf_file: File
 
+): Promise<APIResponse<null>> => {
+  const formData = new FormData();
+  formData.append("pdf_file", pdf_file);
+
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "admin/holiday",
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "PDF upload failed.",
+      }
+    );
+  }
+};
+
+export const listHolidays = async (): Promise<APIResponse<HolidayItem[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/holiday");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching holiday list failed",
+      }
+    );
+  }
+};
+
+export const deleteHoliday = async (id: number): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(`admin/holiday/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || { message: 'Delete failed' };
+  }
+};
+
+export const createNursery = async (data:CreateNurseryDTO): Promise<APIResponse<any>> => {
+  // const urlEncoded = new URLSearchParams();
+  // formData.forEach((value, key) => {
+  //   urlEncoded.append(key, value.toString());
+  // });
+  try {
+    const response = await axiosInstance.post<APIResponse<any>>(
+      "/admin/nursery",
+      data
+    );
+    //   {
+    //     headers: {
+    //       "Content-Type": "application/x-www-form-urlencoded",
+    //     },
+    //   }
+    // );
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to create nursery",
+    };
+  }
+};
+
+export const getNursery = async (): Promise<APIResponse<NurseryDTO[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/nursery");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching nursery list failed",
+      }
+    );
+  }
+};

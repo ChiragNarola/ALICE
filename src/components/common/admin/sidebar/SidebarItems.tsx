@@ -4,7 +4,7 @@ import {
   Laptop2,
   ClipboardCheck,
   FileText,
-  Origami,
+  School,
   CalendarDays
 } from "lucide-react";
 
@@ -68,9 +68,9 @@ export const useSidebarItems = (): SidebarItem[] => {
       href: "/admin/holiday-calendar",
     },
     {
-      title: "Nursary",
-      icon: Origami,
-      href: "/admin/nursaries",
+      title: "Nursery",
+      icon: School,
+      href: "/admin/nursery",
     },
     // {
     //   title: "Settings",

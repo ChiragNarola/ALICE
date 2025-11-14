@@ -3,17 +3,18 @@ import Modal from "../../ui/Modal";
 import { Check } from "lucide-react";
 import { useState } from "react";
 
-interface AddAreaOfInterestModalProps {
+interface AddNurseryModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (areaOfInterest: string) => void;
+    onAdd: (nursery_name: string, description:string) => void;
 }
 
 interface FormValues {
-    areaOfInterest: string;
+    nursery_name: string;
+    description: string;
 }
 
-export default function AddAreaOfInterestModal({ isOpen, onClose, onAdd }: AddAreaOfInterestModalProps) {
+export default function AddNurseryModal({ isOpen, onClose, onAdd }: AddNurseryModalProps) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
     const [loading, setLoading] = useState(false);
 
@@ -24,7 +25,7 @@ export default function AddAreaOfInterestModal({ isOpen, onClose, onAdd }: AddAr
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            onAdd(data.areaOfInterest.trim());
+            onAdd(data.nursery_name.trim(),data.description.trim());
             reset();
             onClose();
         } catch (err) {
@@ -37,20 +38,39 @@ export default function AddAreaOfInterestModal({ isOpen, onClose, onAdd }: AddAr
     if (!isOpen) return null;
 
     return (
-        <Modal title="Add New Area of Interest" onClose={onClose}>
+        <Modal title="Add New Nursery" onClose={onClose}>
             <form className="flex flex-col space-y-2" onSubmit={handleSubmit(onSubmit)}>
-                <label htmlFor="areaOfInterest" className="mb-1 text-sm font-medium text-gray-700">
-                    Area of Interest Title <span className="text-red-500">*</span>
+                <div>
+                <label htmlFor="nurseryName" className="mb-1 text-sm font-medium text-gray-700">
+                    Nursery Name <span className="text-red-500">*</span>
                 </label>
                 <input
-                    id="areaOfInterest"
+                    id="nursery_name"
                     type="text"
-                    placeholder="Enter Area of Interest..."
-                    {...register("areaOfInterest", { required: "Area of Interest title is required" })}
-                    className={`w-full pl-3 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm ${errors.areaOfInterest ? "border-red-500" : "border-gray-300"}`
+                    placeholder="Enter Nursery Name..."
+                    {...register("nursery_name", { required: "Nursery name is required" })}
+                    className={`w-full pl-3 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm ${errors.nursery_name ? "border-red-500" : "border-gray-300"}`
                     }
                 />
-                {errors.areaOfInterest && <p className="text-red-500 text-xs">{errors.areaOfInterest.message}</p>}
+                {errors.nursery_name && <p className="text-red-500 text-xs">{errors.nursery_name.message}</p>}
+                </div>
+
+                <div>
+                <label htmlFor="description" className="mb-1 text-sm font-medium text-gray-700">
+                    Description <span className="text-red-500">*</span>
+                </label>
+                <input
+                    id="description"
+                    type="text"
+                    placeholder="Enter Description..."
+                    {...register("description", { required: "Description is required" })}
+                    className={`w-full pl-3 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm ${errors.description ? "border-red-500" : "border-gray-300"}`
+                    }
+                />
+                {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
+                </div>
+
+
 
                 <div className="flex justify-end space-x-2 mt-2">
                     <button

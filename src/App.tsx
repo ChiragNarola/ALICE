@@ -33,7 +33,9 @@ function AppContent() {
     "/admin/staff",
     "/admin/concerns",
     "/admin/area-of-interest",
-    "/admin/documents"
+    "/admin/documents",
+    "/admin/holiday-calendar",
+    "/admin/nursery"
   ];
 
   const [locked, setLocked] = useState<boolean>(() => {

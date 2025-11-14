@@ -42,3 +42,21 @@ export interface staffDTO {
     qualification: string;
     role_in_organisation: string;
 }
+
+export interface HolidayItem {
+  id: number;
+  title: string;
+  holiday_date: string;
+  end_date: string | null;
+}
+
+export interface CreateNurseryDTO{
+    nursery_name: string;
+    description: string;
+}
+
+export interface NurseryDTO{
+    id: number;
+    nursery_name: string;
+    description: string;
+}

@@ -19,8 +19,8 @@ import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInter
 import UploadedDocsList from "../components/admin/uploadDocument";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
-import HolidayListing from "../components/admin/holidayList";
-import NursariesList from "../components/admin/nursariesList";
+import HolidayList from "../components/admin/holidayList";
+import Nursery from "../components/admin/nursery/nurseryList";
 
 export default function AppRouter() {
     return (
@@ -58,8 +58,8 @@ export default function AppRouter() {
                     <Route path="concerns" element={<ConcernList />} />
                     <Route path="area-of-interest" element={<AreaofinterestList />} />
                     <Route path="documents" element={<UploadedDocsList />} />
-                    <Route path="holiday-calendar" element={<HolidayListing />} />
-                    <Route path="nursaries" element={<NursariesList />} />
+                    <Route path="holiday-calendar" element={<HolidayList />} />
+                    <Route path="nursery" element={<Nursery />} />
                 </Route>
             </Route>
 
