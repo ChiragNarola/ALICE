@@ -134,6 +134,7 @@ const ChildBasicInformation: React.FC = () => {
         formData.append("age_group", finalData.age_group);
         formData.append("role_in_organisation", finalData.role_in_organisation == 'Other' ? finalData.other_role : finalData.role_in_organisation);
         formData.append("qualification", finalData.qualification);
+        formData.append("nursery",finalData.nursery.join(","));
         return formData;
       };
 
@@ -321,18 +322,27 @@ const ChildBasicInformation: React.FC = () => {
 
         if (isStaff) {
           const staff_response = await getStaffDetailsForLoginUser();
+          console.log("staff response is:",staff_response)
           if (staff_response.IsSuccess) {
             setSteps(prevSteps =>
               prevSteps.map(step =>
                 [3].includes(step.id) ? { ...step, isCompleted: true } : step
               )
             );
+
+            const nurseryNames = Array.isArray(staff_response.Data.nursery_names) && staff_response.Data.nursery_names.length > 0
+                      ? staff_response.Data.nursery_names.join(", ")
+                      : staff_response.Data.nursery_names || "";
+
             setStaffData({
               role_in_organisation: staff_response.Data.role_in_organisation || "",
               qualification: staff_response.Data.qualification || "",
               age_group: staff_response.Data.age_group || "1-5",
+              nurseryName: nurseryNames,
+
               // other_role: staff_response.Data.
             });
+            
           }
         }
       } catch (error) {

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MultiRangeSlider from "multi-range-slider-react";
 import { staffJobRole,getNursery } from "../api/api-services";
+import type { NurseryItem } from "../routes/models/response/Response";
 
 const reviewSchema = z
   .object({
@@ -15,7 +16,7 @@ const reviewSchema = z
       .string()
       .regex(/^\d+\-\d+$/, "Age group must be in format min-max"),
     other_role: z.string().optional(),
-    nursery: z.string().nonempty("Nusery is required")
+    nursery: z.array(z.number().min(1)).min(1, "At least one nursery must be selected")
   })
   .refine(
     (data) => {
@@ -54,7 +55,7 @@ const Step4ReviewSubmit = forwardRef<
       role_in_organisation: "Manager",
       other_role: "",
       qualification: "",
-      nursery: "",
+      nursery: [] as number[],
       age_group: "1-5",
     },
     resolver: zodResolver(reviewSchema),
@@ -65,7 +66,7 @@ const Step4ReviewSubmit = forwardRef<
   const [pendingData, setPendingData] = useState<ReviewFormValues | null>(null);
   const selectedRole = watch("role_in_organisation");
   const prevRoleRef = useRef<string>("");
-  const [nurseryList, setNurseryList]=useState<string[]>([]);
+  const [nurseryList, setNurseryList] = useState<NurseryItem[]>([]);
 
   useEffect(() => {
     const jobList = async () => {
@@ -92,7 +93,7 @@ const Step4ReviewSubmit = forwardRef<
   }, [selectedRole, setValue, clearErrors]);
 
   useEffect(() => {
-    if (jobTitle.length && pendingData) {
+    if (jobTitle.length && nurseryList.length && pendingData) {
       const incomingRole = pendingData.role_in_organisation || "";
       let finalRole = incomingRole;
       let finalOtherRole = "";
@@ -102,16 +103,25 @@ const Step4ReviewSubmit = forwardRef<
         finalOtherRole = incomingRole.trim();
       }
 
+      const normalizeNursery = (val: any): number[] => {
+        if (Array.isArray(val)) return val.map(Number);
+        if (typeof val === "string") return val.split(",").map(s => Number(s.trim()));
+        if (typeof val === "number") return [val];
+        return [];
+      };
+
       reset({
         role_in_organisation: finalRole,
         other_role: finalOtherRole,
         qualification: pendingData.qualification || "",
         age_group: pendingData.age_group || "1-5",
+        nursery: normalizeNursery(pendingData.nursery),
       });
 
       setPendingData(null);
     }
-  }, [jobTitle, pendingData, reset]);
+  }, [jobTitle, nurseryList, pendingData, reset]);
+
 
   useImperativeHandle(ref, () => ({
     validateAndSubmit: async () => {
@@ -119,6 +129,8 @@ const Step4ReviewSubmit = forwardRef<
       if (!isValid) return false;
 
       const values = getValues();
+      console.log("values are",values.nursery);
+
       const finalPayload = {
         ...values,
         role_in_organisation:
@@ -139,20 +151,25 @@ const Step4ReviewSubmit = forwardRef<
   }));
 
   useEffect(() => {
-    const loadNurseries = async () => {
-      try {
-        const res = await getNursery();
-        if (res.IsSuccess && Array.isArray(res.Data)) {
-          const names = res.Data.map((n) => n.nursery_name); 
-          setNurseryList(names);
+      const loadNurseries = async () => {
+        try {
+          const res = await getNursery();
+          if (res.IsSuccess && Array.isArray(res.Data)) {
+            // Map API response to objects with id + nursery_name
+            const nurseries = res.Data.map((n: any) => ({
+              id: Number(n.id),
+              name: n.nursery_name,
+            }));
+            setNurseryList(nurseries);
+          }
+        } catch (err) {
+          console.error("Error fetching nurseries:", err);
         }
-      } catch (err) {
-        console.error("Error fetching nurseries:", err);
-      }
-    };
+      };
 
-    loadNurseries();
-  }, []);
+      loadNurseries();
+    }, []);
+
 
 
   return (
@@ -304,7 +321,7 @@ const Step4ReviewSubmit = forwardRef<
   control={control}
   render={({ field }) => (
     <div className="w-full">
-      <Listbox value={field.value} onChange={field.onChange}>
+      <Listbox value={(field.value || []).map(Number)} onChange={(val: number[]) => field.onChange(val)} multiple>
         {({ open }) => (
           <div className="relative">
             {/* Selected Value */}
@@ -320,7 +337,12 @@ const Step4ReviewSubmit = forwardRef<
                 }`}
             >
               <span className="block truncate">
-                {field.value || "Select a nursery name"}
+                {field.value && field.value.length > 0
+                  ? nurseryList
+                      .filter(n => field.value.includes(n.id))
+                      .map(n => n.name)
+                      .join(", ")
+                  : "Select nursery"}
               </span>
               <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                 <ChevronUpDownIcon className="w-5 h-5 text-alice-darkgray" />
@@ -338,10 +360,10 @@ const Step4ReviewSubmit = forwardRef<
               <Listbox.Options
                 className="absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white border border-gray-200 shadow-lg focus:outline-none"
               >
-                {nurseryList.map((title, index) => (
+                {nurseryList.map((nur) => (
                   <Listbox.Option
-                    key={index}
-                    value={title}
+                    key={nur.id}
+                    value={nur.id}
                     className={({ active }) =>
                       `relative cursor-pointer select-none py-2 px-4 text-sm sm:text-base ${
                         active
@@ -357,7 +379,7 @@ const Step4ReviewSubmit = forwardRef<
                             selected ? "font-medium" : "font-normal"
                           }`}
                         >
-                          {title}
+                          {nur.name}
                         </span>
                         {selected && (
                           <CheckIcon className="w-5 h-5 text-white" />

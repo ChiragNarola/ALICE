@@ -41,6 +41,7 @@ export interface staffDTO {
     age_group: string;
     qualification: string;
     role_in_organisation: string;
+    nursery_names: string[];
 }
 
 export interface HolidayItem {
@@ -59,4 +60,9 @@ export interface NurseryDTO{
     id: number;
     nursery_name: string;
     description: string;
+}
+
+export interface NurseryItem {
+  id: number;
+  name: string;
 }

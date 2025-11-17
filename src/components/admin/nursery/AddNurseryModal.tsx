@@ -56,14 +56,17 @@ export default function AddNurseryModal({ isOpen, onClose, onAdd }: AddNurseryMo
                 </div>
 
                 <div>
-                <label htmlFor="description" className="mb-1 text-sm font-medium text-gray-700">
-                    Description <span className="text-red-500">*</span>
-                </label>
+               <label htmlFor="description" className="mb-1 text-sm font-medium text-gray-700">
+                    Overview <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                    (This will be used by the agent to give context about this nursery)
+                    </p>
                 <input
                     id="description"
                     type="text"
                     placeholder="Enter Description..."
-                    {...register("description", { required: "Description is required" })}
+                    {...register("description", { required: "Overview is required" })}
                     className={`w-full pl-3 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm ${errors.description ? "border-red-500" : "border-gray-300"}`
                     }
                 />
