@@ -5,7 +5,8 @@ import {
   ClipboardCheck,
   FileText,
   School,
-  CalendarDays
+  CalendarDays,
+  BadgeQuestionMark 
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -72,6 +73,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: School,
       href: "/admin/nursery",
     },
+    {
+      title: "FAQ",
+      icon: BadgeQuestionMark ,
+      href: "/admin/faq"
+    }
     // {
     //   title: "Settings",
     //   icon: Settings,

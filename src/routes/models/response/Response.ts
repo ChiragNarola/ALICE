@@ -64,5 +64,12 @@ export interface NurseryDTO{
 
 export interface NurseryItem {
   id: number;
-  name: string;
+  name?: string;
+}
+
+export interface FAQItem{
+    id: number;
+    question: string;
+    AI_answer: string;
+    human_answer: string;
 }
