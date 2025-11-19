@@ -154,12 +154,14 @@ const Step4ReviewSubmit = forwardRef<
       const loadNurseries = async () => {
         try {
           const res = await getNursery();
+          console.log("response is:",res)
           if (res.IsSuccess && Array.isArray(res.Data)) {
             // Map API response to objects with id + nursery_name
             const nurseries = res.Data.map((n: any) => ({
-              id: Number(n.id),
+              id: n.id,
               name: n.nursery_name,
             }));
+            console.log("nurseries from useffect is:",nurseries)
             setNurseryList(nurseries);
           }
         } catch (err) {

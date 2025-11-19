@@ -156,7 +156,7 @@ export default function Nursery(){
             ) : paginatedNursery.length === 0 ? (
                 <tr>
                 <Td colSpan={4} className="text-center text-gray-500 py-4">
-                    No holidays found.
+                    No nurseries found.
                 </Td>
                 </tr>
             ) : (
