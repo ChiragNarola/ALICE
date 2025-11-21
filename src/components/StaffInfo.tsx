@@ -94,18 +94,19 @@ const StaffInfo: React.FC = () => {
       ) : (
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="p-4 space-y-4">
-            {/* Job Title */}
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-bold text-gray-800">Job Title</h3>
+           {/* Job Title */}
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                </svg>
               </div>
-              <p className="text-gray-800 font-medium text-lg">{staffData.jobTitle}</p>
+              <h3 className="text-sm font-bold text-gray-800">Job Title</h3>
             </div>
+            <p className="text-gray-700 text-base">{staffData.jobTitle}</p>
+          </div>
+
 
             {/* Qualification */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
@@ -118,7 +119,7 @@ const StaffInfo: React.FC = () => {
                 </div>
                 <h3 className="text-sm font-bold text-gray-800">Qualification</h3>
               </div>
-              <p className="text-gray-800 font-medium text-lg">{staffData.qualification}</p>
+              <p className="text-gray-700 font-medium text-base">{staffData.qualification}</p>
             </div>
 
             {/* Nursery Name */}
@@ -132,7 +133,7 @@ const StaffInfo: React.FC = () => {
                 </div>
                 <h3 className="text-sm font-bold text-gray-800">Nursery</h3>
               </div>
-              <p className="text-gray-800 font-medium text-lg">{staffData.nurseryName}</p>
+              <p className="text-gray-700 font-medium text-base">{staffData.nurseryName}</p>
             </div>
 
             {/* Child Age Range */}

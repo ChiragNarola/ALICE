@@ -6,7 +6,7 @@ interface ChatInputProps {
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   searching: boolean;
-  recommendedQuestionsList: string[];
+  recommendedQuestionsList: React.ReactNode[];
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -44,13 +44,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
     setMessage("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+  console.log("recommended qs in chatinput:",recommendedQuestionsList)
 
   return (
     <>
       <div className="w-full flex flex-col gap-2 absolute bottom-0 px-2">
         {/* Recommended Questions */}
         {recommendedQuestionsList?.length > 0 && (
-          <div className="recommended-questions flex flex-wrap gap-2 mb-2">
+          <div className="flex flex-nowrap gap-2 w-full">
             {recommendedQuestionsList}
           </div>
         )}
