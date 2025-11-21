@@ -434,21 +434,29 @@ const ChatPage: React.FC = () => {
   };
 
 
-  const recommendedQuestionsList =
-  recommendedQuestions?.recommended
-    ? recommendedQuestions.recommended.map((item: any, index: number) => (
-        <button
-          key={index}
-          className="recommended-question-btn"
-          onClick={() => handlerecommendedMessage(item.ai_recommended)}
-        >
-          <div>
-            <b>{item.category}</b>
-          </div>
-          <div>{item.ai_recommended}</div>
-        </button>
-      ))
-    : [];
+  const recommendedQuestionsList = recommendedQuestions?.ai_recommended
+  ? recommendedQuestions.ai_recommended.map((question: string, index: number) => (
+      <button
+  key={index}
+  className="
+    recommended-question-btn
+    px-2 py-1 
+    border rounded 
+    text-sm 
+    text-left
+    break-words 
+    w-full
+  "
+  style={{ width: "33%" }} // each button takes 1/3 row
+  onClick={() => handlerecommendedMessage(question)}
+>
+  {question}
+</button>
+
+    ))
+  : [];
+
+
 
   // console.log("chat messages are:",chatMessages)
 
@@ -486,7 +494,7 @@ const ChatPage: React.FC = () => {
 
         {/* Children Info */}
         {user?.roles && (
-          <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px]">
+          <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px] h-[calc(100vh-140px)]">
             {user.roles.some(role => role.toLowerCase() === 'parent') && !user.roles.some(role => role.toLowerCase() === 'staff') && (
               <ChatChildInfo />
             )}
@@ -536,7 +544,7 @@ const ChatPage: React.FC = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-auto">
                   {activeTab === 'parent' && <ChatChildInfo />}
                   {activeTab === 'staff' && <StaffInfo />}
                 </div>

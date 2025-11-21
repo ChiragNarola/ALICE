@@ -3,7 +3,7 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
@@ -1242,3 +1242,40 @@ export const getNursery = async (): Promise<APIResponse<NurseryDTO[]>> => {
     );
   }
 };
+
+export const getFAQ = async (): Promise<APIResponse<FAQItem[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/faq");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching FAQ list failed",
+      }
+    );
+  }
+};
+
+export const updateAliceAnswer = async (
+  payload: UpdateFAQ
+): Promise<APIResponse<UpdateFAQ>> => {
+  try {
+    const response = await axiosInstance.put<APIResponse<UpdateFAQ>>(
+      `/admin/alice_answer`,
+      payload, 
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Alice answer submission failed",
+    };
+  }
+};
+

@@ -73,3 +73,8 @@ export interface FAQItem{
     AI_answer: string;
     human_answer: string;
 }
+
+export interface UpdateFAQ{
+    id: number;
+    alice_answer:String;
+}
