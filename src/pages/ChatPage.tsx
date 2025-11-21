@@ -47,6 +47,8 @@ const ChatPage: React.FC = () => {
 
   const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
   const botIndexRef = useRef<number | null>(null);
+  const [showRecommended, setShowRecommended] = useState(false);
+
 
 
   const sessionUUID =
@@ -91,27 +93,34 @@ const ChatPage: React.FC = () => {
   const chatMidSent = useRef(false);
   const chatExitSent = useRef(false);
   const lastMessageCount = useRef(0);
+  const hasFetchedQuestions = useRef(false);
 
   useEffect(() => {
-    if (location.pathname === "/chat") {
-      sendChatAnalytics("chat_start");
-      chatStartSent.current = true;
-      if (user) {
-        getquestions(user.id).then((response) => {
-          if (response.IsSuccess && response.Data) {
-            setRecommendedQuestions(response.Data);
-          }
-        });
+    if (location.pathname !== "/chat" || !user || hasFetchedQuestions.current) return;
+
+    sendChatAnalytics("chat_start");
+    chatStartSent.current = true;
+
+    getquestions(user.id).then((response) => {
+      if (response.IsSuccess && response.Data) {
+        setRecommendedQuestions(response.Data);
+        // Only show for new chats
+        if (!searchParams.get("v") && messages.length <= 1) {
+          setShowRecommended(true);
+        }
       }
-    }
-  }, [location.pathname]);
+    });
 
-  useEffect(() => {
-    if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
-      sendChatAnalytics("chat_mid");
-      lastMessageCount.current = chatCount;
-    }
-  }, [chatCount, location.pathname]);
+    hasFetchedQuestions.current = true;
+  }, [location.pathname, user]);
+
+
+  // useEffect(() => {
+  //   if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
+  //     sendChatAnalytics("chat_mid");
+  //     lastMessageCount.current = chatCount;
+  //   }
+  // }, [chatCount, location.pathname]);
 
   useEffect(() => {
     const checkView = () => {
@@ -151,13 +160,13 @@ const ChatPage: React.FC = () => {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
     }
-    if (user) {
-      getquestions(user.id).then((response) => {
-        if (response.IsSuccess && response.Data) {
-          setRecommendedQuestions(response.Data);
-        }
-      });
-    }
+    // if (user) {
+    //   getquestions(user.id).then((response) => {
+    //     if (response.IsSuccess && response.Data) {
+    //       setRecommendedQuestions(response.Data);
+    //     }
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -245,7 +254,7 @@ const ChatPage: React.FC = () => {
 
     setHasAskedQuestion(true);
     setMessage("");
-
+    setShowRecommended(false);
 
     try {
       const formData = new FormData();
@@ -360,6 +369,7 @@ const ChatPage: React.FC = () => {
 
     setHasAskedQuestion(true);
     setMessage(""); //clear input
+    setShowRecommended(false);
 
 
     try {
@@ -455,7 +465,13 @@ const ChatPage: React.FC = () => {
   )) ?? [];
 
   // Only show for NEW chat
-  const isNewChat = messages.length <= 1 && !searchParams.get("v");
+  useEffect(() => {
+    // Only show recommended questions if it's a new chat
+    // New chat = no conversation UUID and no existing messages
+    if (!searchParams.get("v") && messages.length <= 1) {
+    setShowRecommended(true);
+    }
+    }, [searchParams, messages]);
 
 
 
@@ -487,7 +503,7 @@ const ChatPage: React.FC = () => {
                 setMessage={setMessage}
                 message={message}
                 searching={searching}
-                recommendedQuestionsList={isNewChat ? recommendedQuestionsList : null}
+                recommendedQuestionsList={showRecommended  ? recommendedQuestionsList : null}
               />
             </>
           )}
