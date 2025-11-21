@@ -1279,3 +1279,17 @@ export const updateAliceAnswer = async (
   }
 };
 
+export const generateFAQ = async (): Promise<APIResponse<FAQItem[]>> => {
+  try {
+    const res = await axiosInstance.get("/faq");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Generating FAQ failed",
+      }
+    );
+  }
+};

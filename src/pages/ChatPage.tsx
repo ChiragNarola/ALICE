@@ -434,27 +434,28 @@ const ChatPage: React.FC = () => {
   };
 
 
-  const recommendedQuestionsList = recommendedQuestions?.ai_recommended
-  ? recommendedQuestions.ai_recommended.map((question: string, index: number) => (
-      <button
-  key={index}
-  className="
-    recommended-question-btn
-    px-2 py-1 
-    border rounded 
-    text-sm 
-    text-left
-    break-words 
-    w-full
-  "
-  style={{ width: "33%" }} // each button takes 1/3 row
-  onClick={() => handlerecommendedMessage(question)}
->
-  {question}
-</button>
+ const recommendedQuestionsList =
+  recommendedQuestions?.ai_recommended?.map((question: string, index: number) => (
+    <button
+      key={index}
+      className="
+        recommended-question-btn
+        px-2 py-1 
+        border rounded 
+        text-sm 
+        text-left
+        break-words 
+        w-full
+      "
+      style={{ width: "33%" }}
+      onClick={() => handlerecommendedMessage(question)}
+    >
+      {question}
+    </button>
+  )) ?? [];
 
-    ))
-  : [];
+  // Only show for NEW chat
+  const isNewChat = messages.length <= 1 && !searchParams.get("v");
 
 
 
@@ -486,7 +487,7 @@ const ChatPage: React.FC = () => {
                 setMessage={setMessage}
                 message={message}
                 searching={searching}
-                recommendedQuestionsList={!hasAskedQuestion ? recommendedQuestionsList : null}
+                recommendedQuestionsList={isNewChat ? recommendedQuestionsList : null}
               />
             </>
           )}

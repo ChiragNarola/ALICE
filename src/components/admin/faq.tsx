@@ -3,9 +3,10 @@ import { useEffect, useState, useRef } from "react";
 import type { FAQItem } from "../../routes/models/response/Response";
 import { Table, Th, Td } from "../ui/Table";
 import Pagination from "../ui/Pagination";
-import { getFAQ, updateAliceAnswer } from "../../api/api-services";
+import { getFAQ, updateAliceAnswer, generateFAQ } from "../../api/api-services";
 import { toast } from "react-toastify";
 import type { UpdateFAQ } from "../../routes/models/response/Response";
+import Button from "../ui/Button";
 
 
 export default function FAQ(){
@@ -105,6 +106,32 @@ export default function FAQ(){
       }, 2000);
     };
 
+    const handleGenerateFAQ = async () => {
+      try {
+        setLoading(true);
+        const res = await generateFAQ();
+
+        if (res?.IsSuccess && Array.isArray(res.Data)) {
+          const cleaned: FAQItem[] = res.Data.map((h: any) => ({
+            id: h.id,
+            question: h.questions,
+            AI_answer: cleanMarkdown(h.ai_response),
+            human_answer: h.alice_answer,
+          }));
+
+          setFaqs(cleaned);
+          toast.success("FAQ generated successfully!");
+          await fetchFAQList();
+        } else {
+          toast.error(res?.Message || "Failed to generate FAQs");
+        }
+
+      } catch (err: any) {
+        toast.error(err?.Message || "Error generating FAQ");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     return (
         <div className="p-6 space-y-6">
@@ -123,6 +150,7 @@ export default function FAQ(){
 
       {/* Filters Section */}
       <div className="flex flex-wrap items-center gap-4 w-full mt-4">
+
         {/* Search */}
         <div className="flex w-72 flex-col">
           <label htmlFor="doc-search" className="mb-1 text-sm font-medium text-gray-700">
@@ -143,7 +171,20 @@ export default function FAQ(){
             />
           </div>
         </div>
+
+        {/* Generate FAQ Button */}
+        <div className="ml-auto">
+          <Button
+            onClick={handleGenerateFAQ}   
+            variant="teal"
+            className="h-10 rounded-lg shadow"
+          >
+            Generate FAQ
+          </Button>
         </div>
+
+      </div>
+
 
         {/* Table */}
         <div className="overflow-hidden border rounded-lg shadow-sm mt-4">
