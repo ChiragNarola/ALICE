@@ -11,7 +11,8 @@ import { jsPDF } from "jspdf";
 interface ChatMessageProps {
     id?: number | undefined;
     from: "alice" | "user";
-    text: string;
+    u_question: string;
+    ai_answer: string;
     actions?: boolean;
     userimg: string;
     user_response?: string | null; // "like", "dislike", or null
@@ -21,12 +22,23 @@ interface ChatMessageProps {
 const ChatMessage: React.FC<ChatMessageProps> = ({
     id,
     from,
-    text,
+    u_question,
+    ai_answer,
     actions,
     userimg,
     user_response,
     chatBordUniqueId
 }) => {
+    // console.log("user q is:", u_question);
+    // console.log("ai answer is:", ai_answer);
+
+    // Correct text selection
+    const text = from === "alice" ? ai_answer || "" : u_question || "";
+
+
+    // console.log("FROM VALUE:", from);
+
+    // console.log("rendered text:", text);
     const isAlice = from === "alice";
 
     const [liked, setLiked] = useState(user_response === "like");
@@ -59,6 +71,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
 
     const handleLike = async (id: number) => {
+      console.log("message id as in handleLike is:",id)
         try {
             // if (liked) {
             //     setLiked(false);
@@ -100,7 +113,10 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
   const lineHeight = 7;
 
   // Clean text: remove file tags, keep line breaks
-  const cleanText = text.replace(/\[File:.*?\]/gi, "").replace(/\n{2,}/g, "\n");
+  let cleanText = text
+    .replace(/\[File:.*?\]/gi, "")   // remove file references
+    .replace(/\n{2,}/g, "\n")        // collapse multiple line breaks
+    .replace(/^###\s*/gm, "") // remove "###" 
 
   const sender = isAlice ? "System Response" : "User Message";
   let y = margin;
@@ -189,7 +205,7 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
                                             ),
                                         }}
                                     >
-                                        {text.replace(/\[File:.*?\]/gi, "").replace(/\n{2,}/g, "\n")}
+                                        {(text || "").replace(/\[File:.*?\]/gi, "").replace(/\n{2,}/g, "\n")}
                                     </ReactMarkdown>
 
                                     {/* File display */}

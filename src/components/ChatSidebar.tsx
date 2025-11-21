@@ -75,14 +75,17 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
       setIsLoading(true);
       try {
         const response = await getConversationMessageByUUId(conversationUUID);
+        console.log("response from uuid endpoint is:",response)
 
         if (response?.IsSuccess) {
           const apiMessages: any[] = Array.isArray(response)
             ? response
             : response?.Data ?? [];
+            console.log("apimessages after endpoint is:",apiMessages)
           const filteredMessages = apiMessages.filter(
             (item) => !item.is_deleted && !item.is_archived
           );
+          console.log("Filtered messages are:",filteredMessages)
 
           const ui = mapApiToUI(filteredMessages, user?.id ?? 0);
           replaceMessages(ui);

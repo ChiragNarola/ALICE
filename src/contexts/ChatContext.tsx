@@ -46,24 +46,63 @@ export const ChatProvider = ({ children }: { children: any }) => {
 
 
     const ensureAliceIntro = (text = DEFAULT_ALICE_TEXT) => {
-        setMessages((prev) => {
-            if (prev.length > 0 && prev[0].from === "alice") return prev;
-            return [{ from: "alice", text, actions: true }, ...prev];
+    setMessages((prev) => {
+        if (prev.length > 0 && prev[0].from === "alice") return prev;
+
+        const introMessage: ChatMessageUI = {
+            id: undefined,
+            from: "alice",
+            u_question: "",           // No question for intro
+            ai_answer: text,          // Intro text goes to ai_answer
+            actions: true,
+            user_response: null,
+            ts: new Date().toISOString(),
+        };
+
+        return [introMessage, ...prev];
+    });
+};
+
+    const mapApiToUI = (api: ApiMessage[], currentUserId: number): ChatMessageUI[] => {
+        return api.flatMap((m) => {
+            const messages: ChatMessageUI[] = [];
+
+            // user message
+            if (m.u_question) {
+                messages.push({
+                    id: m.id,          // DB id, used for API
+                    key: `${m.id}-user`, // unique for React
+                    from: "user",
+                    u_question: m.u_question,
+                    ai_answer: "",
+                    ts: m.created_at,
+                    actions: true,
+                    user_response: m.user_response,
+                });
+            }
+
+            // AI message
+            if (m.ai_answer) {
+                messages.push({
+                    id: m.id,          // DB id, used for API
+                    key: `${m.id}-ai`,  // unique for React
+                    from: "alice",
+                    u_question: "",
+                    ai_answer: m.ai_answer,
+                    ts: m.updated_at ?? m.created_at,
+                    actions: true,
+                    user_response: m.user_response,
+                });
+            }
+
+            return messages;
         });
     };
 
-    const mapApiToUI = (api: ApiMessage[], currentUserId: number): ChatMessageUI[] => {
-        return api
-            .filter((m) => !m.is_deleted)
-            .map((m) => ({
-                id: m.id,
-                from: m.user_id === currentUserId ? "user" : "alice",
-                text: m.message,
-                ts: m.created_at,
-                actions: true,
-                user_response: m.user_response,
-            }));
-    };
+
+
+
+
 
     const refreshChatList = async () => {
         setIsLoadingChatList(true);

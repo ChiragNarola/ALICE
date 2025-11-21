@@ -13,11 +13,12 @@ import { useChatActivity } from "../contexts/ChatActivityContext";
 import { trackEvent, getquestions } from "../api/api-services";
 import type { QuestionDTO } from "../routes/models/request/Chat";
 
-
+type Sender = "alice" | "user";
 type Message = {
   id?: number;
-  from: "alice" | "user";
-  text: string;
+  from: Sender;
+  u_question: string;
+  ai_answer: string;
   actions?: any;
   user_response?: string | null;
 };
@@ -37,13 +38,15 @@ const ChatPage: React.FC = () => {
     {
       id: 0,
       from: "alice",
-      text: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
+      u_question:"",
+      ai_answer: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
       actions: true,
       user_response: null,
     },
   ]);
 
   const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
+  const botIndexRef = useRef<number | null>(null);
 
 
   const sessionUUID =
@@ -180,8 +183,21 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     if (!messages || messages.length === 0) return;
-    setChatMessages(messages);
+
+    // Convert incoming ChatMessageUI[] to our Message[] type
+    const mappedMessages: Message[] = messages.map(msg => ({
+      id: msg.id,
+      from: msg.from,
+      u_question: msg.u_question, // might be undefined
+      ai_answer: msg.ai_answer,   // might be undefined
+      user_response: msg.user_response ?? null,
+      actions: msg.actions ?? true,
+    }));
+    console.log("mappedmessages are:",mappedMessages)
+
+    setChatMessages(mappedMessages);
   }, [messages]);
+
 
   const handleToggle = () => {
     setIsSidebarOpen(prev => !prev);
@@ -198,20 +214,38 @@ const ChatPage: React.FC = () => {
     // Display file name only for UI
     const userMessageText = file ? `${message} [File: ${file.name}]` : message;
 
-    // Optimistically add user message
-    setChatMessages((prev) => [
-      ...prev,
-      { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
-    ]);
+    // Temporary unique ID for the bot message
+    const tempBotId = Date.now() + Math.floor(Math.random() * 1000);
 
-    // Add placeholder for bot response
-    const botIndex = chatMessages.length + 1;
-    setChatMessages((prev) => [
-      ...prev,
-      { id: 0, from: "alice", text: "...", actions: true },
-    ]);
+    // Add both user message and bot placeholder in one update
+    setChatMessages((prev) => {
+      const userMsg = {
+        id: Date.now(),
+        from: "user" as Sender,
+        u_question: userMessageText,
+        ai_answer: "",
+        actions: true,
+        user_response: null,
+      };
+
+      const botMsg = {
+        id: tempBotId,
+        from: "alice" as Sender,
+        u_question: "",
+        ai_answer: "...",
+        actions: true,
+        user_response: null,
+      };
+
+      // Track bot index in ref
+      botIndexRef.current = prev.length + 1; // index of botMsg in new array
+
+      return [...prev, userMsg, botMsg];
+    });
+
     setHasAskedQuestion(true);
     setMessage("");
+
 
     try {
       const formData = new FormData();
@@ -251,11 +285,15 @@ const ChatPage: React.FC = () => {
         accumulatedText += decoder.decode(value, { stream: true });
 
         setChatMessages((prev) => {
+          const index = botIndexRef.current;
+          console.log("upodating bot at index2",index)
+          if (index === null) return prev;
           const copy = [...prev];
-          copy[botIndex] = {
-            ...copy[botIndex],
+          copy[index] = {
+            ...copy[index],
+            from: "alice",
             id: newMessageId,
-            text: accumulatedText,
+            ai_answer: accumulatedText,
           };
           return copy;
         });
@@ -263,11 +301,14 @@ const ChatPage: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       setChatMessages((prev) => {
+        const index = botIndexRef.current;
+        if (index === null) return prev;
         const copy = [...prev];
-        if (copy[botIndex]) {
-          copy[botIndex] = {
-            ...copy[botIndex],
-            text: "Something went wrong. Please try again...",
+        if (copy[index]) {
+          copy[index] = {
+            ...copy[index],
+            from: "alice",
+            ai_answer: "Something went wrong. Please try again...",
             actions: false,
           };
         }
@@ -289,27 +330,50 @@ const ChatPage: React.FC = () => {
 
     // Add user message + bot placeholder together in one update
     let botIndex = -1;
+
     setChatMessages((prev) => {
-      botIndex = prev.length + 1;
-      return [
-        ...prev,
-        { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
-        { id: 0, from: "alice", text: "...", actions: true },
-      ];
-    });
+        const newBotIndex = prev.length + 1;
+        botIndexRef.current = newBotIndex;
+        console.log("upodating bot at index3",newBotIndex)
+        return [
+          ...prev,
+
+          {
+            id: Date.now(),
+            from: "user",
+            u_question: userMessageText,
+            ai_answer: "",
+            actions: true,
+            user_response: null,
+          },
+
+          {
+            id: 0,
+            from: "alice",
+            u_question: "",
+            ai_answer: "...",
+            actions: true,
+            user_response: null,
+          },
+        ];
+      });
+
     setHasAskedQuestion(true);
-    setMessage(""); // clear input
+    setMessage(""); //clear input
+
 
     try {
       const formData = new FormData();
       formData.append("query", userMessageText);
       formData.append("user_id", String(user?.id));
       formData.append("conversation_id", chatBordUniqueId || "");
+      console.log("form data is:",formData)
 
       const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
         method: "POST",
         body: formData,
       });
+      console.log("response.body is:", response.body);
 
       if (!response.ok) throw new Error(`API error: ${response.status}`);
 
@@ -332,12 +396,15 @@ const ChatPage: React.FC = () => {
         accumulatedText += decoder.decode(value, { stream: true });
 
         setChatMessages((prev) => {
+          const index = botIndexRef.current;
+          if (index === null) return prev;
           const copy = [...prev];
-          if (copy[botIndex]) {
-            copy[botIndex] = {
-              ...copy[botIndex],
+          if (copy[index]) {
+            copy[index] = {
+              ...copy[index],
               id: newMessageId,
-              text: accumulatedText,
+              from: "alice",
+              ai_answer: accumulatedText,
             };
           }
           return copy;
@@ -347,11 +414,14 @@ const ChatPage: React.FC = () => {
     } catch (err) {
       console.error(err);
       setChatMessages((prev) => {
+        const index = botIndexRef.current;
+        if (index === null) return prev;
         const copy = [...prev];
-        if (copy[botIndex]) {
-          copy[botIndex] = {
-            ...copy[botIndex],
-            text: "Something went wrong. Please try again...",
+        if (copy[index]) {
+          copy[index] = {
+            ...copy[index],
+            from: "alice",
+            ai_answer: "Something went wrong. Please try again...",
             actions: false,
           };
         }
@@ -365,19 +435,22 @@ const ChatPage: React.FC = () => {
 
 
   const recommendedQuestionsList =
-    recommendedQuestions?.recommended.map((item: any, index: any) => (
-      <button
-        key={index}
-        className="recommended-question-btn"
-        onClick={() => handlerecommendedMessage(item.ai_recommended)}
-      >
-        <div>
-          <b>{item.category}</b>
-        </div>
-        <div>{item.ai_recommended}</div>
-      </button>
-    ));
+  recommendedQuestions?.recommended
+    ? recommendedQuestions.recommended.map((item: any, index: number) => (
+        <button
+          key={index}
+          className="recommended-question-btn"
+          onClick={() => handlerecommendedMessage(item.ai_recommended)}
+        >
+          <div>
+            <b>{item.category}</b>
+          </div>
+          <div>{item.ai_recommended}</div>
+        </button>
+      ))
+    : [];
 
+  // console.log("chat messages are:",chatMessages)
 
   return (
     <>
