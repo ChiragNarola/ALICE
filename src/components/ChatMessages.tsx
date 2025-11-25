@@ -4,6 +4,7 @@ import userimg from "../assets/images/user-img.png";
 
 type Message = {
   id?: number;
+  realId?: number;
   key?: string,
   from: "alice" | "user";
   u_question: string;
@@ -15,9 +16,10 @@ type Message = {
 interface ChatMessagesProps {
   messages: Message[];
   chatBordUniqueId: string;
+  onReact?: (id: number, reaction: "like" | "dislike" | null) => void;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId, onReact }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Auto scroll to bottom when messages change
@@ -27,10 +29,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId 
 
   return (
     <div className="flex-1 flex flex-col gap-6 sm:gap-8 py-6 md:py-[30px] overflow-y-auto max-h-[calc(100vh-284px)] lg:max-h-[calc(100vh-300px)] px-2 chat_wrapper">
-        {messages.map((msg, idx) => (
+        {messages.map((msg) => (
           <ChatMessage
             key={msg.key}            // <-- use stable id first
             id={msg.id}
+            realId={msg.realId}
             from={msg.from}
             u_question={msg.u_question ?? ""}
             ai_answer={msg.ai_answer ?? ""}
@@ -38,6 +41,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId 
             userimg={userimg}
             user_response={msg.user_response}
             chatBordUniqueId={chatBordUniqueId}
+            onReact={onReact}
           />
         ))}
 

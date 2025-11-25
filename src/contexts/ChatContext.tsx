@@ -63,7 +63,7 @@ export const ChatProvider = ({ children }: { children: any }) => {
     });
 };
 
-    const mapApiToUI = (api: ApiMessage[], currentUserId: number): ChatMessageUI[] => {
+    const mapApiToUI = (api: ApiMessage[]): ChatMessageUI[] => {
         return api.flatMap((m) => {
             const messages: ChatMessageUI[] = [];
 

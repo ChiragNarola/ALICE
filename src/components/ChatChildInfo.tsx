@@ -252,9 +252,10 @@ const ChatChildInfo: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wide">Interests</h4>
-      </div>
-
+        <h4 className="text-[11px] font-bold text-gray-800 uppercase tracking-wide leading-tight pt-1">
+          Interests
+        </h4>
+        </div>
       <div className="flex flex-wrap gap-1">
         {child.topics.map((topic: any, i: any) => (
           <Tippy content={topic} placement="bottom" key={i}>
@@ -279,9 +280,10 @@ const ChatChildInfo: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
         </div>
-        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wide">Concerns</h4>
-      </div>
-
+        <h4 className="text-[11px] font-bold text-gray-800 uppercase tracking-wide leading-tight pt-1">
+        Concerns
+      </h4>
+            </div>
       <div className="flex flex-wrap gap-1">
         {child.concerns.map((concern: any, i: any) => (
           <Tippy content={concern} placement="bottom" key={i}>
@@ -296,7 +298,6 @@ const ChatChildInfo: React.FC = () => {
       </div>
     </div>
   )}
-
 </div>
 </div>
               ))}
