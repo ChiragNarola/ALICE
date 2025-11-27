@@ -15,13 +15,11 @@ import { trackEvent, getquestions } from "../api/api-services";
 type Sender = "alice" | "user";
 type Message = {
   id?: number;
-  realId?: number;
   from: Sender;
   u_question: string;
   ai_answer: string;
   actions?: any;
   user_response?: string | null;
-  isTemp?: boolean;
 };
 
 const ChatPage: React.FC = () => {
@@ -41,7 +39,7 @@ const ChatPage: React.FC = () => {
       from: "alice",
       u_question:"",
       ai_answer: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
-      actions: true,
+      actions: false,
       user_response: null,
     },
   ]);
@@ -49,8 +47,6 @@ const ChatPage: React.FC = () => {
   const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
   // const botIndexRef = useRef<number | null>(null);
   const [showRecommended, setShowRecommended] = useState(false);
-  const botTempIdRef = useRef<number | null>(null);
-
 
 
   const sessionUUID =
@@ -194,12 +190,11 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     if (!messages || messages.length === 0) return;
 
-    // Convert incoming ChatMessageUI[] to our Message[] type
     const mappedMessages: Message[] = messages.map(msg => ({
       id: msg.id,
       from: msg.from,
-      u_question: msg.u_question, // might be undefined
-      ai_answer: msg.ai_answer,   // might be undefined
+      u_question: msg.u_question, 
+      ai_answer: msg.ai_answer,  
       user_response: msg.user_response ?? null,
       actions: msg.actions ?? true,
     }));
@@ -216,176 +211,120 @@ const ChatPage: React.FC = () => {
   setChatVisible(true);
 
   const handleSendMessage = async (e: React.FormEvent, file?: File | null) => {
-    e.preventDefault();
-    if (!message.trim() && !file) return;
+  e.preventDefault();
+  if (!message.trim() && !file) return;
 
-    IsSearching(true);
+  IsSearching(true);
 
-    // Display file name only for UI
-    const userMessageText = file ? `${message} [File: ${file.name}]` : message;
+  const userMessageText = file ? `${message} [File: ${file.name}]` : message;
 
-    // Create stable temporary id
-    const tempBotId = Date.now() + Math.floor(Math.random() * 1000000);
-    botTempIdRef.current = tempBotId;
+  const tempId = Date.now();
+  let dbId = tempId;
 
-    // Add both user message and bot placeholder in one update
-    setChatMessages((prev) => {
-      const userMsg = {
-        id: Date.now(),
-        from: "user" as Sender,
-        u_question: userMessageText,
-        ai_answer: "",
-        actions: true,
-        user_response: null,
-      };
+  console.log("🟡 USER SENT MESSAGE");
+  console.log("tempId assigned for both bubbles:", tempId);
 
-      const botMsg = {
-        id: tempBotId,
-        from: "alice" as Sender,
-        u_question: "",
-        ai_answer: "...",
-        actions: true,
-        user_response: null,
-        isTemp: true,
-      };
-      return [...prev, userMsg, botMsg];
+  // show bubbles immediately
+  setChatMessages(prev => [
+    ...prev,
+    { id: tempId, from:"user", u_question:userMessageText, ai_answer:"", actions:true, user_response:null },
+    { id: tempId, from:"alice", u_question:"", ai_answer:"...", actions:false }
+  ]);
+
+  setMessage("");
+  setHasAskedQuestion(true);
+  setShowRecommended(false);
+
+  try {
+    const formData = new FormData();
+    formData.append("query", userMessageText);
+    formData.append("user_id", String(user?.id));
+    formData.append("conversation_id", chatBordUniqueId || "");
+    if (file) formData.append("file", file);
+
+    const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
+      method: "POST",
+      body: formData
     });
 
-    setHasAskedQuestion(true);
-    setMessage("");
-    setShowRecommended(false);
+    if (!response.ok) throw new Error("API error");
 
-    try {
-      const formData = new FormData();
-      // use the captured userMessageText (not the cleared `message` state)
-      formData.append("query", userMessageText);
-      formData.append("user_id", String(user?.id));
-      formData.append("conversation_id", chatBordUniqueId || "");
+    // read backend IDs
+    const headerConvId = response.headers.get("x-conversation-uuid");
+    const headerUserMessageId = response.headers.get("x-user-message-id");
 
+    console.log("🔵 Headers received:");
+    console.log("conversation uuid:", headerConvId);
+    console.log("user message id:", headerUserMessageId);
 
-      if (file) formData.append("file", file);
+    if (headerConvId) setChatboardUniqueId(headerConvId);
 
-      const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
-        method: "POST",
-        body: formData, // don't set content-type manually
-      });
+    if (headerUserMessageId) {
+      dbId = Number(headerUserMessageId);
+      console.log(`🟢 Swapping tempId(${tempId}) → dbId(${dbId})`);
 
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-      // 🔹 Grab headers
-      const headerConversationId = response.headers.get("x-conversation-uuid");
-      const headerMessageId = response.headers.get("x-message-id");
-      const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
-
-      if (headerConversationId) {
-        // Save conversation id for next request
-        setChatboardUniqueId(headerConversationId);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body received.");
-
-      const decoder = new TextDecoder();
-      let accumulatedText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        accumulatedText += decoder.decode(value, { stream: true });
-        console.debug("[stream] chunk len:", value?.length ?? 0, "accum len:", accumulatedText.length);
-
-
-          setChatMessages((prev) => {
-          const tempId = botTempIdRef.current;
-          if (!tempId) return prev;
-
-          const copy = [...prev];
-          const idx = copy.findIndex((m) => m.id === tempId);
-          console.log("updating bot at index (found):", idx, "tempId:", tempId);
-
-          if (idx === -1) return prev;
-
-          copy[idx] = {
-            ...copy[idx],
-            from: "alice",
-            ai_answer: accumulatedText,
-          };
-
-          return copy;
-        });
-
-      }
-      if (newMessageId) {
-        setChatMessages((prev) => {
-          const copy = [...prev];
-          const idx = copy.findIndex((m) => m.id === tempBotId);
-          if (idx === -1) return prev;
-
-          copy[idx] = { 
-            ...copy[idx], 
-            id: newMessageId,    // 🔹 assign backend ID
-            isTemp: false 
-          };
-          return copy;
-        });
-      }
-
-    } catch (err: any) {
-      console.error(err);
-        setChatMessages((prev) => {
-        const tempId = botTempIdRef.current;
-        if (!tempId) return prev;
-
-        const copy = [...prev];
-        const idx = copy.findIndex((m) => m.id === tempId);
-        if (idx === -1) return prev;
-
-        copy[idx] = {
-          ...copy[idx],
-          from: "alice",
-          ai_answer: "Something went wrong. Please try again...",
-          actions: false,
-        };
-
-        return copy;
-      });
-
-    } finally {
-      // setMessage("");
-      botTempIdRef.current = null;
-      refreshChatList();
-      IsSearching(false);
+      setChatMessages(prev =>
+        prev.map(m => m.id === tempId ? { ...m, id: dbId } : m)
+      );
     }
-  };
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+
+    // STREAM RESPONSE
+    while(true){
+      const { value, done } = await reader!.read();
+      if (done) break;
+
+      accumulated += decoder.decode(value, { stream:true });
+
+      setChatMessages(prev =>
+        prev.map(m => 
+          m.id === dbId && m.from==="alice" 
+            ? { ...m, ai_answer:accumulated }
+            : m
+        )
+      );
+    }
+
+    console.log("🟢 Stream finished — enabling like/dislike for id:", dbId);
+
+    setChatMessages(prev =>
+      prev.map(m => m.id===dbId && m.from==="alice" ? { ...m, actions:true } : m)
+    );
+
+  } catch (err) {
+    console.error("❌ Error while streaming:", err);
+    setChatMessages(prev =>
+      prev.map(m =>
+        m.id===dbId && m.from==="alice"
+          ? { ...m, ai_answer:"Error generating response.", actions:false }
+          : m
+      )
+    );
+  } finally {
+    refreshChatList();
+    IsSearching(false);
+  }
+};
+
 
   const handlerecommendedMessage = async (AImessage: string) => {
   if (!AImessage.trim()) return;
-  
+
   IsSearching(true);
 
-  const userMessageText = AImessage;
+  const tempUserId = Date.now();
 
-  // Generate a stable tempBotId once
-  const tempBotId = Date.now() + Math.floor(Math.random() * 1000000);
-  botTempIdRef.current = tempBotId;
-
-  // Add user and bot placeholder messages
-  setChatMessages((prev) => [
+  // user bubble with temp id
+  setChatMessages(prev => [
     ...prev,
     {
-      id: Date.now(),
+      id: tempUserId,
       from: "user",
-      u_question: userMessageText,
+      u_question: AImessage,
       ai_answer: "",
-      actions: true,
-      user_response: null,
-    },
-    {
-      id: tempBotId,
-      from: "alice",
-      u_question: "",
-      ai_answer: "...",
       actions: true,
       user_response: null,
     },
@@ -397,83 +336,101 @@ const ChatPage: React.FC = () => {
 
   try {
     const formData = new FormData();
-    formData.append("query", userMessageText);
+    formData.append("query", AImessage);
     formData.append("user_id", String(user?.id));
     formData.append("conversation_id", chatBordUniqueId || "");
 
     const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
       method: "POST",
-      body: formData,
+      body: formData
     });
 
-    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    if (!response.ok) throw new Error("API error");
 
-    const headerConversationId = response.headers.get("x-conversation-uuid");
-    const headerMessageId = response.headers.get("x-message-id");
-    const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
+    const headerConvId = response.headers.get("x-conversation-uuid");
+    const headerUserMessageId = response.headers.get("x-user-message-id");
+    const dbId = headerUserMessageId ? Number(headerUserMessageId) : tempUserId;
 
-    if (headerConversationId) setChatboardUniqueId(headerConversationId);
+    if (headerConvId) setChatboardUniqueId(headerConvId);
 
-    const reader = response.body?.getReader();
-    if (!reader) throw new Error("No response body received.");
-
-    const decoder = new TextDecoder();
-    let accumulatedText = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      accumulatedText += decoder.decode(value, { stream: true });
-
-      setChatMessages((prev) => 
-        prev.map(msg => 
-          msg.id === tempBotId 
-            ? { ...msg, from: "alice", ai_answer: accumulatedText }
-            : msg
+    // swap user temp id → db id
+    if (dbId !== tempUserId) {
+      setChatMessages(prev =>
+        prev.map(m =>
+          m.id === tempUserId && m.from === "user"
+            ? { ...m, id: dbId }
+            : m
         )
       );
     }
-    if (newMessageId) {
-  setChatMessages((prev) =>
-    prev.map((m) => (m.id === tempBotId ? { ...m,realId: newMessageId, id: newMessageId, isTemp: false } : m))
-  );
-}
+
+    // add alice placeholder with same db id
+    setChatMessages(prev => [
+      ...prev,
+      {
+        id: dbId,
+        from: "alice",
+        u_question: "",
+        ai_answer: "...",
+        actions: false,
+        user_response: null,
+      },
+    ]);
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+
+    while (true) {
+      const { value, done } = await reader!.read();
+      if (done) break;
+
+      accumulated += decoder.decode(value, { stream: true });
+
+      setChatMessages(prev =>
+        prev.map(m =>
+          m.id === dbId && m.from === "alice"
+            ? { ...m, ai_answer: accumulated }
+            : m
+        )
+      );
+    }
+
+    setChatMessages(prev =>
+      prev.map(m =>
+        m.id === dbId && m.from === "alice"
+          ? { ...m, actions: true }
+          : m
+      )
+    );
 
   } catch (err) {
     console.error(err);
-    setChatMessages((prev) =>
-      prev.map(msg =>
-        msg.id === botTempIdRef.current
-          ? { ...msg, from: "alice", ai_answer: "Something went wrong. Please try again...", actions: false }
-          : msg
+    setChatMessages(prev =>
+      prev.map(m =>
+        m.from === "alice" && m.ai_answer === "..."
+          ? { ...m, ai_answer: "Something went wrong.", actions: false }
+          : m
       )
     );
   } finally {
-    botTempIdRef.current = null;
     refreshChatList();
     IsSearching(false);
   }
 };
 
-    const updateMessageReaction = (messageId: number, reaction: "like" | "dislike" | null) => {
-      setChatMessages(prev =>
-        prev.map(m => {
-          // match either id or realId (some messages use realId)
-          const matches =
-            (typeof m.id === "number" && m.id === messageId) ||
-            (typeof m.realId === "number" && m.realId === messageId);
 
-          if (!matches) return m;
-
-          return {
-            ...m,
-            user_response: reaction === null ? null : reaction === "like" ? "like" : "dislike",
-          };
-        })
-      );
-    };
-
+  const updateMessageReaction = (
+  messageId: number,
+  reaction: "like" | "dislike" | null
+) =>
+  setChatMessages(prev =>
+    prev.map(m =>
+      m.id === messageId && m.from === "alice"
+        ? { ...m, user_response: reaction }
+        : m
+    )
+  );
 
 
 
@@ -497,14 +454,12 @@ const ChatPage: React.FC = () => {
     </button>
   )) ?? [];
 
-  // Only show for NEW chat
   const hasUserMessages = messages.some(m => m.from === "user");
 
   const isNewChat = !searchParams.get("v") && !hasUserMessages;
 
-
   // console.log("chat messages are:",chatMessages)
-  console.log("showRecommended:", showRecommended);
+  // console.log("showRecommended:", showRecommended);
 
 
   return (

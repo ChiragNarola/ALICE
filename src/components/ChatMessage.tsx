@@ -10,7 +10,6 @@ import { jsPDF } from "jspdf";
 
 interface ChatMessageProps {
     id?: number | undefined;
-    realId?: number | undefined;
     from: "alice" | "user";
     u_question: string;
     ai_answer: string;
@@ -18,13 +17,11 @@ interface ChatMessageProps {
     userimg: string;
     user_response?: string | null; // "like", "dislike", or null
     chatBordUniqueId: string;
-    isTemp?: boolean;
     onReact?: (id: number, reaction: "like" | "dislike" | null) => void; // NEW
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
     id,
-    realId,
     from,
     u_question,
     ai_answer,
@@ -32,7 +29,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     userimg,
     user_response,
     chatBordUniqueId,
-    isTemp=false,
     onReact
 }) => {
     // console.log("user q is:", u_question);
@@ -49,13 +45,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const [liked, setLiked] = useState(user_response === "like");
     const [disliked, setDisliked] = useState(user_response === "dislike");
-    const [backendId, setBackendId] = useState<number | undefined>(undefined);
-
-    useEffect(() => {
-        if (realId) setBackendId(realId);  // Only set when backend gives the real ID
-        else if (!isTemp) setBackendId(id); // fallback if not temp
-    }, [realId, id, isTemp]);
-
 
     useEffect(() => {
         setLiked(user_response === "like");
@@ -93,6 +82,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             setLiked(false);
             onReact?.(id, null);
           }
+          console.log("👍 Like pressed — MESSAGE ID:", id, "conversation:", chatBordUniqueId);
         } else {
           const response = await updateConversationReactionById(chatBordUniqueId, id, 0);
           if (response.IsSuccess) {
@@ -116,6 +106,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             setDisliked(false);
             onReact?.(id, null);
           }
+          console.log("👎 Dislike pressed — MESSAGE ID:", id, "conversation:", chatBordUniqueId);
         } else {
           const response = await updateConversationReactionById(chatBordUniqueId, id, 1);
           if (response.IsSuccess) {
@@ -292,8 +283,8 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
           <>
             <Tippy content="Like" placement="bottom">
               <button
-                onClick={() => (liked ? null : handleLike(backendId!))}
-                disabled={!backendId}
+                onClick={() => (liked ? null : handleLike(id!))}
+                disabled={!id}
                 className={`flex items-center gap-1 px-2 py-1 rounded-md transition ${
                   liked
                     ? "text-green-600 bg-green-50"
@@ -306,8 +297,8 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
 
             <Tippy content="Dislike" placement="bottom">
               <button
-                onClick={() => (disliked ? null : handleDislike(backendId!))}
-                disabled={!backendId}
+                onClick={() => (disliked ? null : handleDislike(id!))}
+                disabled={!id}
                 className={`flex items-center gap-1 px-2 py-1 rounded-md transition ${
                   disliked
                     ? "text-red-600 bg-red-50"

@@ -4,8 +4,6 @@ import userimg from "../assets/images/user-img.png";
 
 type Message = {
   id?: number;
-  realId?: number;
-  key?: string,
   from: "alice" | "user";
   u_question: string;
   ai_answer: string;
@@ -29,11 +27,10 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId,
 
   return (
     <div className="flex-1 flex flex-col gap-6 sm:gap-8 py-6 md:py-[30px] overflow-y-auto max-h-[calc(100vh-284px)] lg:max-h-[calc(100vh-300px)] px-2 chat_wrapper">
-        {messages.map((msg) => (
+        {messages.map((msg, index) => (
           <ChatMessage
-            key={msg.key}            // <-- use stable id first
+            key={`${msg.id ?? "tmp"}-${msg.from}-${index}`}
             id={msg.id}
-            realId={msg.realId}
             from={msg.from}
             u_question={msg.u_question ?? ""}
             ai_answer={msg.ai_answer ?? ""}
