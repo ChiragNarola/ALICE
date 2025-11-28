@@ -78,3 +78,9 @@ export interface UpdateFAQ{
     id: number;
     alice_answer:String;
 }
+
+export interface UpdateNursery{
+    nursery_id:number;
+    nursery_name:string;
+    description:string;
+}

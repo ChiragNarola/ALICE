@@ -3,7 +3,7 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ, UpdateNursery } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
@@ -1291,5 +1291,35 @@ export const generateFAQ = async (): Promise<APIResponse<FAQItem[]>> => {
         Message: "Generating FAQ failed",
       }
     );
+  }
+};
+
+export const updateNursery = async (
+  payload: UpdateNursery
+): Promise<APIResponse<UpdateNursery>> => {
+  try {
+    const response = await axiosInstance.put<APIResponse<UpdateNursery>>(
+      `/admin/nursery`,
+      payload, 
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Nursery update failed",
+    };
+  }
+};
+
+export const deleteNursery = async (id: number): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(`/admin/delete?id=${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || { message: 'Delete failed' };
   }
 };

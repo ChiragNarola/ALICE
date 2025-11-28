@@ -1,22 +1,37 @@
 import { useForm } from "react-hook-form";
 import Modal from "../../ui/Modal";
 import { Check } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { UpdateNursery } from "../../../routes/models/response/Response"
+
 
 interface AddNurseryModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onAdd: (nursery_name: string, description:string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd?: (nursery_name: string, description: string) => void;
+  onUpdate?: (payload: UpdateNursery) => void; // same type as API
+  initialData?: UpdateNursery | null;
 }
+
 
 interface FormValues {
     nursery_name: string;
     description: string;
 }
 
-export default function AddNurseryModal({ isOpen, onClose, onAdd }: AddNurseryModalProps) {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
+export default function AddNurseryModal({ isOpen, onClose, onAdd, onUpdate, initialData }: AddNurseryModalProps) {
+    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormValues>();
     const [loading, setLoading] = useState(false);
+
+    //pre fill values for edit
+    useEffect(() => {
+        if (initialData) {
+            setValue("nursery_name", initialData.nursery_name || "");
+            setValue("description", initialData.description || "");
+        } else {
+            reset();
+        }
+    }, [initialData, isOpen, reset, setValue]);
 
 
     const onSubmit = async (data: FormValues) => {
@@ -25,7 +40,15 @@ export default function AddNurseryModal({ isOpen, onClose, onAdd }: AddNurseryMo
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            onAdd(data.nursery_name.trim(),data.description.trim());
+            if (initialData?.nursery_id && onUpdate) {
+                    onUpdate({
+                        nursery_id: initialData.nursery_id,
+                        nursery_name: data.nursery_name.trim(),
+                        description: data.description.trim(),
+                    });
+                } else if (onAdd) {
+                    onAdd(data.nursery_name.trim(), data.description.trim());
+                }
             reset();
             onClose();
         } catch (err) {
@@ -98,7 +121,7 @@ export default function AddNurseryModal({ isOpen, onClose, onAdd }: AddNurseryMo
                         ) : (
                             <>
                                 <Check className="w-4 h-4" />
-                                Submit
+                                {initialData?.nursery_id ? "Update" : "Submit"}
                             </>
                         )}
                     </button>

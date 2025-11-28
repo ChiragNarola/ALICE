@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import type { NurseryDTO, CreateNurseryDTO } from "../../../routes/models/response/Response"
+import type { NurseryDTO, CreateNurseryDTO, UpdateNursery } from "../../../routes/models/response/Response"
 import { toast } from "react-toastify"
-import { createNursery, getNursery } from "../../../api/api-services"
-import {School, Search} from "lucide-react"
+import { createNursery, getNursery, updateNursery, deleteNursery } from "../../../api/api-services"
+import {School, Search, Edit, Trash} from "lucide-react"
 import Button from "../../ui/Button";
 import { Table, Th, Td } from "../../ui/Table";
 import AddNurseryModal from "./AddNurseryModal";
@@ -22,6 +22,8 @@ export default function Nursery(){
     const[loading,setLoading]=useState(false);
     const[pageSize,setPageSize]=useState(5);
     const[isModalOpen,setIsModalOpen]=useState(false);
+    const [editingNursery, setEditingNursery] = useState<UpdateNursery | null>(null);
+
 
     const handleAddNursery = async(nursery_name: string, description: string) =>{
         if(!nursery_name){
@@ -68,6 +70,43 @@ export default function Nursery(){
     useEffect(() => {
         fetchNursery();
         }, []);
+
+    const handleUpdateNursery = async (payload: UpdateNursery) => {
+      try {
+        const res = await updateNursery(payload);
+        if (res?.IsSuccess) {
+          toast.success("Nursery updated successfully!");
+          setNursery(prev =>
+            prev.map(item =>
+              item.id === payload.nursery_id ? { ...item, ...payload } : item
+            )
+          );
+          setIsModalOpen(false);
+        } else {
+          toast.error(res?.Message || "Failed to update nursery.");
+        }
+      } catch (error: any) {
+        toast.error(error?.Message || "Failed to update nursery.");
+      }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this nursery?")) return;
+    
+        try {
+          const res = await deleteNursery(id);
+          if (res?.IsSuccess) {
+            toast.success("Nursery deleted successfully!");
+            setNursery(prev => prev.filter(n => n.id !== id));
+          } else {
+            toast.error(res?.Message || "Failed to delete nursery.");
+          }
+        } catch (error: any) {
+          toast.error(error?.Message || "Failed to delete nursery.");
+        }
+      };
+
+
 
     const filteredNursery = nursery.filter((nursery) => {
     const matchesSearch =
@@ -140,6 +179,7 @@ export default function Nursery(){
                 <Th>Sr.No</Th>
                 <Th>Nursery Name</Th>
                 <Th>Description</Th>
+                <Th>Actions</Th>
             </tr>
             </thead>
 
@@ -168,6 +208,28 @@ export default function Nursery(){
                     <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                     <Td className="font-medium text-gray-900">{nursery.nursery_name}</Td>
                     <Td>{nursery.description}</Td>
+                    <Td className="flex space-x-2">
+                    {/* Update Button */}
+                    <button
+                    className="px-3 py-1 bg-blue-500 text-white rounded-md flex items-center gap-2"
+                    onClick={() => {
+                      setEditingNursery({
+                        nursery_id: nursery.id,
+                        nursery_name: nursery.nursery_name,
+                        description: nursery.description,
+                      });
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    className="px-3 py-1 bg-red-500 text-white rounded-md flex items-center gap-2"
+                    onClick={() => handleDelete(nursery.id)}
+                  >
+                    <Trash className="w-4 h-4" />
+                  </button>
+                    </Td>
                 </tr>
                 ))
             )}
@@ -188,10 +250,15 @@ export default function Nursery(){
 
         {/* modal */}
         <AddNurseryModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onAdd={handleAddNursery}
-        />
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingNursery(null); // clear after closing
+        }}
+        onAdd={handleAddNursery} // still for adding
+        onUpdate={handleUpdateNursery} // new for editing
+        initialData={editingNursery} // new: pre-fill modal when editing
+      />
 
     </div>
     )
