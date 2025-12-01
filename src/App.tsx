@@ -7,9 +7,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ChildrenProvider } from "./contexts/ChildrenContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { ChatActivityProvider } from "./contexts/ChatActivityContext";
-import { useAutoLock } from "./hooks/autoLock";
+import { useAutoLogout } from "./hooks/autoLogout";
 import { useState, useEffect } from "react";
-import LockScreen from "./components/LockScreen";
 
 function AppContent() {
   const [parsedUser, setParsedUser] = useState<any>(() => {
@@ -71,15 +70,30 @@ function AppContent() {
     };
   }, [parsedUser]);
 
-  useAutoLock(() => {
-    const path = window.location.pathname;
-    const isExcluded = excludedRoutes.some((route) => path.startsWith(route));
+  useAutoLogout(parsedUser);
 
-    if (isLockableRole && !isExcluded) {
-      setLocked(true);
-      localStorage.setItem("isLocked", "true");
-    }
-  }, 60000);
+  // Optional: keep checking storage in case user logs out in another tab
+  useEffect(() => {
+    const checkUser = () => {
+      const storedUser =
+        sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
+      if (storedUser) {
+        const newUser = JSON.parse(storedUser);
+        if (JSON.stringify(newUser) !== JSON.stringify(parsedUser)) {
+          setParsedUser(newUser);
+        }
+      } else if (parsedUser) {
+        setParsedUser(null);
+      }
+    };
+
+    window.addEventListener("storage", checkUser);
+    const interval = setInterval(checkUser, 1000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", checkUser);
+    };
+  }, [parsedUser]);
 
   return (
     <>
@@ -91,14 +105,6 @@ function AppContent() {
               <div className={locked ? "pointer-events-none filter blur-sm" : ""}>
                 <AppRouter />
               </div>
-              {locked && (
-                <LockScreen
-                  onUnlock={() => {
-                    setLocked(false);
-                    localStorage.removeItem("isLocked");
-                  }}
-                />
-              )}
             </ChatProvider>
           </ChildrenProvider>
         </AuthProvider>

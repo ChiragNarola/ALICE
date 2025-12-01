@@ -22,6 +22,7 @@ import ResetPassword from "../pages/ResetPassword";
 import HolidayList from "../components/admin/HolidayList";
 import Nursery from "../components/admin/nursery/NurseryList";
 import FAQ from "../components/admin/faq"
+import PinLogin from "../components/PinLoginScreen";
 
 export default function AppRouter() {
     return (
@@ -34,6 +35,7 @@ export default function AppRouter() {
                 <Route path="/email-verification" element={<EmailVerification />} />
                 <Route path="/forgotpassword" element={<ForgotPassword />} />
                 <Route path="/resetpassword" element={<ResetPassword />} />
+                <Route path="/pin-login" element={<PinLogin />} />
 
             </Route>
 

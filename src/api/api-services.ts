@@ -1117,20 +1117,14 @@ export const setPin = async (
   }
 };
 
-export const verifyPin = async (
-  pin: string
-
-): Promise<APIResponse<null>> => {
-  const urlEncoded = new URLSearchParams();
-  urlEncoded.append("pin", pin);
-
+export const verifyPin = async (formData: FormData): Promise<APIResponse<null>> => {
   try {
     const response = await axiosInstance.post<APIResponse<null>>(
       "/users/verify_pin",
-      urlEncoded.toString(),
+      formData,
       {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "multipart/form-data",
         },
       }
     );
@@ -1146,6 +1140,8 @@ export const verifyPin = async (
     );
   }
 };
+
+
 
 export const uploadHolidayPdf = async (
   pdf_file: File
@@ -1321,5 +1317,18 @@ export const deleteNursery = async (id: number): Promise<APIResponse<any>> => {
     return response.data;
   } catch (error: any) {
     throw error?.response?.data || { message: 'Delete failed' };
+  }
+};
+
+export const hasPin = async (email: string): Promise<boolean> => {
+  try {
+    const response = await axiosInstance.get("/users/has-pin", { 
+      params: { email } 
+    });
+
+    return response.data?.Data?.has_pin ?? false;
+  } catch (err: any) {
+    console.error("Has PIN API error:", err);
+    return false;
   }
 };

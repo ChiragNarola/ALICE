@@ -32,6 +32,8 @@ export interface AuthContextType {
   ) => Promise<APIResponse<LoginResponseDTO> | null>;
   logout: () => void;
   isLoading: boolean;
+  showSetPinAfterLogin: boolean;
+  setShowSetPinAfterLogin: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface APIResponse<T> {

@@ -7,6 +7,8 @@ import { useChat } from "../../contexts/ChatContext";
 import { User, MessageCircle, LogOut, Lock, Eye, EyeOff } from "lucide-react";
 import { changePassword, setPin } from "../../api/api-services";
 import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/AuthContext";
+
 
 interface DashboardHeaderProps {
   showMessageDropdown: boolean;
@@ -57,6 +59,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     pin: "",
     confirm_pin: "",
   });
+  const { user } = useAuth(); 
+
+
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
@@ -173,6 +178,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       const response = await setPin(pinData.pin);
 
       if (response.IsSuccess) {
+        localStorage.setItem("user_pin",pinData.pin)
+        console.log("email is:",user?.email)
+        if (user?.email) {
+            localStorage.setItem("user_email", user.email);
+        }
         toast.success("Pin set successfully!");
         setShowSetPin(false);
         setPinData({ pin: "", confirm_pin: ""});
@@ -189,6 +199,28 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       setLoading(false);
     }
   };
+
+  const { showSetPinAfterLogin, setShowSetPinAfterLogin, user: authUser } = useAuth();
+
+    useEffect(() => {
+      if (showSetPinAfterLogin) {
+        const roles = authUser?.roles || [];
+        console.log("User roles on login:", roles);
+
+        if (roles.includes("staff") || roles.includes("parent+staff")) {
+          setShowSetPin(true); // show the Set PIN modal
+        }
+
+        setShowSetPinAfterLogin(false); // reset the flag
+
+        const savedPinSet = localStorage.getItem("pin_set");
+        const savedPinEmail = localStorage.getItem("user_email");
+        console.log("saved pin and email is:", savedPinSet, savedPinEmail);
+      }
+    }, [showSetPinAfterLogin, setShowSetPinAfterLogin, authUser]);
+
+
+
 
   return (
     <>

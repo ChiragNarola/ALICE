@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
 import type { LoginFormInputs } from "../routes/models/request/Auth";
 import "react-phone-input-2/lib/style.css";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, KeyRound } from "lucide-react";
 import { useChildren } from "../contexts/ChildrenContext";
 
 const LoginForm = () => {
@@ -21,6 +21,15 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormInputs>({ mode: "onChange" });
+
+  const savedPinSet = localStorage.getItem("pin_set");
+  const savedPinEmail = localStorage.getItem("user_email");
+  console.log("saved pin and email is:", savedPinSet, savedPinEmail);
+  const ue=localStorage.getItem("user_email")  // should show the user email
+  const up=localStorage.getItem("user_pin")    // should show 4-digit PIN if set
+  const ps=localStorage.getItem("pin_set")     // should be "true"
+  console.log("LocalStorage values - Email:", ue, "PIN:", up, "PIN Set:", ps);
+
 
   const onSubmit = async (data: LoginFormInputs) => {
     setLoading(true);
@@ -62,6 +71,29 @@ const LoginForm = () => {
       <p className="text-base lg:text-lg font-normal leading-[1.5] text-alice-darkgray mt-[10px] mb-6 sm:mb-8 md:mb-10 2xl:mb-12">
         Welcome back! Please enter your details
       </p>
+
+      {savedPinEmail && savedPinSet === "true" && (
+      <div className="flex items-center justify-between gap-3 p-3 mb-6 2xl:mb-9 rounded-xl bg-[#F5FBFA] border border-alice-teal/20">
+        <div className="text-left">
+          <p className="text-[13px] lg:text-sm font-semibold text-alice-black">
+            Quick login available
+          </p>
+          <p className="text-[12px] lg:text-xs text-alice-darkgray">
+            You’ve set up a 4-digit PIN for faster access.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/pin-login")}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-alice-teal text-[13px] lg:text-sm font-semibold text-alice-teal bg-white hover:bg-alice-teal hover:text-white transition-colors duration-200"
+        >
+          <KeyRound size={16} />
+          Use PIN
+        </button>
+      </div>
+    )}
+
 
       {/* Email Field */}
       <div className="mb-6">
