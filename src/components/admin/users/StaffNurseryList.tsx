@@ -4,11 +4,12 @@ import Pagination from "../../ui/Pagination";
 import { Users, Search } from "lucide-react";
 import { toast } from "react-toastify";
 
-import { getStaffNurseryStatus } from "../../../api/api-services";
+import { getStaffNurseryStatus, updateStaffNurseryStatus } from "../../../api/api-services";
 import type {
   StaffNurseryStatusDTO,
   StaffNurseryAssignmentDTO,
 } from "../../../routes/models/response/Response";
+import ApproveRejectModal from "./ApproveRejectModal";
 
 interface StaffNurseryRow {
   user_id: number;
@@ -96,9 +97,45 @@ export default function StaffNurseryList() {
     return "bg-gray-100 text-gray-700 border border-gray-200";
   };
 
+  const [selectedRow, setSelectedRow] = useState<StaffNurseryRow | null>(null);
+  const [actionType, setActionType] = useState<"APPROVED" | "REJECTED" | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openModal = (row: StaffNurseryRow, type: "APPROVED" | "REJECTED") => {
+    setSelectedRow(row);
+    setActionType(type);
+    setModalOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (!selectedRow || !actionType) return;
+    
+    try {
+      const payload = {
+        user_id: selectedRow.user_id,
+        nursery_id: selectedRow.nursery_id,
+        status: actionType.toLowerCase(),
+      };
+
+      const res = await updateStaffNurseryStatus(payload);
+
+      if (res.IsSuccess) {
+        toast.success(`Status updated to ${actionType}!`);
+        fetchStaffNursery();
+      } else {
+        toast.error(res?.Message || "Failed to update status");
+      }
+    } catch (e: any) {
+      toast.error(e?.Message || "Failed to update status");
+    } finally {
+      setModalOpen(false);
+    }
+  };
+
+
+
   return (
     <div className="p-6 space-y-6">
-      {/* Page Heading - same color scheme as other admin pages */}
       <div className="flex items-center justify-between border-b pb-4">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-indigo-100 rounded-lg">
@@ -154,6 +191,7 @@ export default function StaffNurseryList() {
               <Th>Role in Organisation</Th>
               <Th>Qualification</Th>
               <Th>Status</Th>
+              <Th>Actions</Th>
             </tr>
           </thead>
           <tbody>
@@ -194,6 +232,24 @@ export default function StaffNurseryList() {
                       {row.status ? row.status : "N/A"}
                     </span>
                   </Td>
+                  <Td>
+                    {row.status === "PENDING" && (
+                      <div className="flex space-x-2">
+                        <button
+                          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md"
+                          onClick={() => openModal(row, "APPROVED")}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md"
+                          onClick={() => openModal(row, "REJECTED")}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </Td>
                 </tr>
               ))
             )}
@@ -212,6 +268,16 @@ export default function StaffNurseryList() {
           setPageSize(size);
           setCurrentPage(1);
         }}
+      />
+
+      {/* modal */}
+      <ApproveRejectModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleConfirm}
+        staffName={selectedRow?.staff_name || ""}
+        nurseryName={selectedRow?.nursery_name || ""}
+        actionType={actionType || "APPROVED"}
       />
     </div>
   );

@@ -1349,3 +1349,22 @@ export const getStaffNurseryStatus = async (): Promise<
     );
   }
 };
+
+export const updateStaffNurseryStatus = async (payload: {
+  user_id: number;
+  nursery_id: number;
+  status: string;
+}): Promise<APIResponse<any>> => {
+  try {
+    const res = await axiosInstance.put("admin/staff-nursery-status", payload);
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Message: "Updating staff nursery status failed",
+        Data: null,
+      }
+    );
+  }
+};
