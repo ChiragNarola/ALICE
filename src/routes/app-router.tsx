@@ -21,6 +21,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import HolidayList from "../components/admin/HolidayList";
 import Nursery from "../components/admin/nursery/NurseryList";
+import StaffNurseryList from "../components/admin/users/StaffNurseryList";
 import FAQ from "../components/admin/faq"
 import PinLogin from "../components/PinLoginScreen";
 
@@ -58,6 +59,7 @@ export default function AppRouter() {
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="user" element={<UserList />} />
                     <Route path="staff" element={<StaffList />} />
+                    <Route path="staff-nursery" element={<StaffNurseryList />} />
                     <Route path="concerns" element={<ConcernList />} />
                     <Route path="area-of-interest" element={<AreaofinterestList />} />
                     <Route path="documents" element={<UploadedDocsList />} />

@@ -183,6 +183,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         if (user?.email) {
             localStorage.setItem("user_email", user.email);
         }
+        // store pin_set as true
+        localStorage.setItem("pin_set", "true");
         toast.success("Pin set successfully!");
         setShowSetPin(false);
         setPinData({ pin: "", confirm_pin: ""});
@@ -205,7 +207,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     useEffect(() => {
       if (showSetPinAfterLogin) {
         const roles = authUser?.roles || [];
+        const pinSet = localStorage.getItem("pin_set");
         console.log("User roles on login:", roles);
+
+        // Do NOT open modal if PIN is already set
+        if (pinSet === "true") {
+          setShowSetPinAfterLogin(false);
+          return;
+        }
 
         if (roles.includes("staff") || roles.includes("parent+staff")) {
           setShowSetPin(true); // show the Set PIN modal
@@ -306,9 +315,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 Change Password
               </button>
 
-              {userRoles.includes("staff") && (
+              {userRoles.includes("staff") && localStorage.getItem("pin_set") !== "true" && (
               <button
-                onClick={() => setShowSetPin(true)}
+                onClick={() => {
+                  const pinSet = localStorage.getItem("pin_set");
+                  if (pinSet === "true") {
+                  toast.info("PIN is already set");
+                  return;
+                  }
+                  setShowSetPin(true);
+                }}
                 className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
               >
                 <Lock className="w-5 h-5" />

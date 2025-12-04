@@ -3,7 +3,7 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ, UpdateNursery } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
@@ -1330,5 +1330,22 @@ export const hasPin = async (email: string): Promise<boolean> => {
   } catch (err: any) {
     console.error("Has PIN API error:", err);
     return false;
+  }
+};
+
+export const getStaffNurseryStatus = async (): Promise<
+  APIResponse<StaffNurseryStatusDTO[]>
+> => {
+  try {
+    const res = await axiosInstance.get("admin/staff-nursery-status");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching staff nursery status failed",
+      }
+    );
   }
 };

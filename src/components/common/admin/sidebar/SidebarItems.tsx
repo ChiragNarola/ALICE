@@ -43,11 +43,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: Users,
       href: "/admin/user",
     },
-    // {
-    //   title: "Staff",
-    //   icon: Users,
-    //   href: "/admin/staff",
-    // },
+    {
+      title: "Staff Nursery",
+      icon: Users,
+      href: "/admin/staff-nursery",
+    },
     {
       title: "Concerns",
       icon: ClipboardCheck,

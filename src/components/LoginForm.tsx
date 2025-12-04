@@ -47,6 +47,15 @@ const LoginForm = () => {
 
         if (role === "staff" || role === "parent") {
           toast.success("Login successful");
+
+          const pinSet = localStorage.getItem("pin_set");
+
+          if (pinSet === "false") {
+          // Redirect into DashboardLayout so the existing PIN modal appears
+          navigate("/child-basic-info");
+          return;
+          }
+
           navigate("/");
         } else {
           toast.error("Access denied. Only staff or parent can login.");
