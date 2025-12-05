@@ -134,7 +134,7 @@ const ChildBasicInformation: React.FC = () => {
         formData.append("age_group", finalData.age_group);
         formData.append("role_in_organisation", finalData.role_in_organisation == 'Other' ? finalData.other_role : finalData.role_in_organisation);
         formData.append("qualification", finalData.qualification);
-        formData.append("nursery",finalData.nursery.join(","));
+        formData.append("nursery_id",finalData.nursery.join(","));
         return formData;
       };
 

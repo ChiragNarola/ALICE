@@ -9,6 +9,7 @@ const StaffInfo: React.FC = () => {
     childAgeMin: 1,
     childAgeMax: 9,
   });
+  const [profileStatus, setProfileStatus] = useState<"pending" | "rejected" | "approved">("pending");
   const [loading, setLoading] = useState(true);
 
   // Fetch staff data from API
@@ -22,6 +23,20 @@ const StaffInfo: React.FC = () => {
 
         if (staff_response.IsSuccess && staff_response.Data) {
           const data = staff_response.Data;
+
+          // Extract nursery status list 
+          const statusArray = Array.isArray(data.nursery_status)
+            ? data.nursery_status.map((s: string) => s.toLowerCase())
+            : [];
+
+          // Default = pending, override if needed
+          if (statusArray.includes("rejected")) {
+            setProfileStatus("rejected");
+          } else if (statusArray.length > 0 && statusArray.every(s => s === "pending")) {
+            setProfileStatus("pending");
+          } else {
+            setProfileStatus("approved");
+          }
 
           // Parse age group (e.g., "1-9" -> min: 1, max: 9)
           const ageRange = data.age_group ? data.age_group.split('-') : ['1', '9'];
@@ -94,6 +109,20 @@ const StaffInfo: React.FC = () => {
       ) : (
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="p-4 space-y-4">
+
+            {/* PROFILE STATUS */}
+            {profileStatus !== "approved" && (
+              <div className={`mx-4 px-4 py-2 rounded-lg text-sm font-semibold border
+                ${profileStatus === "pending"
+                  ? "bg-yellow-100 text-yellow-700 border-yellow-300"
+                  : "bg-red-100 text-red-700 border-red-300"
+                }`}
+              >
+                {profileStatus === "pending" && "Profile is under review"}
+                {profileStatus === "rejected" && "Profile Rejected"}
+              </div>
+            )}
+
            {/* Job Title */}
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
             <div className="flex items-center gap-3 mb-2">

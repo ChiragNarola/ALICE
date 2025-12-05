@@ -42,6 +42,7 @@ export interface staffDTO {
     qualification: string;
     role_in_organisation: string;
     nursery_names: string[];
+    nursery_status: string[];
 }
 
 export interface HolidayItem {
