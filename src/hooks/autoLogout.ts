@@ -9,6 +9,7 @@ export function useAutoLogout(user: any) {
 
   useEffect(() => {
     if (!user) return;
+    if (user.roles?.includes("admin")) return;
 
     const resetTimer = () => {
       if (logoutTimer.current) clearTimeout(logoutTimer.current);
