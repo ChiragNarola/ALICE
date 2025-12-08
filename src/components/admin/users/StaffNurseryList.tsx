@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { Users, Search } from "lucide-react";
+import { Users, Search, AlertTriangle } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ApproveRejectModal from "./ApproveRejectModal";
@@ -84,7 +84,13 @@ export default function StaffNurseryList() {
           }, {})
         );
 
-        setRows(grouped);
+        const sorted = grouped.sort((a, b) => {
+          const aPending = a.nurseries.some(n => n.status?.toLowerCase() === "pending");
+          const bPending = b.nurseries.some(n => n.status?.toLowerCase() === "pending");
+          return aPending === bPending ? 0 : aPending ? -1 : 1;
+        });
+
+        setRows(sorted);
       } else {
         toast.error(res?.Message || "Failed to load staff nursery data.");
       }
@@ -288,7 +294,19 @@ export default function StaffNurseryList() {
                   <Td>{row.age_group || "-"}</Td>
                   <Td>{row.role_in_organisation || "-"}</Td>
                   <Td>{row.qualification || "-"}</Td>
-                  <Td>{row.nurseries.length}</Td>
+                  <Td className="flex items-center gap-1 !border-b-0">
+                    {row.nurseries.length}
+                    {row.nurseries.some(n => (n.status || "").toLowerCase() === "pending") && (
+                      <div className="relative group">
+                        <AlertTriangle className="w-4 h-4 text-yellow-500 cursor-default" />
+
+                        {/* Tooltip */}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-5 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
+                          Approvals Pending 
+                        </div>
+                      </div>
+                    )}
+                  </Td>
                   <Td>
                     <button
                       onClick={() => openModal(row)}
