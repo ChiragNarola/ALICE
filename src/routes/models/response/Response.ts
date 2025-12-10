@@ -106,4 +106,5 @@ export interface StaffNurseryStatusDTO {
   qualification?: string | null;
 
   nurseries: StaffNurseryAssignmentDTO[];
+  created_at: string;
 }

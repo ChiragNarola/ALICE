@@ -104,6 +104,7 @@ const logout = async () => {
     // 🔥 Save PIN & email BEFORE clearing storage
     const savedPin = localStorage.getItem("user_pin");
     const savedEmail = localStorage.getItem("user_email");
+    const savedPinSet = localStorage.getItem("pin_set");
 
     setUser(null);
 
@@ -115,6 +116,9 @@ const logout = async () => {
     if (savedPin && savedEmail) {
       localStorage.setItem("user_pin", savedPin);
       localStorage.setItem("user_email", savedEmail);
+    }
+    if (savedPinSet !== null) {
+      localStorage.setItem("pin_set", savedPinSet); 
     }
   }
 };

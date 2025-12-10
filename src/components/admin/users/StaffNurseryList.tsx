@@ -22,6 +22,7 @@ interface GroupedStaffRow {
   age_group?: string | null;
   role_in_organisation?: string | null;
   qualification?: string | null;
+  created_at?: string;
   nurseries: {
     nursery_id: number;
     nursery_name: string;
@@ -59,6 +60,7 @@ export default function StaffNurseryList() {
             nursery_id: n.nursery_id,
             nursery_name: n.nursery_name,
             status: n.status,
+            created_at: staff.created_at,
           }))
         );
 
@@ -72,6 +74,7 @@ export default function StaffNurseryList() {
                 age_group: row.age_group,
                 role_in_organisation: row.role_in_organisation,
                 qualification: row.qualification,
+                created_at: row.created_at,
                 nurseries: [],
               };
             }
@@ -85,10 +88,20 @@ export default function StaffNurseryList() {
         );
 
         const sorted = grouped.sort((a, b) => {
-          const aPending = a.nurseries.some(n => n.status?.toLowerCase() === "pending");
-          const bPending = b.nurseries.some(n => n.status?.toLowerCase() === "pending");
-          return aPending === bPending ? 0 : aPending ? -1 : 1;
-        });
+        const aPending = a.nurseries.some(n => (n.status || "").toLowerCase() === "pending");
+        const bPending = b.nurseries.some(n => (n.status || "").toLowerCase() === "pending");
+
+        if (aPending && bPending) {
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        }
+
+        if (aPending) return -1;
+        if (bPending) return 1;
+
+        return 0;
+      });
+
+
 
         setRows(sorted);
       } else {
@@ -233,7 +246,7 @@ export default function StaffNurseryList() {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
-              Staff Nursery Mapping
+              Staff Details
             </h1>
             <p className="text-sm text-gray-500">
               View nursery assignments for staff and their approval status.

@@ -5,7 +5,13 @@ const WelcomeSection = () => (
   <div className="w-screen h-screen bg-alice-peach flex items-center justify-center overflow-hidden px-4">
     <div className="w-full max-w-xl bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] px-8 py-8">
       <div className="flex flex-col items-center text-center">
-        <img src={logo} alt="Logo" className="h-10 mb-4" />
+        <img
+  src={logo}
+  srcSet="/logo@2x.png 2x, /logo@3x.png 3x"
+  alt="Logo"
+  className="h-[60px] w-auto"
+/>
+
         <h1 className="text-xl font-semibold text-alice-black">Welcome to Alice Admin Panel</h1>
         <p className="text-sm text-alice-darkgray mt-1">
           Your AI-powered childcare guide
