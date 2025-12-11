@@ -4,10 +4,11 @@ import userimg from "../../assets/images/user-img.png";
 import { useNavigate} from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import { useChat } from "../../contexts/ChatContext";
-import { User, MessageCircle, LogOut, Lock, Eye, EyeOff } from "lucide-react";
-import { changePassword, setPin } from "../../api/api-services";
+import { User, MessageCircle, LogOut, Lock, Eye, EyeOff, KeySquare } from "lucide-react";
+import { changePassword, setPin, updatePin } from "../../api/api-services";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/AuthContext";
+import  UpdatePinModal from "../common/UpdatePinModal"
 
 
 interface DashboardHeaderProps {
@@ -60,6 +61,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     confirm_pin: "",
   });
   const { user } = useAuth(); 
+  const [showUpdatePin, setShowUpdatePin] = useState(false);
+  const [updatePinData, setUpdatePinData] = useState({
+    old_pin: "",
+    new_pin: "",
+    confirm_new_pin: "",
+  });
+  const [showOldPin, setShowOldPin] = useState(false);
+  const [showNewPin, setShowNewPin] = useState(false);
+  const [showConfirmNewPin, setShowConfirmNewPin] = useState(false);
 
 
 
@@ -168,6 +178,60 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
+
+  const validateUpdatePin = () => {
+      const newErrors: any = {};
+      const { old_pin, new_pin, confirm_new_pin } = updatePinData;
+
+      if (!old_pin.trim()) newErrors.old_pin = "Old PIN is required.";
+      else if (!/^\d{4}$/.test(old_pin)) newErrors.old_pin = "PIN must be 4 digits.";
+
+      if (!new_pin.trim()) newErrors.new_pin = "New PIN is required.";
+      else if (!/^\d{4}$/.test(new_pin)) newErrors.new_pin = "PIN must be 4 digits.";
+      else if (new_pin === old_pin) newErrors.new_pin = "New PIN must be different.";
+
+      if (!confirm_new_pin.trim()) newErrors.confirm_new_pin = "Confirm PIN is required.";
+      else if (confirm_new_pin !== new_pin) newErrors.confirm_new_pin = "PINs do not match.";
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+
+
+    const handleUpdatePin = async () => {
+          if (!validateUpdatePin()) return;
+
+          setLoading(true);
+          try {
+            const response = await updatePin(updatePinData.old_pin, updatePinData.new_pin);
+
+            if (response.IsSuccess) {
+              localStorage.setItem("user_pin", updatePinData.new_pin);
+
+              toast.success("PIN updated successfully!");
+              setShowUpdatePin(false);
+
+              setUpdatePinData({
+                old_pin: "",
+                new_pin: "",
+                confirm_new_pin: "",
+              });
+
+              setErrors({});
+            } else {
+              toast.error(response.Message || "Failed to update PIN.");
+            }
+          } catch (error: any) {
+            toast.error(error?.Message || "Something went wrong.");
+          } finally {
+            setLoading(false);
+          }
+        };
+
+
+
+
+
 
   const handleSetPin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -314,6 +378,34 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <Lock className="w-5 h-5" />
                 Change Password
               </button>
+
+              <button
+                onClick={() => setShowUpdatePin(true)}
+                className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
+              >
+                <KeySquare className="w-5 h-5" />
+                Update PIN
+              </button>
+
+                {/* Update PIN Modal */}
+                  {showUpdatePin && (
+                  <UpdatePinModal
+                    updatePinData={updatePinData}
+                    setUpdatePinData={setUpdatePinData}
+                    errors={errors}
+                    showOldPin={showOldPin}
+                    setShowOldPin={setShowOldPin}
+                    showNewPin={showNewPin}
+                    setShowNewPin={setShowNewPin}
+                    showConfirmNewPin={showConfirmNewPin}
+                    setShowConfirmNewPin={setShowConfirmNewPin}
+                    loading={loading}
+                    handleUpdatePin={() => handleUpdatePin()}
+                    onClose={() => setShowUpdatePin(false)}
+                  />
+                )}
+
+
 
               {userRoles.includes("staff") && localStorage.getItem("pin_set") !== "true" && (
               <button

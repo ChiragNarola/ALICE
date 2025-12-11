@@ -17,9 +17,18 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (!(config.data instanceof FormData)) {
-      config.headers["Content-Type"] = "application/json";
-    }
+    axiosInstance.interceptors.request.use(
+      (config) => {
+        const token = getStoredItem("auth_token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        // 🔥 Do not set Content-Type manually
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
 
     return config;
   },

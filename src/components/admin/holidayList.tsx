@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listHolidays, uploadHolidayFile, deleteHoliday } from "../../api/api-services";
+import { listHolidays, uploadHolidayFile, deleteHoliday,addHoliday } from "../../api/api-services";
 import { toast } from "react-toastify";
 import { Table, Th, Td } from "../ui/Table";
 import { Search, CalendarDays, Upload, Check, Trash2} from "lucide-react";
@@ -7,6 +7,9 @@ import Button from "../ui/Button";
 import Tippy from "@tippyjs/react";
 import Pagination from "../ui/Pagination";
 import type { HolidayItem } from "../../routes/models/response/Response";
+import AddHolidayModal from "./AddHolidayModal";
+import type { APIResponse } from "../../routes/models/response/Auth";
+
 
 
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
@@ -38,6 +41,8 @@ export default function HolidayList() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [isHolidayModalOpen, setIsHolidayModalOpen] = useState(false);
+
 
   const allowedExtensions = ["csv", "xlsx", "xls"];;
   const MAX_FILE_SIZE_MB = 10;
@@ -159,6 +164,21 @@ export default function HolidayList() {
         }
     };
 
+  const handleAddHoliday = async (title: string, holiday_date: string) => {
+    try {
+      const res: APIResponse<HolidayItem> = await addHoliday({ id: 0, title, holiday_date, end_date: null });
+      if (res.IsSuccess) {
+        toast.success(res.Message);
+        fetchHolidayData();
+      } else {
+        toast.error(res.Message);
+      }
+    } catch (err: any) {
+      toast.error(err?.Message ?? "Something went wrong");
+    }
+  };
+
+
   return (
     <div className="p-6 space-y-6">
       {/* Heading with New Holiday button */}
@@ -197,15 +217,23 @@ export default function HolidayList() {
           </div>
         </div>
 
-        {/* Add Document Button */}
-        <div className="ml-auto">
-            <Button
+        {/* Buttons Container */}
+        <div className="flex gap-2 ml-auto">
+          <Button
             onClick={() => setModalOpen(true)}
             variant="teal"
             className="h-10 rounded-lg shadow"
-            >
+          >
             + Upload Holiday File
-            </Button>
+          </Button>
+
+          <Button
+            onClick={() => setIsHolidayModalOpen(true)}
+            variant="teal"
+            className="h-10 rounded-lg shadow"
+          >
+            + Add Holiday
+          </Button>
         </div>
         </div>
 
@@ -360,6 +388,13 @@ export default function HolidayList() {
               onPageChange={setCurrentPage}
               onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
             />
+
+      {/* modal */}
+      <AddHolidayModal
+        isOpen={isHolidayModalOpen}
+        onClose={() => setIsHolidayModalOpen(false)}
+        onAdd={handleAddHoliday} // function to call your API/service
+      />
     
       </div>
   );

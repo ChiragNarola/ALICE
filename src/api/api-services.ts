@@ -586,17 +586,13 @@ export const verifyEmailCode = async (
   verificationCode: string
 ): Promise<APIResponse<null>> => {
   try {
-    const formData = new URLSearchParams();
-    formData.append("verification_code", verificationCode);
+    const params = new URLSearchParams();
+    params.append("verification_code", verificationCode);
 
     const res = await axiosInstance.post(
       "users/verify_email_code",
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
+      params // <-- Do NOT call .toString()
+      // DO NOT set Content-Type manually
     );
 
     return res.data;
@@ -1073,26 +1069,24 @@ export const changePassword = async (
   }
 };
 
-export const setPin = async (
-  pin: string
-
-): Promise<APIResponse<null>> => {
-  const urlEncoded = new URLSearchParams();
-  urlEncoded.append("pin", pin);
+export const setPin = async (pin: string): Promise<APIResponse<null>> => {
+  const form = new FormData();
+  form.append("pin", pin); // <-- EXACT KEY
 
   try {
-    const response = await axiosInstance.post<APIResponse<null>>(
+    const response = await axiosInstance.post(
       "/users/set_pin",
-      urlEncoded.toString(),
+      form,
       {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "multipart/form-data",
         },
       }
     );
 
     return response.data;
   } catch (error: any) {
+    console.log("ERROR DATA:", error?.response?.data);
     throw (
       error?.response?.data ?? {
         IsSuccess: false,
@@ -1127,7 +1121,29 @@ export const verifyPin = async (formData: FormData): Promise<APIResponse<null>> 
   }
 };
 
+export const updatePin = async (old_pin: string, new_pin: string): Promise<APIResponse<null>> => {
+  try {
+    const formData = new FormData();
+    formData.append("old_pin", old_pin);
+    formData.append("new_pin", new_pin);
 
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/users/update_pin",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "PIN update failed.",
+      }
+    );
+  }
+};
 
 export const uploadHolidayFile = async (
   file: File
@@ -1177,6 +1193,27 @@ export const deleteHoliday = async (id: number): Promise<APIResponse<any>> => {
     throw error?.response?.data || { message: 'Delete failed' };
   }
 };
+
+export const addHoliday = async (
+  data: HolidayItem
+): Promise<APIResponse<HolidayItem>> => {
+  try {
+    const res = await axiosInstance.post<APIResponse<HolidayItem>>(
+      "admin/add_holiday",
+      data
+    );
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Adding holiday failed",
+      }
+    );
+  }
+};
+
 
 export const createNursery = async (data:CreateNurseryDTO): Promise<APIResponse<any>> => {
   // const urlEncoded = new URLSearchParams();
@@ -1349,3 +1386,4 @@ export const updateStaffNurseryStatus = async (payload: {
     );
   }
 };
+
