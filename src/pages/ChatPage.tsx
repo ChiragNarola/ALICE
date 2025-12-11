@@ -221,8 +221,8 @@ const ChatPage: React.FC = () => {
   const tempId = Date.now();
   let dbId = tempId;
 
-  console.log("🟡 USER SENT MESSAGE");
-  console.log("tempId assigned for both bubbles:", tempId);
+  // console.log("🟡 USER SENT MESSAGE");
+  // console.log("tempId assigned for both bubbles:", tempId);
 
   // show bubbles immediately
   setChatMessages(prev => [
@@ -253,15 +253,15 @@ const ChatPage: React.FC = () => {
     const headerConvId = response.headers.get("x-conversation-uuid");
     const headerUserMessageId = response.headers.get("x-user-message-id");
 
-    console.log("🔵 Headers received:");
-    console.log("conversation uuid:", headerConvId);
-    console.log("user message id:", headerUserMessageId);
+    // console.log("🔵 Headers received:");
+    // console.log("conversation uuid:", headerConvId);
+    // console.log("user message id:", headerUserMessageId);
 
     if (headerConvId) setChatboardUniqueId(headerConvId);
 
     if (headerUserMessageId) {
       dbId = Number(headerUserMessageId);
-      console.log(`🟢 Swapping tempId(${tempId}) → dbId(${dbId})`);
+      // console.log(`🟢 Swapping tempId(${tempId}) → dbId(${dbId})`);
 
       setChatMessages(prev =>
         prev.map(m => m.id === tempId ? { ...m, id: dbId } : m)
@@ -288,14 +288,14 @@ const ChatPage: React.FC = () => {
       );
     }
 
-    console.log("🟢 Stream finished — enabling like/dislike for id:", dbId);
+    // console.log("🟢 Stream finished — enabling like/dislike for id:", dbId);
 
     setChatMessages(prev =>
       prev.map(m => m.id===dbId && m.from==="alice" ? { ...m, actions:true } : m)
     );
 
   } catch (err) {
-    console.error("❌ Error while streaming:", err);
+    console.error("Error while streaming:", err);
     setChatMessages(prev =>
       prev.map(m =>
         m.id===dbId && m.from==="alice"
