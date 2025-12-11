@@ -1,10 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    baseURL: import.meta.env.VITE_API_BASE_URL
 });
 
 // Request interceptor to attach token
@@ -18,6 +15,10 @@ axiosInstance.interceptors.request.use(
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
     }
 
     return config;

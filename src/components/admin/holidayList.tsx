@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listHolidays, uploadHolidayPdf, deleteHoliday } from "../../api/api-services";
+import { listHolidays, uploadHolidayFile, deleteHoliday } from "../../api/api-services";
 import { toast } from "react-toastify";
 import { Table, Th, Td } from "../ui/Table";
 import { Search, CalendarDays, Upload, Check, Trash2} from "lucide-react";
@@ -39,7 +39,7 @@ export default function HolidayList() {
   const [fileError, setFileError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
-  const allowedExtensions = ["pdf"];
+  const allowedExtensions = ["csv", "xlsx", "xls"];;
   const MAX_FILE_SIZE_MB = 10;
 
   const fetchHolidayData = async () => {
@@ -76,8 +76,8 @@ export default function HolidayList() {
 
     if (!ext || !allowedExtensions.includes(ext)) {
       setUploadedFile(null);
-      setFileError("Invalid file type! Allowed: PDF");
-      toast.error("Invalid file type! Allowed: PDF", { autoClose: 3000 });
+      setFileError("Invalid file type! Allowed: CSV, XLSX, XLS");
+      toast.error("Invalid file type! Allowed: CSV, XLSX, XLS", { autoClose: 3000 });
       e.target.value = "";
       return;
     }
@@ -106,10 +106,10 @@ export default function HolidayList() {
 
     try {
       setUploadLoading(true);
-      const response = await uploadHolidayPdf(uploadedFile!);
+      const response = await uploadHolidayFile(uploadedFile!);
 
       if (response?.IsSuccess) {
-        toast.success("Holiday PDF uploaded successfully!", {
+        toast.success("Holiday File uploaded successfully!", {
           autoClose: 3000,
         });
         setUploadedFile(null);
@@ -204,7 +204,7 @@ export default function HolidayList() {
             variant="teal"
             className="h-10 rounded-lg shadow"
             >
-            + Add Holiday PDF
+            + Upload Holiday File
             </Button>
         </div>
         </div>
@@ -217,7 +217,6 @@ export default function HolidayList() {
                 <Th>Sr.No</Th>
                 <Th>Holiday Title</Th>
                 <Th>Date</Th>
-                <Th>End Date</Th>
                 <Th>Actions</Th>
             </tr>
             </thead>
@@ -247,7 +246,6 @@ export default function HolidayList() {
                     <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                     <Td className="font-medium text-gray-900">{holiday.title}</Td>
                     <Td>{holiday.holiday_date}</Td>
-                    <Td>{holiday.end_date || "-"}</Td>
                     <Td>
                         <div className="flex space-x-2">
                         <Button
@@ -271,7 +269,7 @@ export default function HolidayList() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <div className="flex flex-col gap-4 bg-white rounded-xl">
           <h2 className="text-lg font-semibold text-gray-900">
-            Add New Holiday PDF <span className="text-red-500">*</span>
+            Add New Holiday Calendar <span className="text-red-500">*</span>
           </h2>
           {/* File Upload */}
           <div className="flex flex-col w-full">
@@ -292,7 +290,7 @@ export default function HolidayList() {
                   id="file-upload"
                   type="file"
                   className="hidden"
-                  accept=".pdf,.docx,.txt,.xlsx,.pptx"
+                  accept=".pdf,.docx,.txt,.xlsx,.pptx,.csv,.xls"
                   onChange={handleFileSelect}
                 />
                 {fileError && <p className="mt-2 text-sm text-red-600">{fileError}</p>}

@@ -24,11 +24,9 @@ const LoginForm = () => {
 
   const savedPinSet = localStorage.getItem("pin_set");
   const savedPinEmail = localStorage.getItem("user_email");
-  console.log("saved pin and email is:", savedPinSet, savedPinEmail);
   const ue=localStorage.getItem("user_email")  // should show the user email
   const up=localStorage.getItem("user_pin")    // should show 4-digit PIN if set
   const ps=localStorage.getItem("pin_set")     // should be "true"
-  console.log("LocalStorage values - Email:", ue, "PIN:", up, "PIN Set:", ps);
 
 
   const onSubmit = async (data: LoginFormInputs) => {

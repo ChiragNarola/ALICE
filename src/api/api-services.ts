@@ -9,32 +9,18 @@ import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
 
 //Auth
-export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
-  const urlEncoded = new URLSearchParams();
-  formData.forEach((value, key) => {
-    urlEncoded.append(key, value.toString());
-  });
-
-  try {
-    const response = await axiosInstance.post<APIResponse<LoginResponseDTO>>(
-      "/users/login",
-      urlEncoded.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    return response.data;
-  } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Login failed",
-    };
-  }
+export const loginUser = async (formData: FormData) => {
+  const response = await axiosInstance.post(
+    "/users/login",
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" }
+    }
+  );
+  return response.data;
 };
+
+
 
 
 export const logoutUser = async (sessionUUID: string): Promise<APIResponse<null>> => {
@@ -1143,22 +1129,17 @@ export const verifyPin = async (formData: FormData): Promise<APIResponse<null>> 
 
 
 
-export const uploadHolidayPdf = async (
-  pdf_file: File
+export const uploadHolidayFile = async (
+  file: File
 
 ): Promise<APIResponse<null>> => {
   const formData = new FormData();
-  formData.append("pdf_file", pdf_file);
+  formData.append("file", file);
 
   try {
     const response = await axiosInstance.post<APIResponse<null>>(
       "admin/holiday",
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
+      formData
     );
 
     return response.data;
@@ -1167,7 +1148,7 @@ export const uploadHolidayPdf = async (
       error?.response?.data ?? {
         IsSuccess: false,
         Data: null,
-        Message: "PDF upload failed.",
+        Message: "File upload failed.",
       }
     );
   }
