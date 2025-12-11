@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { Users, Search, AlertTriangle } from "lucide-react";
+import { Users, Search, Hourglass, BadgeCheck } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ApproveRejectModal from "./ApproveRejectModal";
@@ -259,13 +259,13 @@ export default function StaffNurseryList() {
       <div className="flex flex-wrap gap-4 mt-2">
         <div className="flex flex-col w-72">
           <label className="mb-1 text-sm font-medium text-gray-700">
-            Search by staff / nursery
+            Search by keyword
           </label>
           <div className="relative">
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Type staff name, email or nursery..."
+              placeholder="Type staff name"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -289,49 +289,82 @@ export default function StaffNurseryList() {
               <Th>Role in Organisation</Th>
               <Th>Qualification</Th>
               <Th>Nursery Count</Th>
-              <Th>Actions</Th>
+              <Th>Approve / Reject</Th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
-              <tr><Td colSpan={8} className="text-center py-6">Loading...</Td></tr>
+              <tr>
+                <Td colSpan={8} className="text-center py-6">Loading...</Td>
+              </tr>
             ) : paginatedRows.length === 0 ? (
-              <tr><Td colSpan={8} className="text-center text-gray-500 py-4">No data found.</Td></tr>
+              <tr>
+                <Td colSpan={8} className="text-center text-gray-500 py-4">No data found.</Td>
+              </tr>
             ) : (
               paginatedRows.map((row, index) => (
                 <tr key={row.user_id} className="border-b hover:bg-gray-50 transition">
-                  <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
-                  <Td className="font-medium text-gray-900">{row.staff_name}</Td>
-                  <Td text-gray-600 >{row.email}</Td>
-                  <Td>{row.age_group || "-"}</Td>
-                  <Td>{row.role_in_organisation || "-"}</Td>
-                  <Td>{row.qualification || "-"}</Td>
-                  <Td className="flex items-center gap-1 !border-b-0">
-                    {row.nurseries.length}
-                    {row.nurseries.some(n => (n.status || "").toLowerCase() === "pending") && (
-                      <div className="relative group">
-                        <AlertTriangle className="w-4 h-4 text-yellow-500 cursor-default" />
-
-                        {/* Tooltip */}
-                        <div className="absolute left-1/2 -translate-x-1/2 top-5 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
-                          Approvals Pending 
-                        </div>
-                      </div>
-                    )}
+                  <Td className="align-middle">
+                    {(currentPage - 1) * pageSize + index + 1}
                   </Td>
-                  <Td>
-                    <button
-                      onClick={() => openModal(row)}
-                      className="px-3 py-1 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-                    >
-                      ...
-                    </button>
+
+                  <Td className="align-middle font-medium text-gray-900">
+                    <div className="inline-flex items-center gap-2">
+                      <span className="leading-none">{row.staff_name}</span>
+                    </div>
+                  </Td>
+
+                  <Td className="align-middle text-gray-600">
+                    {row.email}
+                  </Td>
+
+                  <Td className="align-middle">
+                    {row.age_group || "-"}
+                  </Td>
+
+                  <Td className="align-middle">
+                    {row.role_in_organisation || "-"}
+                  </Td>
+
+                  <Td className="align-middle">
+                    {row.qualification || "-"}
+                  </Td>
+
+                  <Td className="align-middle !border-b-0">
+                    <div className="inline-flex items-center gap-2">
+                      <span className="text-sm font-medium leading-none">{row.nurseries.length}</span>
+
+                      {row.nurseries.some(n => (n.status || "").toLowerCase() === "pending") && (
+                        <div className="relative group">
+                          <div className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-yellow-50 text-yellow-700 text-xs font-medium">
+                            <Hourglass className="w-3 h-3" />
+                          </div>
+
+                          <div className="absolute left-1/2 -translate-x-1/2 top-8 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap">
+                            Pending Approvals
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Td>
+
+                  <Td className="align-middle">
+                    <div className="inline-flex items-center">
+                      <button
+                        onClick={() => openModal(row)}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50"
+                        aria-label="Open actions"
+                      >
+                        <BadgeCheck className="w-4 h-4" />
+                      </button>
+                    </div>
                   </Td>
                 </tr>
               ))
             )}
           </tbody>
+
         </Table>
       </div>
 

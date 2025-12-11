@@ -8,7 +8,7 @@ import type {
   APIResponse,
   LoginResponseDTO,
 } from "../routes/models/response/Auth";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { resetActivityTimer } = useChatActivity(); 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [showSetPinAfterLogin, setShowSetPinAfterLogin] = useState(false);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("user_email", u.email);
 
       const pin = await hasPin(u.email); // true/false
-      console.log("PIN existence check for", u.email, ":", pin);
+      // console.log("PIN existence check for", u.email, ":", pin);
       if (!pin) {
         localStorage.setItem("pin_set", "false");
         setShowSetPinAfterLogin(true);

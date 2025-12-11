@@ -198,7 +198,7 @@ const ChatPage: React.FC = () => {
       user_response: msg.user_response ?? null,
       actions: msg.actions ?? true,
     }));
-    console.log("mappedmessages are:",mappedMessages)
+    // console.log("mappedmessages are:",mappedMessages)
 
     setChatMessages(mappedMessages);
   }, [messages]);

@@ -322,7 +322,7 @@ const ChildBasicInformation: React.FC = () => {
 
         if (isStaff) {
           const staff_response = await getStaffDetailsForLoginUser();
-          console.log("staff response is:",staff_response)
+          // console.log("staff response is:",staff_response)
           if (staff_response.IsSuccess) {
             setSteps(prevSteps =>
               prevSteps.map(step =>

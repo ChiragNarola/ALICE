@@ -33,7 +33,7 @@ export default function ApproveRejectModal({
   ).length;
 
   return (
-    <Modal title={`Nursery Listing for ${staffName}`} onClose={onClose}>
+    <Modal title={`Review Nursery for ${staffName}`} onClose={onClose}>
       <div className="space-y-6 p-1">
         <hr className="border-gray-300 my-2" />
 

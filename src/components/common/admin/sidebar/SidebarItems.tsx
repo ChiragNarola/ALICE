@@ -44,7 +44,7 @@ export const useSidebarItems = (): SidebarItem[] => {
       href: "/admin/user",
     },
     {
-      title: "Staff Nursery",
+      title: "Staff Details",
       icon: Users,
       href: "/admin/staff-nursery",
     },

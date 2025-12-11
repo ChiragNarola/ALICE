@@ -38,7 +38,7 @@ function AppContent() {
     "/admin/faq"
   ];
 
-  const [locked, setLocked] = useState<boolean>(() => {
+  const [locked] = useState<boolean>(() => {
     const path = window.location.pathname;
     const isExcluded = excludedRoutes.some((route) => path.startsWith(route));
     return (
