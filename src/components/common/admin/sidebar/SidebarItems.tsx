@@ -3,7 +3,10 @@ import {
   Users,
   Laptop2,
   ClipboardCheck,
-  FileText
+  FileText,
+  School,
+  CalendarDays,
+  BadgeQuestionMark 
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -40,11 +43,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: Users,
       href: "/admin/user",
     },
-    // {
-    //   title: "Staff",
-    //   icon: Users,
-    //   href: "/admin/staff",
-    // },
+    {
+      title: "Staff Details",
+      icon: Users,
+      href: "/admin/staff-nursery",
+    },
     {
       title: "Concerns",
       icon: ClipboardCheck,
@@ -60,6 +63,21 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: FileText,
       href: "/admin/documents",
     },
+    {
+      title: "Holiday Calendar",
+      icon: CalendarDays,
+      href: "/admin/holiday-calendar",
+    },
+    {
+      title: "Nursery",
+      icon: School,
+      href: "/admin/nursery",
+    },
+    {
+      title: "FAQ",
+      icon: BadgeQuestionMark ,
+      href: "/admin/faq"
+    }
     // {
     //   title: "Settings",
     //   icon: Settings,

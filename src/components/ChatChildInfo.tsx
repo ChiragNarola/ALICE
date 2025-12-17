@@ -240,65 +240,66 @@ const ChatChildInfo: React.FC = () => {
 
                   {/* Divider */}
                   <div className="border-t border-gray-200 my-2"></div>
-                  {/* Topics of Interest */}
+                  {/* Interests + Concerns in same row */}
+<div className="flex gap-4">
+  
+  {/* Interests */}
+  {child.topics.length > 0 && (
+    <div className="flex-1">
+      <div className="flex items-center gap-1.5 mb-2">
+        <div className="w-4 h-4 bg-green-100 rounded flex items-center justify-center">
+          <svg className="w-2.5 h-2.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h4 className="text-[11px] font-bold text-gray-800 uppercase tracking-wide leading-tight pt-1">
+          Interests
+        </h4>
+        </div>
+      <div className="flex flex-wrap gap-1">
+        {child.topics.map((topic: any, i: any) => (
+          <Tippy content={topic} placement="bottom" key={i}>
+            <span
+              className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full
+              bg-green-50 text-green-700 border border-green-200 cursor-default"
+            >
+              {topic} {/* FULL VALUE */}
+            </span>
+          </Tippy>
+        ))}
+      </div>
+    </div>
+  )}
 
-                  {child.topics.length > 0 && (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <div className="w-4 h-4 bg-green-100 rounded flex items-center justify-center">
-                          <svg className="w-2.5 h-2.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wide">Interests</h4>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {child.topics.map((topic: any, i: any) => (
-                          <Tippy content={topic} placement="bottom">
-                            <span
-                              key={i}
-                              className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full
-               bg-green-50 text-green-700 border border-green-200
-               max-w-[100px] cursor-default">
-                              <span className="truncate overflow-hidden whitespace-nowrap block w-full">
-                                {topic}
-                              </span>
-                            </span>
-                          </Tippy>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Concerns */}
-                  {child.concerns.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <div className="w-4 h-4 bg-orange-100 rounded flex items-center justify-center">
-                          <svg className="w-2.5 h-2.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                        </div>
-                        <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wide">Concerns</h4>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {child.concerns.map((concern: any, i: any) => (
-                          <Tippy content={concern} placement="bottom">
-                            <span
-                              key={i}
-                              className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full
-               bg-orange-50 text-orange-700 border border-orange-200
-               max-w-[100px] cursor-default">
-                              <span className="truncate overflow-hidden whitespace-nowrap block w-full">
-                                {concern}
-                              </span>
-                            </span>
-                          </Tippy>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+  {/* Concerns */}
+  {child.concerns.length > 0 && (
+    <div className="flex-1">
+      <div className="flex items-center gap-1.5 mb-2">
+        <div className="w-4 h-4 bg-orange-100 rounded flex items-center justify-center">
+          <svg className="w-2.5 h-2.5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+        </div>
+        <h4 className="text-[11px] font-bold text-gray-800 uppercase tracking-wide leading-tight pt-1">
+        Concerns
+      </h4>
+            </div>
+      <div className="flex flex-wrap gap-1">
+        {child.concerns.map((concern: any, i: any) => (
+          <Tippy content={concern} placement="bottom" key={i}>
+            <span
+              className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded-full
+              bg-orange-50 text-orange-700 border border-orange-200 cursor-default"
+            >
+              {concern} {/* FULL VALUE */}
+            </span>
+          </Tippy>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
+</div>
               ))}
             </div>
           )}

@@ -20,8 +20,10 @@ export type Sender = "user" | "alice";
 
 export interface ChatMessageUI {
     id?: number;
+    key?: string,
     from: Sender;
-    text: string;
+    u_question: string;
+    ai_answer: string;
     actions?: boolean;
     user_response?: string | null;
     ts?: string;
@@ -35,7 +37,8 @@ export interface ApiMessage {
     created_at: string;
     updated_at: string;
     is_testdata: boolean;
-    message: string;
+    u_question: string;
+    ai_answer: string;
     conversation_id: number;
 }
 

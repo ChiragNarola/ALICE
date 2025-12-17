@@ -36,9 +36,10 @@ export function Sidebar({ }: SidebarProps) {
                         <>
                             <div className="h-11 w-auto flex items-center">
                                 <img
-                                    src={logo}
-                                    alt="A.L.I.C.E logo"
-                                    className="h-11 w-auto max-w-[120px] object-contain"
+                                src={logo}
+                                srcSet="/logo@2x.png 2x, /logo@3x.png 3x"
+                                alt="Logo"
+                                className="h-[53px] w-auto"
                                 />
                             </div>
                         </>

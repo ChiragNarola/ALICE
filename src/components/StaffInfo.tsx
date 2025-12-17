@@ -5,9 +5,11 @@ const StaffInfo: React.FC = () => {
   const [staffData, setStaffData] = useState({
     jobTitle: "",
     qualification: "",
-    childAgeMin: 0,
-    childAgeMax: 5,
+    nurseryName:"",
+    childAgeMin: 1,
+    childAgeMax: 9,
   });
+  const [profileStatus, setProfileStatus] = useState<"pending" | "rejected" | "approved">("pending");
   const [loading, setLoading] = useState(true);
 
   // Fetch staff data from API
@@ -22,14 +24,33 @@ const StaffInfo: React.FC = () => {
         if (staff_response.IsSuccess && staff_response.Data) {
           const data = staff_response.Data;
 
-          // Parse age group (e.g., "0-5" -> min: 0, max: 5)
-          const ageRange = data.age_group ? data.age_group.split('-') : ['0', '5'];
-          const minAge = parseInt(ageRange[0]) || 0;
-          const maxAge = parseInt(ageRange[1]) || 5;
+          // Extract nursery status list 
+          const statusArray = Array.isArray(data.nursery_status)
+            ? data.nursery_status.map((s: string) => s.toLowerCase())
+            : [];
 
+          // Default = pending, override if needed
+          if (statusArray.includes("rejected")) {
+            setProfileStatus("rejected");
+          } else if (statusArray.length > 0 && statusArray.every(s => s === "pending")) {
+            setProfileStatus("pending");
+          } else {
+            setProfileStatus("approved");
+          }
+
+          // Parse age group (e.g., "1-9" -> min: 1, max: 9)
+          const ageRange = data.age_group ? data.age_group.split('-') : ['1', '9'];
+          const minAge = parseInt(ageRange[0]) || 1;
+          const maxAge = parseInt(ageRange[1]) || 9;
+          
+          const nurseryNames = Array.isArray(data.nursery_names) && data.nursery_names.length > 0
+                ? data.nursery_names.join(", ")
+                : "";
+          
           setStaffData({
             jobTitle: data.role_in_organisation || "",
             qualification: data.qualification || "",
+            nurseryName: nurseryNames,
             childAgeMin: minAge,
             childAgeMax: maxAge,
           });
@@ -43,6 +64,9 @@ const StaffInfo: React.FC = () => {
 
     fetchStaffDetails();
   }, []);
+
+
+
   return (
     <div className="bg-white w-full h-full flex flex-col">
       {/* Header */}
@@ -85,18 +109,33 @@ const StaffInfo: React.FC = () => {
       ) : (
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="p-4 space-y-4">
-            {/* Job Title */}
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-bold text-gray-800">Job Title</h3>
+
+            {/* PROFILE STATUS */}
+            {profileStatus !== "approved" && (
+              <div className={`mx-4 px-4 py-2 rounded-lg text-sm font-semibold border
+                ${profileStatus === "pending"
+                  ? "bg-yellow-100 text-yellow-700 border-yellow-300"
+                  : "bg-red-100 text-red-700 border-red-300"
+                }`}
+              >
+                {profileStatus === "pending" && "Profile is under review"}
+                {profileStatus === "rejected" && "Profile Rejected"}
               </div>
-              <p className="text-gray-800 font-medium text-lg">{staffData.jobTitle}</p>
+            )}
+
+           {/* Job Title */}
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-bold text-gray-800">Job Title</h3>
             </div>
+            <p className="text-gray-700 text-base">{staffData.jobTitle}</p>
+          </div>
+
 
             {/* Qualification */}
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
@@ -109,7 +148,21 @@ const StaffInfo: React.FC = () => {
                 </div>
                 <h3 className="text-sm font-bold text-gray-800">Qualification</h3>
               </div>
-              <p className="text-gray-800 font-medium text-lg">{staffData.qualification}</p>
+              <p className="text-gray-700 font-medium text-base">{staffData.qualification}</p>
+            </div>
+
+            {/* Nursery Name */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 hover:border-teal-200">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-bold text-gray-800">Nursery</h3>
+              </div>
+              <p className="text-gray-700 font-medium text-base">{staffData.nurseryName}</p>
             </div>
 
             {/* Child Age Range */}

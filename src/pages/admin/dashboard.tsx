@@ -48,6 +48,8 @@ import type {
   TopCategoryDTO,
   HourlyTrendDTO,
 } from "../../routes/models/request/AdminRequest";
+import { connectStaffWebSocket } from "../../api/web-socket";
+import { useNavigate } from "react-router-dom";
 
 type CountUpNumberProps = { end: number; duration?: number };
 
@@ -114,7 +116,32 @@ const AdminDashboard = () => {
     cost: [],
   });
 
+  const navigate = useNavigate();
 
+  useEffect(() => {
+  if (!(window as any)._staffWSConnected) {
+    (window as any)._staffWSConnected = true;
+
+    connectStaffWebSocket((msg: any) => {
+      console.log("WS RECEIVED:", msg); 
+
+      if (msg.type === "NEW_STAFF" && msg.target === "admin") {
+        toast.info(`🆕 New Staff Registered: ${msg.name}`, {
+          autoClose: false,
+          closeOnClick: true,
+          position: "top-right",
+          onClick: () => navigate("/admin/staff-nursery"),
+          style: {
+            cursor: "pointer",
+            borderLeft: "6px solid #059669",
+            fontSize: "15px",
+            fontWeight: "600"
+          }
+        });
+      }
+    });
+  }
+}, []);
 
   // ======== Dashboard Fetch ========
   const fetchData = async () => {

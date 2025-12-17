@@ -5,7 +5,14 @@ import userimg from "../assets/images/user-img.png";
 const ChatHeader: React.FC = () => (
   <header className="w-full bg-[#FEF7ED] border-b border-[#F3F0EB] py-3 px-4 flex items-center justify-between">
     <div className="flex items-center gap-3">
-      <img src={logo} alt="A.L.I.C.E." className="h-12 w-12" />
+      <img
+  src={logo}
+  srcSet="/logo.png 1x, /logo@2x.png 2x, /logo@3x.png 3x"
+  className="h-12 w-12"
+  alt="Logo"
+/>
+
+
       <div>
         <div className="font-bold text-xl sm:text-2xl text-alice-black">A.L.I.C.E.</div>
         <div className="text-xs sm:text-sm text-alice-darkgray">AI Learning, Insights & Childcare Expert</div>

@@ -9,7 +9,7 @@ const WelcomeSection = () => (
       <div className="md:w-1/2 flex flex-col py-5 px-5 sm:px-8 bg-alice-peach">
         {/* Logo */}
         <div className="mb-8 sm:mb-10 2xl:mb-14">
-          <img src={logo} alt="Logo" className="h-15" />
+          <img src={logo} alt="Logo" className="h-[60px] w-auto object-contain" />
         </div>
         <div className="flex flex-col items-center justify-center text-center w-full flex-1">
           {/* Heading */}

@@ -6,7 +6,8 @@ interface ChatInputProps {
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   searching: boolean;
-  recommendedQuestionsList: string[];
+  recommendedQuestionsList: React.ReactNode[];
+  isNewChat: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -47,14 +48,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <>
-      <div className="w-full flex flex-col gap-2 px-2">
-        {/* Recommended Questions */}
-        {recommendedQuestionsList?.length > 0 && (
-          <div className="recommended-questions flex flex-wrap gap-2 mb-2">
+      <div className="w-full flex flex-col px-2">
+
+      {/* Recommended Questions — only when new chat and has questions */}
+      {recommendedQuestionsList?.length > 0 && (
+        <div className="w-full flex flex-col gap-2 px-2 mb-2">
+          <div className="flex flex-nowrap gap-2 w-full">
             {recommendedQuestionsList}
           </div>
-        )}
-
+        </div>
+      )}
         {/* Input Form */}
         <form
           onSubmit={handleSend}

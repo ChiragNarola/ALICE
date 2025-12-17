@@ -12,18 +12,19 @@ import StaffInfo from "../components/StaffInfo";
 import { useChatActivity } from "../contexts/ChatActivityContext";
 import { trackEvent, getquestions } from "../api/api-services";
 
-
+type Sender = "alice" | "user";
 type Message = {
   id?: number;
-  from: "alice" | "user";
-  text: string;
+  from: Sender;
+  u_question: string;
+  ai_answer: string;
   actions?: any;
   user_response?: string | null;
 };
 
 const ChatPage: React.FC = () => {
 
-  const { messages, refreshChatList, hasAskedQuestion, setHasAskedQuestion, setChatboardUniqueId, chatBordUniqueId } = useChat();
+  const { messages, refreshChatList, setHasAskedQuestion, setChatboardUniqueId, chatBordUniqueId } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const location = useLocation();
@@ -36,13 +37,16 @@ const ChatPage: React.FC = () => {
     {
       id: 0,
       from: "alice",
-      text: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
-      actions: true,
+      u_question:"",
+      ai_answer: "Hello! I'm A.L.I.C.E., your parenting guide. I'm here to help you with guidance about your child's development and any questions you might have. What would you like to know today?",
+      actions: false,
       user_response: null,
     },
   ]);
 
   const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
+  // const botIndexRef = useRef<number | null>(null);
+  const [showRecommended, setShowRecommended] = useState(false);
 
 
   const sessionUUID =
@@ -86,28 +90,34 @@ const ChatPage: React.FC = () => {
   const chatStartSent = useRef(false);
   const chatMidSent = useRef(false);
   const chatExitSent = useRef(false);
-  const lastMessageCount = useRef(0);
+  const hasFetchedQuestions = useRef(false);
 
   useEffect(() => {
-    if (location.pathname === "/chat") {
-      sendChatAnalytics("chat_start");
-      chatStartSent.current = true;
-      if (user) {
-        getquestions(user.id).then((response) => {
-          if (response.IsSuccess && response.Data) {
-            setRecommendedQuestions(response.Data);
-          }
-        });
+    if (location.pathname !== "/chat" || !user || hasFetchedQuestions.current) return;
+
+    sendChatAnalytics("chat_start");
+    chatStartSent.current = true;
+
+    getquestions(user.id).then((response) => {
+      if (response.IsSuccess && response.Data) {
+        setRecommendedQuestions(response.Data);
+        // Only show for new chats
+        if (!searchParams.get("v") && messages.length <= 1) {
+          setShowRecommended(true);
+        }
       }
-    }
-  }, [location.pathname]);
+    });
 
-  useEffect(() => {
-    if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
-      sendChatAnalytics("chat_mid");
-      lastMessageCount.current = chatCount;
-    }
-  }, [chatCount, location.pathname]);
+    hasFetchedQuestions.current = true;
+  }, [location.pathname, user]);
+
+
+  // useEffect(() => {
+  //   if (location.pathname === "/chat" && chatCount > lastMessageCount.current) {
+  //     sendChatAnalytics("chat_mid");
+  //     lastMessageCount.current = chatCount;
+  //   }
+  // }, [chatCount, location.pathname]);
 
   useEffect(() => {
     const checkView = () => {
@@ -148,13 +158,13 @@ const ChatPage: React.FC = () => {
       setChatboardUniqueId(uniqueId);
       console.log("Generated new conversation UUID:", uniqueId);
     }
-    if (user) {
-      getquestions(user.id).then((response) => {
-        if (response.IsSuccess && response.Data) {
-          setRecommendedQuestions(response.Data);
-        }
-      });
-    }
+    // if (user) {
+    //   getquestions(user.id).then((response) => {
+    //     if (response.IsSuccess && response.Data) {
+    //       setRecommendedQuestions(response.Data);
+    //     }
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -180,8 +190,20 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     if (!messages || messages.length === 0) return;
-    setChatMessages(messages);
+
+    const mappedMessages: Message[] = messages.map(msg => ({
+      id: msg.id,
+      from: msg.from,
+      u_question: msg.u_question, 
+      ai_answer: msg.ai_answer,  
+      user_response: msg.user_response ?? null,
+      actions: msg.actions ?? true,
+    }));
+    // console.log("mappedmessages are:",mappedMessages)
+
+    setChatMessages(mappedMessages);
   }, [messages]);
+
 
   const handleToggle = () => {
     setIsSidebarOpen(prev => !prev);
@@ -190,178 +212,227 @@ const ChatPage: React.FC = () => {
   setChatVisible(true);
 
   const handleSendMessage = async (e: React.FormEvent, file?: File | null) => {
-    e.preventDefault();
-    if (!message.trim() && !file) return;
+  e.preventDefault();
+  if (!message.trim() && !file) return;
 
-    IsSearching(true);
+  IsSearching(true);
 
-    // Display file name only for UI
-    const userMessageText = file ? `${message} [File: ${file.name}]` : message;
+  const userMessageText = file ? `${message} [File: ${file.name}]` : message;
 
-    // Optimistically add user message
-    setChatMessages((prev) => [
-      ...prev,
-      { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
-    ]);
+  const tempId = Date.now();
+  let dbId = tempId;
 
-    // Add placeholder for bot response
-    const botIndex = chatMessages.length + 1;
-    setChatMessages((prev) => [
-      ...prev,
-      { id: 0, from: "alice", text: "...", actions: true },
-    ]);
-    setHasAskedQuestion(true);
-    setMessage("");
+  // console.log("🟡 USER SENT MESSAGE");
+  // console.log("tempId assigned for both bubbles:", tempId);
 
-    try {
-      const formData = new FormData();
-      formData.append("query", message);
-      formData.append("user_id", String(user?.id));
-      formData.append("conversation_id", chatBordUniqueId || "");
+  // show bubbles immediately
+  setChatMessages(prev => [
+    ...prev,
+    { id: tempId, from:"user", u_question:userMessageText, ai_answer:"", actions:true, user_response:null },
+    { id: tempId, from:"alice", u_question:"", ai_answer:"...", actions:false }
+  ]);
 
-      if (file) formData.append("file", file);
+  setMessage("");
+  setHasAskedQuestion(true);
+  setShowRecommended(false);
 
-      const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
-        method: "POST",
-        body: formData, // don't set content-type manually
-      });
+  try {
+    const formData = new FormData();
+    formData.append("query", userMessageText);
+    formData.append("user_id", String(user?.id));
+    formData.append("conversation_id", chatBordUniqueId || "");
+    if (file) formData.append("file", file);
 
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
+    const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
+      method: "POST",
+      body: formData
+    });
 
-      // 🔹 Grab headers
-      const headerConversationId = response.headers.get("x-conversation-uuid");
-      const headerMessageId = response.headers.get("x-message-id");
-      const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
+    if (!response.ok) throw new Error("API error");
 
-      if (headerConversationId) {
-        // Save conversation id for next request
-        setChatboardUniqueId(headerConversationId);
-      }
+    // read backend IDs
+    const headerConvId = response.headers.get("x-conversation-uuid");
+    const headerUserMessageId = response.headers.get("x-user-message-id");
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body received.");
+    // console.log("🔵 Headers received:");
+    // console.log("conversation uuid:", headerConvId);
+    // console.log("user message id:", headerUserMessageId);
 
-      const decoder = new TextDecoder();
-      let accumulatedText = "";
+    if (headerConvId) setChatboardUniqueId(headerConvId);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    if (headerUserMessageId) {
+      dbId = Number(headerUserMessageId);
+      // console.log(`🟢 Swapping tempId(${tempId}) → dbId(${dbId})`);
 
-        accumulatedText += decoder.decode(value, { stream: true });
-
-        setChatMessages((prev) => {
-          const copy = [...prev];
-          copy[botIndex] = {
-            ...copy[botIndex],
-            id: newMessageId,
-            text: accumulatedText,
-          };
-          return copy;
-        });
-      }
-    } catch (err: any) {
-      console.error(err);
-      setChatMessages((prev) => {
-        const copy = [...prev];
-        if (copy[botIndex]) {
-          copy[botIndex] = {
-            ...copy[botIndex],
-            text: "Something went wrong. Please try again...",
-            actions: false,
-          };
-        }
-        return copy;
-      });
-    } finally {
-      // setMessage("");
-      refreshChatList();
-      IsSearching(false);
+      setChatMessages(prev =>
+        prev.map(m => m.id === tempId ? { ...m, id: dbId } : m)
+      );
     }
-  };
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+
+    // STREAM RESPONSE
+    while(true){
+      const { value, done } = await reader!.read();
+      if (done) break;
+
+      accumulated += decoder.decode(value, { stream:true });
+
+      setChatMessages(prev =>
+        prev.map(m => 
+          m.id === dbId && m.from==="alice" 
+            ? { ...m, ai_answer:accumulated }
+            : m
+        )
+      );
+    }
+
+    // console.log("🟢 Stream finished — enabling like/dislike for id:", dbId);
+
+    setChatMessages(prev =>
+      prev.map(m => m.id===dbId && m.from==="alice" ? { ...m, actions:true } : m)
+    );
+
+  } catch (err) {
+    console.error("Error while streaming:", err);
+    setChatMessages(prev =>
+      prev.map(m =>
+        m.id===dbId && m.from==="alice"
+          ? { ...m, ai_answer:"Error generating response.", actions:false }
+          : m
+      )
+    );
+  } finally {
+    refreshChatList();
+    IsSearching(false);
+  }
+};
+
 
   const handlerecommendedMessage = async (AImessage: string) => {
-    if (!AImessage.trim()) return;
+  if (!AImessage.trim()) return;
 
-    IsSearching(true);
+  IsSearching(true);
 
-    const userMessageText = AImessage;
+  const tempUserId = Date.now();
 
-    // Add user message + bot placeholder together in one update
-    let botIndex = -1;
-    setChatMessages((prev) => {
-      botIndex = prev.length + 1;
-      return [
-        ...prev,
-        { id: Date.now(), from: "user", text: userMessageText, actions: true, user_response: null },
-        { id: 0, from: "alice", text: "...", actions: true },
-      ];
+  // user bubble with temp id
+  setChatMessages(prev => [
+    ...prev,
+    {
+      id: tempUserId,
+      from: "user",
+      u_question: AImessage,
+      ai_answer: "",
+      actions: true,
+      user_response: null,
+    },
+  ]);
+
+  setHasAskedQuestion(true);
+  setMessage("");
+  setShowRecommended(false);
+
+  try {
+    const formData = new FormData();
+    formData.append("query", AImessage);
+    formData.append("user_id", String(user?.id));
+    formData.append("conversation_id", chatBordUniqueId || "");
+
+    const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
+      method: "POST",
+      body: formData
     });
-    setHasAskedQuestion(true);
-    setMessage(""); // clear input
 
-    try {
-      const formData = new FormData();
-      formData.append("query", userMessageText);
-      formData.append("user_id", String(user?.id));
-      formData.append("conversation_id", chatBordUniqueId || "");
+    if (!response.ok) throw new Error("API error");
 
-      const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
-        method: "POST",
-        body: formData,
-      });
+    const headerConvId = response.headers.get("x-conversation-uuid");
+    const headerUserMessageId = response.headers.get("x-user-message-id");
+    const dbId = headerUserMessageId ? Number(headerUserMessageId) : tempUserId;
 
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
+    if (headerConvId) setChatboardUniqueId(headerConvId);
 
-      const headerConversationId = response.headers.get("x-conversation-uuid");
-      const headerMessageId = response.headers.get("x-message-id");
-      const newMessageId = headerMessageId ? Number(headerMessageId) : Date.now();
-
-      if (headerConversationId) setChatboardUniqueId(headerConversationId);
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body received.");
-
-      const decoder = new TextDecoder();
-      let accumulatedText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        accumulatedText += decoder.decode(value, { stream: true });
-
-        setChatMessages((prev) => {
-          const copy = [...prev];
-          if (copy[botIndex]) {
-            copy[botIndex] = {
-              ...copy[botIndex],
-              id: newMessageId,
-              text: accumulatedText,
-            };
-          }
-          return copy;
-        });
-      }
-
-    } catch (err) {
-      console.error(err);
-      setChatMessages((prev) => {
-        const copy = [...prev];
-        if (copy[botIndex]) {
-          copy[botIndex] = {
-            ...copy[botIndex],
-            text: "Something went wrong. Please try again...",
-            actions: false,
-          };
-        }
-        return copy;
-      });
-    } finally {
-      refreshChatList();
-      IsSearching(false);
+    // swap user temp id → db id
+    if (dbId !== tempUserId) {
+      setChatMessages(prev =>
+        prev.map(m =>
+          m.id === tempUserId && m.from === "user"
+            ? { ...m, id: dbId }
+            : m
+        )
+      );
     }
-  };
+
+    // add alice placeholder with same db id
+    setChatMessages(prev => [
+      ...prev,
+      {
+        id: dbId,
+        from: "alice",
+        u_question: "",
+        ai_answer: "...",
+        actions: false,
+        user_response: null,
+      },
+    ]);
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+
+    while (true) {
+      const { value, done } = await reader!.read();
+      if (done) break;
+
+      accumulated += decoder.decode(value, { stream: true });
+
+      setChatMessages(prev =>
+        prev.map(m =>
+          m.id === dbId && m.from === "alice"
+            ? { ...m, ai_answer: accumulated }
+            : m
+        )
+      );
+    }
+
+    setChatMessages(prev =>
+      prev.map(m =>
+        m.id === dbId && m.from === "alice"
+          ? { ...m, actions: true }
+          : m
+      )
+    );
+
+  } catch (err) {
+    console.error(err);
+    setChatMessages(prev =>
+      prev.map(m =>
+        m.from === "alice" && m.ai_answer === "..."
+          ? { ...m, ai_answer: "Something went wrong.", actions: false }
+          : m
+      )
+    );
+  } finally {
+    refreshChatList();
+    IsSearching(false);
+  }
+};
+
+
+  const updateMessageReaction = (
+  messageId: number,
+  reaction: "like" | "dislike" | null
+) =>
+  setChatMessages(prev =>
+    prev.map(m =>
+      m.id === messageId && m.from === "alice"
+        ? { ...m, user_response: reaction }
+        : m
+    )
+  );
+
 
 
   const recommendedQuestionsList =
@@ -377,8 +448,8 @@ const ChatPage: React.FC = () => {
         <div>{item.ai_recommended}</div>
       </button>
     ));
-
-
+  const hasUserMessages = messages.some(m => m.from === "user");
+  const isNewChat = !searchParams.get("v") && !hasUserMessages;
   return (
     <>
       <main className="flex-1 flex px-2 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">
@@ -398,14 +469,15 @@ const ChatPage: React.FC = () => {
         <section className="flex-1 flex flex-col justify-between mb-1 pr-5 h-[calc(100vh-140px)] relative">
           {isChatVisible && (
             <>
-              <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} />
+              <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction}/>
 
               <ChatInput
                 onSend={handleSendMessage}
                 setMessage={setMessage}
                 message={message}
                 searching={searching}
-                recommendedQuestionsList={!hasAskedQuestion ? recommendedQuestionsList : null}
+                recommendedQuestionsList={isNewChat && showRecommended ? recommendedQuestionsList : []}
+                isNewChat={isNewChat}
               />
             </>
           )}
@@ -413,7 +485,7 @@ const ChatPage: React.FC = () => {
 
         {/* Children Info */}
         {user?.roles && (
-          <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px]">
+          <aside className="hidden lg:flex flex-col border-r bg-white shadow-sm w-[350px] h-[calc(100vh-140px)]">
             {user.roles.some(role => role.toLowerCase() === 'parent') && !user.roles.some(role => role.toLowerCase() === 'staff') && (
               <ChatChildInfo />
             )}
@@ -463,7 +535,7 @@ const ChatPage: React.FC = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-auto">
                   {activeTab === 'parent' && <ChatChildInfo />}
                   {activeTab === 'staff' && <StaffInfo />}
                 </div>

@@ -5,7 +5,8 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MultiRangeSlider from "multi-range-slider-react";
-import { staffJobRole } from "../api/api-services";
+import { staffJobRole,getNursery } from "../api/api-services";
+import type { NurseryItem } from "../routes/models/response/Response";
 
 const reviewSchema = z
   .object({
@@ -15,6 +16,7 @@ const reviewSchema = z
       .string()
       .regex(/^\d+\-\d+$/, "Age group must be in format min-max"),
     other_role: z.string().optional(),
+    nursery: z.array(z.number().min(1)).min(1, "At least one nursery must be selected")
   })
   .refine(
     (data) => {
@@ -53,6 +55,7 @@ const Step4ReviewSubmit = forwardRef<
       role_in_organisation: "Manager",
       other_role: "",
       qualification: "",
+      nursery: [] as number[],
       age_group: "1-5",
     },
     resolver: zodResolver(reviewSchema),
@@ -63,6 +66,7 @@ const Step4ReviewSubmit = forwardRef<
   const [pendingData, setPendingData] = useState<ReviewFormValues | null>(null);
   const selectedRole = watch("role_in_organisation");
   const prevRoleRef = useRef<string>("");
+  const [nurseryList, setNurseryList] = useState<NurseryItem[]>([]);
 
   useEffect(() => {
     const jobList = async () => {
@@ -89,7 +93,7 @@ const Step4ReviewSubmit = forwardRef<
   }, [selectedRole, setValue, clearErrors]);
 
   useEffect(() => {
-    if (jobTitle.length && pendingData) {
+    if (jobTitle.length && nurseryList.length && pendingData) {
       const incomingRole = pendingData.role_in_organisation || "";
       let finalRole = incomingRole;
       let finalOtherRole = "";
@@ -99,16 +103,25 @@ const Step4ReviewSubmit = forwardRef<
         finalOtherRole = incomingRole.trim();
       }
 
+      const normalizeNursery = (val: any): number[] => {
+        if (Array.isArray(val)) return val.map(Number);
+        if (typeof val === "string") return val.split(",").map(s => Number(s.trim()));
+        if (typeof val === "number") return [val];
+        return [];
+      };
+
       reset({
         role_in_organisation: finalRole,
         other_role: finalOtherRole,
         qualification: pendingData.qualification || "",
         age_group: pendingData.age_group || "1-5",
+        nursery: normalizeNursery(pendingData.nursery),
       });
 
       setPendingData(null);
     }
-  }, [jobTitle, pendingData, reset]);
+  }, [jobTitle, nurseryList, pendingData, reset]);
+
 
   useImperativeHandle(ref, () => ({
     validateAndSubmit: async () => {
@@ -116,6 +129,8 @@ const Step4ReviewSubmit = forwardRef<
       if (!isValid) return false;
 
       const values = getValues();
+      console.log("values are",values.nursery);
+
       const finalPayload = {
         ...values,
         role_in_organisation:
@@ -134,6 +149,30 @@ const Step4ReviewSubmit = forwardRef<
       setPendingData(data);
     },
   }));
+
+  useEffect(() => {
+      const loadNurseries = async () => {
+        try {
+          const res = await getNursery();
+          console.log("response is:",res)
+          if (res.IsSuccess && Array.isArray(res.Data)) {
+            // Map API response to objects with id + nursery_name
+            const nurseries = res.Data.map((n: any) => ({
+              id: n.id,
+              name: n.nursery_name,
+            }));
+            console.log("nurseries from useffect is:",nurseries)
+            setNurseryList(nurseries);
+          }
+        } catch (err) {
+          console.error("Error fetching nurseries:", err);
+        }
+      };
+
+      loadNurseries();
+    }, []);
+
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -269,6 +308,101 @@ const Step4ReviewSubmit = forwardRef<
             />
           )}
         />
+      </div>
+
+      {/* select nursery */}
+      <div>
+        <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+          <span className="bg-[#FEFCF8] px-[5px]">
+            Nursery Name <span className="text-red-500"></span>
+          </span>
+        </label>
+
+   <Controller
+  name="nursery"
+  control={control}
+  render={({ field }) => (
+    <div className="w-full">
+      <Listbox value={(field.value || []).map(Number)} onChange={(val: number[]) => field.onChange(val)} multiple>
+        {({ open }) => (
+          <div className="relative">
+            {/* Selected Value */}
+            <Listbox.Button
+              className={`relative w-full px-4 py-3 lg:py-4 text-left border rounded-[12px] text-[14px] sm:text-base lg:text-lg font-normal cursor-pointer focus:outline-none transition-all duration-300 ease-in-out
+                ${
+                  errors.nursery
+                    ? "border-red-500"
+                    : "border-alice-gray"
+                }
+                ${
+                  !field.value ? "text-alice-darkgray" : "text-alice-black"
+                }`}
+            >
+              <span className="block truncate">
+                {field.value && field.value.length > 0
+                  ? nurseryList
+                      .filter(n => field.value.includes(n.id))
+                      .map(n => n.name)
+                      .join(", ")
+                  : "Select nursery"}
+              </span>
+              <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                <ChevronUpDownIcon className="w-5 h-5 text-alice-darkgray" />
+              </span>
+            </Listbox.Button>
+
+            {/* Dropdown Options */}
+            <Transition
+              as={Fragment}
+              show={open}
+              leave="transition ease-in duration-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Listbox.Options
+                className="absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white border border-gray-200 shadow-lg focus:outline-none"
+              >
+                {nurseryList.map((nur) => (
+                  <Listbox.Option
+                    key={nur.id}
+                    value={nur.id}
+                    className={({ active }) =>
+                      `relative cursor-pointer select-none py-2 px-4 text-sm sm:text-base ${
+                        active
+                          ? "bg-alice-teal text-white"
+                          : "text-gray-700"
+                      }`
+                    }
+                  >
+                    {({ selected }) => (
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-medium" : "font-normal"
+                          }`}
+                        >
+                          {nur.name}
+                        </span>
+                        {selected && (
+                          <CheckIcon className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                    )}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+          </div>
+        )}
+      </Listbox>
+      {errors.nursery && (
+        <p className="text-red-500 text-sm mt-1">
+          {errors.nursery.message}
+        </p>
+      )}
+    </div>
+  )}
+/>
       </div>
 
       {/* Age Range Slider */}

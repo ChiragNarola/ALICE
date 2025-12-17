@@ -3,37 +3,24 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, staffDTO, UserDTO } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
+import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
 
 //Auth
-export const loginUser = async (formData: FormData): Promise<APIResponse<LoginResponseDTO>> => {
-  const urlEncoded = new URLSearchParams();
-  formData.forEach((value, key) => {
-    urlEncoded.append(key, value.toString());
-  });
-
-  try {
-    const response = await axiosInstance.post<APIResponse<LoginResponseDTO>>(
-      "/users/login",
-      urlEncoded.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    return response.data;
-  } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Login failed",
-    };
-  }
+export const loginUser = async (formData: FormData) => {
+  const response = await axiosInstance.post(
+    "/users/login",
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" }
+    }
+  );
+  return response.data;
 };
+
+
 
 
 export const logoutUser = async (sessionUUID: string): Promise<APIResponse<null>> => {
@@ -599,17 +586,13 @@ export const verifyEmailCode = async (
   verificationCode: string
 ): Promise<APIResponse<null>> => {
   try {
-    const formData = new URLSearchParams();
-    formData.append("verification_code", verificationCode);
+    const params = new URLSearchParams();
+    params.append("verification_code", verificationCode);
 
     const res = await axiosInstance.post(
       "users/verify_email_code",
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
+      params // <-- Do NOT call .toString()
+      // DO NOT set Content-Type manually
     );
 
     return res.data;
@@ -1086,4 +1069,321 @@ export const changePassword = async (
   }
 };
 
+export const setPin = async (pin: string): Promise<APIResponse<null>> => {
+  const form = new FormData();
+  form.append("pin", pin); // <-- EXACT KEY
+
+  try {
+    const response = await axiosInstance.post(
+      "/users/set_pin",
+      form,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.log("ERROR DATA:", error?.response?.data);
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Failed to set pin",
+      }
+    );
+  }
+};
+
+export const verifyPin = async (formData: FormData): Promise<APIResponse<null>> => {
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/users/verify_pin",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Pin verification failed.",
+      }
+    );
+  }
+};
+
+export const updatePin = async (old_pin: string, new_pin: string): Promise<APIResponse<null>> => {
+  try {
+    const formData = new FormData();
+    formData.append("old_pin", old_pin);
+    formData.append("new_pin", new_pin);
+
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "/users/update_pin",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "PIN update failed.",
+      }
+    );
+  }
+};
+
+export const uploadHolidayFile = async (
+  file: File
+
+): Promise<APIResponse<null>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await axiosInstance.post<APIResponse<null>>(
+      "admin/holiday",
+      formData
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "File upload failed.",
+      }
+    );
+  }
+};
+
+export const listHolidays = async (): Promise<APIResponse<HolidayItem[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/holiday");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching holiday list failed",
+      }
+    );
+  }
+};
+
+export const deleteHoliday = async (id: number): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(`admin/holiday/${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || { message: 'Delete failed' };
+  }
+};
+
+export const addHoliday = async (
+  data: HolidayItem
+): Promise<APIResponse<HolidayItem>> => {
+  try {
+    const res = await axiosInstance.post<APIResponse<HolidayItem>>(
+      "admin/add_holiday",
+      data
+    );
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Adding holiday failed",
+      }
+    );
+  }
+};
+
+
+export const createNursery = async (data:CreateNurseryDTO): Promise<APIResponse<any>> => {
+  // const urlEncoded = new URLSearchParams();
+  // formData.forEach((value, key) => {
+  //   urlEncoded.append(key, value.toString());
+  // });
+  try {
+    const response = await axiosInstance.post<APIResponse<any>>(
+      "/admin/nursery",
+      data
+    );
+    //   {
+    //     headers: {
+    //       "Content-Type": "application/x-www-form-urlencoded",
+    //     },
+    //   }
+    // );
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to create nursery",
+    };
+  }
+};
+
+export const getNursery = async (): Promise<APIResponse<NurseryDTO[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/nursery");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching nursery list failed",
+      }
+    );
+  }
+};
+
+export const getFAQ = async (): Promise<APIResponse<FAQItem[]>> => {
+  try {
+    const res = await axiosInstance.get("admin/faq");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching FAQ list failed",
+      }
+    );
+  }
+};
+
+export const updateAliceAnswer = async (
+  payload: UpdateFAQ
+): Promise<APIResponse<UpdateFAQ>> => {
+  try {
+    const response = await axiosInstance.put<APIResponse<UpdateFAQ>>(
+      `/admin/alice_answer`,
+      payload, 
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Alice answer submission failed",
+    };
+  }
+};
+
+export const generateFAQ = async (): Promise<APIResponse<FAQItem[]>> => {
+  try {
+    const res = await axiosInstance.get("/faq");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Generating FAQ failed",
+      }
+    );
+  }
+};
+
+export const updateNursery = async (
+  payload: UpdateNursery
+): Promise<APIResponse<UpdateNursery>> => {
+  try {
+    const response = await axiosInstance.put<APIResponse<UpdateNursery>>(
+      `/admin/nursery`,
+      payload, 
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Nursery update failed",
+    };
+  }
+};
+
+export const deleteNursery = async (id: number): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.delete(`/admin/delete?id=${id}`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data || { message: 'Delete failed' };
+  }
+};
+
+export const hasPin = async (email: string): Promise<boolean> => {
+  try {
+    const response = await axiosInstance.get("/users/has-pin", { 
+      params: { email } 
+    });
+
+    return response.data?.Data?.has_pin ?? false;
+  } catch (err: any) {
+    console.error("Has PIN API error:", err);
+    return false;
+  }
+};
+
+export const getStaffNurseryStatus = async (): Promise<
+  APIResponse<StaffNurseryStatusDTO[]>
+> => {
+  try {
+    const res = await axiosInstance.get("admin/staff-nursery-status");
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Fetching staff nursery status failed",
+      }
+    );
+  }
+};
+
+export const updateStaffNurseryStatus = async (payload: {
+  user_id: number;
+  nursery_id: number;
+  status: string;
+}): Promise<APIResponse<any>> => {
+  try {
+    const res = await axiosInstance.put("admin/staff-nursery-status", payload);
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Message: "Updating staff nursery status failed",
+        Data: null,
+      }
+    );
+  }
+};
 

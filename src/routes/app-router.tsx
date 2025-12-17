@@ -19,6 +19,11 @@ import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInter
 import UploadedDocsList from "../components/admin/uploadDocument";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import HolidayList from "../components/admin/HolidayList";
+import Nursery from "../components/admin/nursery/NurseryList";
+import StaffNurseryList from "../components/admin/users/StaffNurseryList";
+import FAQ from "../components/admin/faq"
+import PinLogin from "../components/PinLoginScreen";
 
 export default function AppRouter() {
     return (
@@ -31,6 +36,7 @@ export default function AppRouter() {
                 <Route path="/email-verification" element={<EmailVerification />} />
                 <Route path="/forgotpassword" element={<ForgotPassword />} />
                 <Route path="/resetpassword" element={<ResetPassword />} />
+                <Route path="/pin-login" element={<PinLogin />} />
 
             </Route>
 
@@ -53,9 +59,13 @@ export default function AppRouter() {
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="user" element={<UserList />} />
                     <Route path="staff" element={<StaffList />} />
+                    <Route path="staff-nursery" element={<StaffNurseryList />} />
                     <Route path="concerns" element={<ConcernList />} />
                     <Route path="area-of-interest" element={<AreaofinterestList />} />
                     <Route path="documents" element={<UploadedDocsList />} />
+                    <Route path="holiday-calendar" element={<HolidayList />} />
+                    <Route path="nursery" element={<Nursery />} />
+                    <Route path="faq" element={ <FAQ/>}/>
                 </Route>
             </Route>
 
