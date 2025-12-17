@@ -24,12 +24,12 @@ type Message = {
 
 const ChatPage: React.FC = () => {
 
-  const { messages, refreshChatList, setHasAskedQuestion, setChatboardUniqueId, chatBordUniqueId } = useChat();
+  const { messages, refreshChatList, setHasAskedQuestion } = useChat();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const location = useLocation();
   const [message, setMessage] = useState("");
-  // const [chatBordUniqueId, setChatboardUniqueId] = useState("");
+  const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
   const { startTracking, stopTracking, chatCount, timeSpent } = useChatActivity();
   const [activeTab, setActiveTab] = useState<'parent' | 'staff'>('parent');
@@ -156,7 +156,6 @@ const ChatPage: React.FC = () => {
     } else {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
-      console.log("Generated new conversation UUID:", uniqueId);
     }
     // if (user) {
     //   getquestions(user.id).then((response) => {
@@ -435,21 +434,34 @@ const ChatPage: React.FC = () => {
 
 
 
-  const recommendedQuestionsList =
-    recommendedQuestions?.recommended.map((item: any, index: any) => (
-      <button
-        key={index}
-        className="recommended-question-btn text-sm"
-        onClick={() => handlerecommendedMessage(item.ai_recommended)}
-      >
-        <div>
-          <b>{item.category}</b>
-        </div>
-        <div>{item.ai_recommended}</div>
-      </button>
-    ));
+ const recommendedQuestionsList =
+  recommendedQuestions?.ai_recommended?.map((question: string, index: number) => (
+    <button
+      key={index}
+      className="
+        recommended-question-btn
+        px-2 py-1 
+        border rounded 
+        text-sm 
+        text-left
+        break-words 
+        w-full
+      "
+      style={{ width: "33%" }}
+      onClick={() => handlerecommendedMessage(question)}
+    >
+      {question}
+    </button>
+  )) ?? [];
+
   const hasUserMessages = messages.some(m => m.from === "user");
+
   const isNewChat = !searchParams.get("v") && !hasUserMessages;
+
+  // console.log("chat messages are:",chatMessages)
+  // console.log("showRecommended:", showRecommended);
+
+
   return (
     <>
       <main className="flex-1 flex px-2 gap-5 w-full m-auto relative transition-all duration-700 ease-in-out">
@@ -466,7 +478,7 @@ const ChatPage: React.FC = () => {
         </section>
 
         {/* Chat Section */}
-        <section className="flex-1 flex flex-col justify-between mb-1 pr-5 h-[calc(100vh-140px)] relative">
+        <section className="flex-1 pr-5 h-[calc(100vh-140px)] relative">
           {isChatVisible && (
             <>
               <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction}/>

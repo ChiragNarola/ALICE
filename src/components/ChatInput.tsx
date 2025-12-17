@@ -48,7 +48,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <>
-      <div className="w-full flex flex-col px-2">
+      <div className="w-full flex flex-col absolute bottom-0 px-2">
 
       {/* Recommended Questions — only when new chat and has questions */}
       {recommendedQuestionsList?.length > 0 && (
