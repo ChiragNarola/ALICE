@@ -19,7 +19,7 @@ import AreaofinterestList from "../components/admin/area_of_interest/AreaOfInter
 import UploadedDocsList from "../components/admin/uploadDocument";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
-import HolidayList from "../components/admin/HolidayList";
+import HolidayList from "../components/admin/holidayList";
 import Nursery from "../components/admin/nursery/NurseryList";
 import StaffNurseryList from "../components/admin/users/StaffNurseryList";
 import FAQ from "../components/admin/faq"
