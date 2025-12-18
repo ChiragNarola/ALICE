@@ -49,20 +49,36 @@ export default function StaffNurseryList() {
         const data: StaffNurseryStatusDTO[] = res.Data;
 
         // Flatten first
-        const flattened = data.flatMap((staff) =>
-          staff.nurseries.map((n: StaffNurseryAssignmentDTO) => ({
-            user_id: staff.user_id,
-            staff_name: `${staff.first_name} ${staff.last_name}`,
-            email: staff.email,
-            age_group: staff.age_group,
-            role_in_organisation: staff.role_in_organisation,
-            qualification: staff.qualification,
-            nursery_id: n.nursery_id,
-            nursery_name: n.nursery_name,
-            status: n.status,
-            created_at: staff.created_at,
-          }))
-        );
+        const flattened = data.flatMap((staff) => {
+            if (!staff.nurseries || staff.nurseries.length === 0) {
+              return [{
+                user_id: staff.user_id,
+                staff_name: `${staff.first_name} ${staff.last_name}`,
+                email: staff.email,
+                age_group: staff.age_group,
+                role_in_organisation: staff.role_in_organisation,
+                qualification: staff.qualification,
+                nursery_id: 0,
+                nursery_name: "",
+                status: null,
+                created_at: staff.created_at,
+              }];
+            }
+
+            return staff.nurseries.map((n: StaffNurseryAssignmentDTO) => ({
+              user_id: staff.user_id,
+              staff_name: `${staff.first_name} ${staff.last_name}`,
+              email: staff.email,
+              age_group: staff.age_group,
+              role_in_organisation: staff.role_in_organisation,
+              qualification: staff.qualification,
+              nursery_id: n.nursery_id,
+              nursery_name: n.nursery_name,
+              status: n.status,
+              created_at: staff.created_at,
+            }));
+          });
+
 
         const grouped: GroupedStaffRow[] = Object.values(
           flattened.reduce((acc: Record<number, GroupedStaffRow>, row) => {
