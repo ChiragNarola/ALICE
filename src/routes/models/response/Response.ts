@@ -5,6 +5,8 @@ export interface UserDTO {
     last_name: string;
     name?: string;
     roles: string[];
+    created_at: string;
+    last_login: string;
 }
 
 export interface DisplayUser {
@@ -12,6 +14,8 @@ export interface DisplayUser {
     name: string;
     email: string;
     roles: string[];
+    createdAt: string;
+    lastLogin: string;
 }
 
 export interface ConcernDTO {

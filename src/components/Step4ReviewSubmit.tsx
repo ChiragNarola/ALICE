@@ -418,7 +418,6 @@ const Step4ReviewSubmit = forwardRef<
             return (
               <>
                 <MultiRangeSlider
-                  key={value}
                   min={0}
                   max={5}
                   step={1}

@@ -1,5 +1,6 @@
 // UploadedDocsList.tsx
 import { useEffect, useState } from "react";
+import { File } from "lucide-react";
 import { Table, Th, Td } from "../../components/ui/Table";
 import Pagination from "../../components/ui/Pagination";
 import { Search, FileText, Upload, Check } from "lucide-react";
@@ -355,6 +356,7 @@ export default function UploadedDocsList() {
               </Th>
               <Th>Sr.No</Th>
               <Th>Document Name</Th>
+              <Th className="text-center">View File</Th>
             </tr>
           </thead>
 
@@ -393,6 +395,7 @@ export default function UploadedDocsList() {
                   </Td>
                   <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                   <Td className="font-medium text-gray-900">{doc.fileName}</Td>
+                  <Td className="flex justify-center items-center"><File className="w-5 h-6"/></Td>
                 </tr>
               ))
             )}

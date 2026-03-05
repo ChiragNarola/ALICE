@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { Users, Search, Hourglass, BadgeCheck } from "lucide-react";
+import { Users, Search, Hourglass, BadgeCheck, PlusIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ApproveRejectModal from "./ApproveRejectModal";
-import { getStaffNurseryStatus, updateStaffNurseryStatus } from "../../../api/api-services";
+import { createNursery, getStaffNurseryStatus, updateStaffNurseryStatus } from "../../../api/api-services";
 
 import type {
   StaffNurseryStatusDTO,
   StaffNurseryAssignmentDTO,
+  CreateNurseryDTO,
+  NurseryDTO,
 } from "../../../routes/models/response/Response";
+import AddNurseryModal from "../nursery/AddNurseryModal";
 
 // ==========================================================
 // TYPE FOR GROUPED ROW
@@ -36,6 +39,8 @@ export default function StaffNurseryList() {
   const [pageSize, setPageSize] = useState(5);
   const [rows, setRows] = useState<GroupedStaffRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [nursery, setNursery] = useState<NurseryDTO[]>([]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<GroupedStaffRow | null>(null);
@@ -183,13 +188,13 @@ export default function StaffNurseryList() {
           prev.map((row) =>
             row.user_id === selectedRow.user_id
               ? {
-                  ...row,
-                  nurseries: row.nurseries.map((n) =>
-                    n.nursery_id === nursery_id
-                      ? { ...n, status: action }
-                      : n
-                  ),
-                }
+                ...row,
+                nurseries: row.nurseries.map((n) =>
+                  n.nursery_id === nursery_id
+                    ? { ...n, status: action }
+                    : n
+                ),
+              }
               : row
           )
         );
@@ -200,7 +205,26 @@ export default function StaffNurseryList() {
       toast.error("Failed to update");
     }
   };
-
+  const handleAddNursery = async (nursery_name: string, description: string) => {
+    if (!nursery_name) {
+      toast.error("Nursery name cannot be empty");
+      return;
+    }
+    try {
+      const payload: CreateNurseryDTO = { nursery_name, description }
+      const res = await createNursery(payload);
+      if (res?.IsSuccess) {
+        setNursery((prev) => [res.Data, ...prev]);
+        toast.success("Nursery added successfully!");
+        setIsModalOpen(false);
+      } else {
+        toast.error(res?.Message || "Failed to add nursery.");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.Message || "Failed to add nursery.");
+    }
+  };
 
   const handleBulkChange = async (action: "approved" | "rejected") => {
     if (!selectedRow) return;
@@ -232,18 +256,18 @@ export default function StaffNurseryList() {
           ),
         };
       });
-      
+
       setRows((prev) =>
         prev.map((row) =>
           row.user_id === selectedRow.user_id
             ? {
-                ...row,
-                nurseries: row.nurseries.map((n) =>
-                  (n.status || "").toLowerCase() === "pending"
-                    ? { ...n, status: action }
-                    : n
-                ),
-              }
+              ...row,
+              nurseries: row.nurseries.map((n) =>
+                (n.status || "").toLowerCase() === "pending"
+                  ? { ...n, status: action }
+                  : n
+              ),
+            }
             : row
         )
       );
@@ -362,6 +386,11 @@ export default function StaffNurseryList() {
                           </div>
                         </div>
                       )}
+                      <button onClick={() => setIsModalOpen(true)}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50"
+                        aria-label="Open actions">
+                        <PlusIcon className="w-4 h-4" />
+                      </button>
                     </div>
                   </Td>
 
@@ -409,6 +438,12 @@ export default function StaffNurseryList() {
           bulkReject={() => handleBulkChange("rejected")}
         />
       )}
+      <AddNurseryModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false); // clear after closing
+        }}
+        onAdd={handleAddNursery} />
     </div>
   );
 }

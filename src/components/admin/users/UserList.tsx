@@ -27,6 +27,8 @@ export default function UserList() {
                         email: u.email,
                         roles: u.roles,
                         role: u.roles.join(", "),
+                        createdAt: u.created_at,
+                        lastLogin: u.last_login,
                     }));
 
                     setUsers(mappedUsers);
@@ -131,6 +133,8 @@ export default function UserList() {
                             <Th>Name</Th>
                             <Th>Email</Th>
                             <Th>Role</Th>
+                            <Th>Last Login</Th>
+                            <Th>User Created</Th>
                         </tr>
                     </thead>
                     <tbody>
@@ -165,6 +169,23 @@ export default function UserList() {
                                             >
                                                 {user.roles.length === 0 ? "Unknown" : user.roles.join(", ")}
                                             </span>
+                                        </Td>
+                                        <Td>
+                                            {user.lastLogin
+                                                ? new Date(user.lastLogin).toLocaleDateString("en-GB", {
+                                                    day: "2-digit",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                }): "-"}
+                                        </Td>
+                                        <Td className="text-gray-600">
+                                            {user.createdAt
+                                                ? new Date(user.createdAt).toLocaleDateString("en-GB", {
+                                                    day: "2-digit",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                }) : "-"
+                                            }
                                         </Td>
                                     </tr>
                                 ))}

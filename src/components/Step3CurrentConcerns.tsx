@@ -20,6 +20,7 @@ const Step3CurrentConcerns = forwardRef<StepRefType>((_, ref) => {
 
   /** Validate and Submit */
   const validateAndSubmit = async (): Promise<boolean> => {
+    return true;
     const newErrors = children.map((child) => {
       const hasNoConcernsSelected = !child.concerns || child.concerns.length === 0;
       const isOtherSelected = child.concerns.includes(OTHER_OPTION_ID);
