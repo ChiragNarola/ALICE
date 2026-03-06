@@ -1,6 +1,5 @@
 // UploadedDocsList.tsx
 import { useEffect, useState } from "react";
-import { File } from "lucide-react";
 import { Table, Th, Td } from "../../components/ui/Table";
 import Pagination from "../../components/ui/Pagination";
 import { Search, FileText, Upload, Check } from "lucide-react";
@@ -30,7 +29,8 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
 interface DocumentItem {
   id: number;
   fileName: string;
-  namespace?: string
+  namespace?: string;
+  url: string;
 }
 
 interface NamespaceItem {
@@ -73,6 +73,7 @@ export default function UploadedDocsList() {
           id: doc.id,
           fileName: doc.fileName,
           namespace: doc.namespace,
+          url: doc.url,
         }));
 
         setDocuments(formattedDocs);
@@ -220,7 +221,10 @@ export default function UploadedDocsList() {
     }
   };
 
-
+  // ======== Open File ========
+  const openFile = (url: string) => {
+    window.open(url);
+  };
 
 
   // ======== Filter + Paginate ========
@@ -395,7 +399,14 @@ export default function UploadedDocsList() {
                   </Td>
                   <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                   <Td className="font-medium text-gray-900">{doc.fileName}</Td>
-                  <Td className="flex justify-center items-center"><File className="w-5 h-6"/></Td>
+                  <Td className="flex justify-center items-center">
+                    <button onClick={() => openFile(doc.url)}
+                      className="w-8 h-8 flex items-center justify-center rounded-md
+                      text-teal-800 hover:bg-teal-800 hover:text-white transition focus:outline-none"
+                    >
+                      <FileText size={20} />
+                    </button>
+                  </Td>
                 </tr>
               ))
             )}

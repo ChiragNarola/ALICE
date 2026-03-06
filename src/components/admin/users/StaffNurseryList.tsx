@@ -13,7 +13,7 @@ import type {
   CreateNurseryDTO,
   NurseryDTO,
 } from "../../../routes/models/response/Response";
-import AddNurseryModal from "../nursery/AddNurseryModal";
+import AssignNurseryModal from "../nursery/AssignNurseryModal";
 
 // ==========================================================
 // TYPE FOR GROUPED ROW
@@ -40,8 +40,6 @@ export default function StaffNurseryList() {
   const [rows, setRows] = useState<GroupedStaffRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [nursery, setNursery] = useState<NurseryDTO[]>([]);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<GroupedStaffRow | null>(null);
 
@@ -55,34 +53,34 @@ export default function StaffNurseryList() {
 
         // Flatten first
         const flattened = data.flatMap((staff) => {
-            if (!staff.nurseries || staff.nurseries.length === 0) {
-              return [{
-                user_id: staff.user_id,
-                staff_name: `${staff.first_name} ${staff.last_name}`,
-                email: staff.email,
-                age_group: staff.age_group,
-                role_in_organisation: staff.role_in_organisation,
-                qualification: staff.qualification,
-                nursery_id: 0,
-                nursery_name: "",
-                status: null,
-                created_at: staff.created_at,
-              }];
-            }
-
-            return staff.nurseries.map((n: StaffNurseryAssignmentDTO) => ({
+          if (!staff.nurseries || staff.nurseries.length === 0) {
+            return [{
               user_id: staff.user_id,
               staff_name: `${staff.first_name} ${staff.last_name}`,
               email: staff.email,
               age_group: staff.age_group,
               role_in_organisation: staff.role_in_organisation,
               qualification: staff.qualification,
-              nursery_id: n.nursery_id,
-              nursery_name: n.nursery_name,
-              status: n.status,
+              nursery_id: 0,
+              nursery_name: "",
+              status: null,
               created_at: staff.created_at,
-            }));
-          });
+            }];
+          }
+
+          return staff.nurseries.map((n: StaffNurseryAssignmentDTO) => ({
+            user_id: staff.user_id,
+            staff_name: `${staff.first_name} ${staff.last_name}`,
+            email: staff.email,
+            age_group: staff.age_group,
+            role_in_organisation: staff.role_in_organisation,
+            qualification: staff.qualification,
+            nursery_id: n.nursery_id,
+            nursery_name: n.nursery_name,
+            status: n.status,
+            created_at: staff.created_at,
+          }));
+        });
 
 
         const grouped: GroupedStaffRow[] = Object.values(
@@ -109,18 +107,18 @@ export default function StaffNurseryList() {
         );
 
         const sorted = grouped.sort((a, b) => {
-        const aPending = a.nurseries.some(n => (n.status || "").toLowerCase() === "pending");
-        const bPending = b.nurseries.some(n => (n.status || "").toLowerCase() === "pending");
+          const aPending = a.nurseries.some(n => (n.status || "").toLowerCase() === "pending");
+          const bPending = b.nurseries.some(n => (n.status || "").toLowerCase() === "pending");
 
-        if (aPending && bPending) {
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-        }
+          if (aPending && bPending) {
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+          }
 
-        if (aPending) return -1;
-        if (bPending) return 1;
+          if (aPending) return -1;
+          if (bPending) return 1;
 
-        return 0;
-      });
+          return 0;
+        });
 
 
 
@@ -160,6 +158,11 @@ export default function StaffNurseryList() {
     setModalOpen(true);
   };
 
+  const openNurseryModal=(row: GroupedStaffRow) => {
+    setSelectedRow(row);
+    setIsModalOpen(true);
+  }
+
   const handleStatus = async (nursery_id: number, action: "approved" | "rejected") => {
     if (!selectedRow) return;
     try {
@@ -178,7 +181,7 @@ export default function StaffNurseryList() {
             ...prev,
             nurseries: prev.nurseries.map((n) =>
               n.nursery_id === nursery_id
-                ? { ...n, status: action } 
+                ? { ...n, status: action }
                 : n
             ),
           };
@@ -205,27 +208,7 @@ export default function StaffNurseryList() {
       toast.error("Failed to update");
     }
   };
-  const handleAddNursery = async (nursery_name: string, description: string) => {
-    if (!nursery_name) {
-      toast.error("Nursery name cannot be empty");
-      return;
-    }
-    try {
-      const payload: CreateNurseryDTO = { nursery_name, description }
-      const res = await createNursery(payload);
-      if (res?.IsSuccess) {
-        setNursery((prev) => [res.Data, ...prev]);
-        toast.success("Nursery added successfully!");
-        setIsModalOpen(false);
-      } else {
-        toast.error(res?.Message || "Failed to add nursery.");
-      }
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error?.Message || "Failed to add nursery.");
-    }
-  };
-
+  
   const handleBulkChange = async (action: "approved" | "rejected") => {
     if (!selectedRow) return;
 
@@ -386,9 +369,11 @@ export default function StaffNurseryList() {
                           </div>
                         </div>
                       )}
-                      <button onClick={() => setIsModalOpen(true)}
-                        className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50"
-                        aria-label="Open actions">
+                      <button onClick={() => openNurseryModal(row)}
+                        aria-label="Open actions"
+                        className="w-7 h-7 flex items-center justify-center rounded-md
+                      border-teal-800 text-teal-800 border bg-transparent hover:bg-teal-800 hover:text-white transition focus:outline-none"
+                      >
                         <PlusIcon className="w-4 h-4" />
                       </button>
                     </div>
@@ -438,12 +423,12 @@ export default function StaffNurseryList() {
           bulkReject={() => handleBulkChange("rejected")}
         />
       )}
-      <AddNurseryModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false); // clear after closing
-        }}
-        onAdd={handleAddNursery} />
+      <AssignNurseryModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        userId={selectedRow?.user_id}
+        existingNursery={selectedRow?.nurseries}
+      />
     </div>
   );
 }
