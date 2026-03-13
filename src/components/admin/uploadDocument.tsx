@@ -29,7 +29,7 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
 interface DocumentItem {
   id: number;
   fileName: string;
-  namespace?: string;
+  namespaces: string[];
   url: string;
 }
 
@@ -65,15 +65,12 @@ export default function UploadedDocsList() {
       const response = await listDocuments();
 
       if (response?.Data) {
-        // Filter out documents where namespace is null
-        const filteredDocs = response.Data.filter((doc: any) => doc.namespace !== null);
-
         // Map response to match DocumentItem interface
-        const formattedDocs = filteredDocs.map((doc: any) => ({
+        const formattedDocs = response.Data.map((doc: any) => ({
           id: doc.id,
-          fileName: doc.fileName,
-          namespace: doc.namespace,
-          url: doc.url,
+          fileName: doc.file_name || doc.fileName,
+          namespaces: doc.namespaces || (doc.namespace ? [doc.namespace] : []),
+          url: doc.file_url || doc.url,
         }));
 
         setDocuments(formattedDocs);
@@ -233,7 +230,7 @@ export default function UploadedDocsList() {
     const matchesSearch =
       search.trim() === "" || doc.fileName.toLowerCase().includes(search.toLowerCase());
     const matchesNamespace =
-      selectedNamespace === "" || doc.namespace === selectedNamespace;
+      selectedNamespace === "" || doc.namespaces.includes(selectedNamespace);
     return matchesSearch && matchesNamespace;
   });
 
@@ -360,6 +357,7 @@ export default function UploadedDocsList() {
               </Th>
               <Th>Sr.No</Th>
               <Th>Document Name</Th>
+              <Th>Linked Tags</Th>
               <Th className="text-center">View File</Th>
             </tr>
           </thead>
@@ -399,6 +397,17 @@ export default function UploadedDocsList() {
                   </Td>
                   <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                   <Td className="font-medium text-gray-900">{doc.fileName}</Td>
+                  <Td>
+                    <div className="flex flex-wrap gap-1">
+                      {doc.namespaces
+                        .filter((ns) => ns !== selectedNamespace)
+                        .map((ns, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                            {namespaces.find((n) => n.name === ns)?.title || ns}
+                          </span>
+                        ))}
+                    </div>
+                  </Td>
                   <Td className="flex justify-center items-center">
                     <button onClick={() => openFile(doc.url)}
                       className="w-8 h-8 flex items-center justify-center rounded-md

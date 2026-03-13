@@ -4,7 +4,6 @@ import Footer from "../components/common/Footer";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
 import { Outlet } from "react-router-dom";
-import { ChatVisibilityProvider } from "../contexts/ChatVisibilityContext";
 import ChatSidebar from "../components/ChatSidebar";
 import { updateConversationtitleById, archiveConversationById } from '../api/api-services';
 import { useChat } from "../contexts/ChatContext";
@@ -61,32 +60,30 @@ const DashboardLayout: React.FC = () => {
     };
 
     return (
-        <ChatVisibilityProvider>
-            <div className="min-h-screen flex flex-col bg-[#FEFCF8]">
-                {isSidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-30 bg-black/40 transition-opacity duration-300"
-                        onClick={handleToggle}
-                        aria-label="Close sidebar overlay"
-                    />
-                )}
-                <ChatSidebar isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onClose={handleToggle} archive={Archive} rename={renameInline} />
-                <DashboardHeader
-                    showMessageDropdown={showMessageDropdown}
-                    setShowMessageDropdown={setShowMessageDropdown}
-                    showUserDropdown={showUserDropdown}
-                    setShowUserDropdown={setShowUserDropdown}
-                    messageRef={messageRef}
-                    userRef={userRef}
-                    handleLogout={handleLogout}
-                    setIsSidebarOpen={setIsSidebarOpen}
-                    isSidebarOpen={isSidebarOpen}
-                    handleToggle={handleToggle}
+        <div className="min-h-screen flex flex-col bg-[#FEFCF8]">
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 z-30 bg-black/40 transition-opacity duration-300"
+                    onClick={handleToggle}
+                    aria-label="Close sidebar overlay"
                 />
-                <Outlet />
-                <Footer />
-            </div>
-        </ChatVisibilityProvider>
+            )}
+            <ChatSidebar isOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} onClose={handleToggle} archive={Archive} rename={renameInline} />
+            <DashboardHeader
+                showMessageDropdown={showMessageDropdown}
+                setShowMessageDropdown={setShowMessageDropdown}
+                showUserDropdown={showUserDropdown}
+                setShowUserDropdown={setShowUserDropdown}
+                messageRef={messageRef}
+                userRef={userRef}
+                handleLogout={handleLogout}
+                setIsSidebarOpen={setIsSidebarOpen}
+                isSidebarOpen={isSidebarOpen}
+                handleToggle={handleToggle}
+            />
+            <Outlet />
+            <Footer />
+        </div>
     );
 };
 

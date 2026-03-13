@@ -196,7 +196,7 @@ const LoginForm = () => {
         )}
       </button>
 
-      <p className="text-center text-[14px] lg:text-base text-alice-black font-semibold">
+      <p className="text-center text-[14px] lg:text-base text-alice-black font-semibold mt-4">
         Don’t have an account?{" "}
         <NavLink
           to="/signup"
@@ -205,6 +205,25 @@ const LoginForm = () => {
           Signup for free
         </NavLink>
       </p>
+
+      <div className="mt-6 flex flex-col items-center">
+        <div className="relative w-full flex items-center justify-center mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-alice-gray"></div>
+          </div>
+          <div className="relative px-4 bg-[#FEFCF8] text-sm text-alice-darkgray font-medium">
+            OR
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/guest-chat")}
+          className="w-full border-2 border-alice-teal text-alice-teal hover:bg-alice-teal hover:text-white text-base font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-all ease-in-out duration-300"
+        >
+          Try as Guest
+        </button>
+      </div>
     </form>
   );
 };

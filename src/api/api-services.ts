@@ -8,6 +8,18 @@ import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
 
+export interface DateParams {
+  start_date: string;
+  end_date: string;
+}
+
+export interface DocumentDTO {
+  id: number;
+  file_name: string;
+  file_url: string;
+  namespaces: string[];
+}
+
 //Auth
 export const loginUser = async (formData: FormData) => {
   const response = await axiosInstance.post(
@@ -41,6 +53,25 @@ export const logoutUser = async (sessionUUID: string): Promise<APIResponse<null>
       IsSuccess: false,
       Data: null,
       Message: "Logout failed",
+    };
+  }
+};
+
+export const exportUsers = async (params: DateParams): Promise<Blob> => {
+  try {
+    const response = await axiosInstance.get("admin/export-users", {
+      params: {
+        start_date: params.start_date,
+        end_date: params.end_date,
+      },
+      responseType: "blob",
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to export users",
     };
   }
 };
@@ -610,10 +641,6 @@ export const verifyEmailCode = async (
 
 //Admin Dashboard Page:- 
 
-interface DateParams {
-  start_date: string;
-  end_date: string;
-}
 export const getNewSignUps = async (
   params: DateParams
 ): Promise<APIResponse<UserDTO[]>> => {
@@ -858,7 +885,7 @@ export const countOthers = async (): Promise<APIResponse<string>> => {
 };
 
 
-export const listDocuments = async (): Promise<APIResponse<string[]>> => {
+export const listDocuments = async (): Promise<APIResponse<DocumentDTO[]>> => {
   try {
     const res = await axiosInstance.get("admin/listDocuments");
     return res.data;
@@ -1387,3 +1414,59 @@ export const updateStaffNurseryStatus = async (payload: {
   }
 };
 
+// --- Invite User APIs (Mocked until Backend Endpoints are ready) ---
+export interface InviteUserPayload {
+  email: string;
+  first_name: string;
+  last_name: string;
+  contact_number: string;
+  location: string;
+  role: string[];
+  nursery_id?: number[];
+}
+
+export const inviteSingleUser = async (data: InviteUserPayload): Promise<APIResponse<any>> => {
+  try {
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formData.append('first_name', data.first_name);
+    formData.append('last_name', data.last_name);
+    formData.append('contact_number', data.contact_number);
+    formData.append('location', data.location);
+
+    // The UI sends a single role, so we take the first element.
+    data.role.forEach(role => {
+      formData.append('role', role);
+    });
+    // The UI sends a single nursery_id for staff.
+    if (data.nursery_id && data.nursery_id.length > 0) {
+      formData.append('nursery_id', String(data.nursery_id[0]));
+    }
+
+    const response = await axiosInstance.post('admin/create-user', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send invitation",
+    };
+  }
+};
+
+export const inviteBulkUsers = async (formData: FormData): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.post('admin/bulk-create-users', formData, { 
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send bulk invitations",
+    };
+  }
+};

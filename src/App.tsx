@@ -9,6 +9,7 @@ import { ChatProvider } from "./contexts/ChatContext";
 import { ChatActivityProvider } from "./contexts/ChatActivityContext";
 import { useAutoLogout } from "./hooks/autoLogout";
 import { useState, useEffect } from "react";
+import { ChatVisibilityProvider } from "./contexts/ChatVisibilityContext";
 
 function AppContent() {
   const [parsedUser, setParsedUser] = useState<any>(() => {
@@ -99,15 +100,17 @@ function AppContent() {
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       <ChatActivityProvider>
-        <AuthProvider>
-          <ChildrenProvider>
-            <ChatProvider>
-              <div className={locked ? "pointer-events-none filter blur-sm" : ""}>
-                <AppRouter />
-              </div>
-            </ChatProvider>
-          </ChildrenProvider>
-        </AuthProvider>
+        <ChatVisibilityProvider>
+          <AuthProvider>
+            <ChildrenProvider>
+              <ChatProvider>
+                <div className={locked ? "pointer-events-none filter blur-sm" : ""}>
+                  <AppRouter />
+                </div>
+              </ChatProvider>
+            </ChildrenProvider>
+          </AuthProvider>
+        </ChatVisibilityProvider>
       </ChatActivityProvider>
     </>
   );

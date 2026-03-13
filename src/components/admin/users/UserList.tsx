@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { Users, Search } from "lucide-react";
+import { Users, Search, UserPlus, Download } from "lucide-react";
 import { getUserList } from "../../../api/api-services";
 import type { DisplayUser } from "../../../routes/models/response/Response";
+import InviteUserModal from "./InviteUserModal";
+import ExportUsersModal from "./ExportUsersModal";
+import { toast } from "react-toastify";
 
 export default function UserList() {
     const [search, setSearch] = useState("");
@@ -12,36 +15,45 @@ export default function UserList() {
     const [pageSize, setPageSize] = useState(5);
     const [users, setUsers] = useState<DisplayUser[]>([]);
     const [loading, setLoading] = useState(false);
+    
+    // Modal state
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+    const fetchUsers = useCallback(async () => {
+        try {
+            setLoading(true);
+            const formData = new FormData();
+            const response = await getUserList(formData);
+
+            if (response.IsSuccess && response.Data) {
+                const mappedUsers: DisplayUser[] = response.Data.map((u) => ({
+                    id: u.id,
+                    name: `${u.first_name} ${u.last_name}`,
+                    email: u.email,
+                    roles: u.roles,
+                    role: u.roles.join(", "),
+                    createdAt: u.created_at,
+                    lastLogin: u.last_login,
+                }));
+
+                setUsers(mappedUsers);
+            }
+        } catch (err) {
+            console.error("Failed to fetch users", err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const formData = new FormData();
-                const response = await getUserList(formData);
-
-                if (response.IsSuccess && response.Data) {
-                    const mappedUsers: DisplayUser[] = response.Data.map((u) => ({
-                        id: u.id,
-                        name: `${u.first_name} ${u.last_name}`,
-                        email: u.email,
-                        roles: u.roles,
-                        role: u.roles.join(", "),
-                        createdAt: u.created_at,
-                        lastLogin: u.last_login,
-                    }));
-
-                    setUsers(mappedUsers);
-                }
-            } catch (err) {
-                console.error("Failed to fetch users", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchUsers();
-    }, []);
+    }, [fetchUsers]);
+
+    const handleInviteSuccess = () => {
+        toast.success("Invitation sent successfully!");
+        fetchUsers(); // Refresh the list
+    };
 
     // Filtered users based on search and role
     const filteredUsers = users.filter(
@@ -76,6 +88,25 @@ export default function UserList() {
                             View, search, and manage all users in your system.
                         </p>
                     </div>
+                </div>
+                
+                <div className="flex space-x-3">
+                    {/* Export Button */}
+                    <button
+                        onClick={() => setIsExportModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#134e4a] text-white text-sm font-medium rounded-lg hover:bg-[#0f3e3b] transition"
+                    >
+                        <Download className="w-4 h-4" />
+                        Export Users
+                    </button>
+                    {/* Invite Button */}
+                    <button
+                        onClick={() => setIsInviteModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#134e4a] text-white text-sm font-medium rounded-lg hover:bg-[#0f3e3b] transition"
+                    >
+                        <UserPlus className="w-4 h-4" />
+                        Invite User
+                    </button>
                 </div>
             </div>
 
@@ -140,7 +171,7 @@ export default function UserList() {
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan={4} className="text-center py-6">
+                                <td colSpan={6} className="text-center py-6">
                                     <div className="flex justify-center items-center py-6">
                                         <div className="w-8 h-8 border-2 border-alice-teal border-t-transparent rounded-full animate-spin" />
                                         <span className="text-gray-600 px-1">Loading...</span>
@@ -206,6 +237,19 @@ export default function UserList() {
                     setPageSize(size);
                     setCurrentPage(1);
                 }}
+            />
+
+            {/* Invite Modal */}
+            <InviteUserModal 
+                isOpen={isInviteModalOpen}
+                onClose={() => setIsInviteModalOpen(false)}
+                onSuccess={handleInviteSuccess}
+            />
+
+            {/* Export Modal */}
+            <ExportUsersModal 
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
             />
         </div >
     );

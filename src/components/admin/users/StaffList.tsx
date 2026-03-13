@@ -26,6 +26,8 @@ export default function StaffList() {
                             email: u.email,
                             roles: u.roles,
                             role: u.roles.join(", "),
+                            createdAt: u.created_at,
+                            lastLogin: u.last_login,
                         }));
 
 

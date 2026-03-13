@@ -22,13 +22,15 @@ import ResetPassword from "../pages/ResetPassword";
 import HolidayList from "../components/admin/holidayList";
 import Nursery from "../components/admin/nursery/NurseryList";
 import StaffNurseryList from "../components/admin/users/StaffNurseryList";
-import FAQ from "../components/admin/faq"
+import FAQ from "../components/admin/faq";
 import PinLogin from "../components/PinLoginScreen";
+import GuestChatPage from "../pages/GuestChatPage";
 
 export default function AppRouter() {
     return (
         <Routes>
             <Route path="/" element={<DefaultRoute />} />
+            <Route path="/guest-chat" element={<GuestChatPage />} />
 
             <Route element={<WelcomeSection />}>
                 <Route path="/login" element={<Login />} />

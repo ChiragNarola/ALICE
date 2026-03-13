@@ -5,13 +5,11 @@ import { Users, Search, Hourglass, BadgeCheck, PlusIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ApproveRejectModal from "./ApproveRejectModal";
-import { createNursery, getStaffNurseryStatus, updateStaffNurseryStatus } from "../../../api/api-services";
+import { getStaffNurseryStatus, updateStaffNurseryStatus } from "../../../api/api-services";
 
 import type {
   StaffNurseryStatusDTO,
   StaffNurseryAssignmentDTO,
-  CreateNurseryDTO,
-  NurseryDTO,
 } from "../../../routes/models/response/Response";
 import AssignNurseryModal from "../nursery/AssignNurseryModal";
 
