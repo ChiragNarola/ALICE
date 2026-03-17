@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { Bounce, toast } from "react-toastify";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { v4 as uuidv4 } from "uuid";
 import { useChat } from "../contexts/ChatContext";
 import { useChatActivity } from "../contexts/ChatActivityContext";
+import { guestChatRequest } from "../api/api-services";
+import { useNavigate } from "react-router-dom";
 
 type Sender = "alice" | "user";
 type Message = {
@@ -18,6 +21,8 @@ type Message = {
 
 const GuestChatPage: React.FC = () => {
   const { messages, setHasAskedQuestion } = useChat();
+  const [requiresSignUp, setRequiresSignUp] = useState<boolean>(false);
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
@@ -32,6 +37,23 @@ const GuestChatPage: React.FC = () => {
       user_response: null,
     },
   ]);
+
+  const showLimitExceededToast = () => (
+    toast.error('You have exceeded your trial limit. Please sign up to continue.', {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+      onClose(reason) {
+        navigate("/signup");
+      },
+    })
+  );
 
   useEffect(() => {
     if (!chatBordUniqueId) {
@@ -76,82 +98,76 @@ const GuestChatPage: React.FC = () => {
 
   const { setChatVisible } = useChatVisibility();
   useEffect(() => {
-      setChatVisible(true);
+    setChatVisible(true);
   }, [setChatVisible]);
 
   const handleSendMessage = async (e: React.FormEvent, file?: File | null) => {
     e.preventDefault();
     if (!message.trim() && !file) return;
-
+    if (requiresSignUp) {
+      showLimitExceededToast();
+      return;
+    }
     IsSearching(true);
+
+    const sessionId = localStorage.getItem("chat_session_id") || "";
 
     const userMessageText = file ? `${message} [File: ${file.name}]` : message;
     const tempId = Date.now();
-    let dbId = tempId;
 
     setChatMessages(prev => [
       ...prev,
-      { id: tempId, from: "user", u_question: userMessageText, ai_answer: "", actions: true, user_response: null },
-      { id: tempId, from: "alice", u_question: "", ai_answer: "...", actions: false }
+      { id: tempId, from: "user", u_question: userMessageText, ai_answer: "", actions: true },
+      { id: tempId + 1, from: "alice", u_question: "", ai_answer: "...", actions: false }
     ]);
 
     setMessage("");
-    setHasAskedQuestion(true);
 
     try {
-      const formData = new FormData();
-      formData.append("query", userMessageText);
-      formData.append("user_id", "guest_" + (sessionStorage.getItem("session_uuid") || "temp"));
-      formData.append("conversation_id", chatBordUniqueId || "");
-      if (file) formData.append("file", file);
+      let responseData;
 
-      const response = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
-        method: "POST",
-        body: formData
-      });
+      if (file) {
+        const formData = new FormData();
+        formData.append("message", message);
+        if (sessionId) formData.append("session_id", sessionId);
+        formData.append("file", file);
 
-      if (!response.ok) throw new Error("API error");
+        const res = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
+          method: "POST",
+          body: formData
+        });
 
-      const headerConvId = response.headers.get("x-conversation-uuid");
-      const headerUserMessageId = response.headers.get("x-user-message-id");
-
-      if (headerConvId) setChatboardUniqueId(headerConvId);
-
-      if (headerUserMessageId) {
-        dbId = Number(headerUserMessageId);
-        setChatMessages(prev =>
-          prev.map(m => m.id === tempId ? { ...m, id: dbId } : m)
-        );
+        if (!res.ok) throw new Error("API error");
+        responseData = await res.json();
+      }
+      else {
+        responseData = await guestChatRequest({
+          message,
+          session_id: sessionId || undefined
+        });
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let accumulated = "";
-
-      while (true) {
-        const { value, done } = await reader!.read();
-        if (done) break;
-
-        accumulated += decoder.decode(value, { stream: true });
-
-        setChatMessages(prev =>
-          prev.map(m => 
-            m.id === dbId && m.from === "alice" 
-              ? { ...m, ai_answer: accumulated }
-              : m
-          )
-        );
+      if (responseData.session_id) {
+        localStorage.setItem("chat_session_id", responseData.session_id);
       }
 
       setChatMessages(prev =>
-        prev.map(m => m.id === dbId && m.from === "alice" ? { ...m, actions: true } : m)
+        prev.map(m =>
+          m.id === tempId + 1
+            ? { ...m, ai_answer: responseData.message, actions: true }
+            : m
+        )
       );
+
+      if (responseData.requires_signup) {
+        setRequiresSignUp(true);
+      }
 
     } catch (err) {
       console.error("Error while streaming:", err);
       setChatMessages(prev =>
         prev.map(m =>
-          m.id === dbId && m.from === "alice"
+          m.id === tempId + 1
             ? { ...m, ai_answer: "Error generating response.", actions: false }
             : m
         )

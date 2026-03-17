@@ -3,10 +3,15 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO,FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO, FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
+
+export interface ChatRequest {
+  session_id?: string;
+  message: string;
+}
 
 export interface DateParams {
   start_date: string;
@@ -1470,3 +1475,19 @@ export const inviteBulkUsers = async (formData: FormData): Promise<APIResponse<a
     };
   }
 };
+
+
+export const guestChatRequest = async (chatRequest: ChatRequest): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.post('freeChat', chatRequest, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send invitation",
+    };
+  }
+}
