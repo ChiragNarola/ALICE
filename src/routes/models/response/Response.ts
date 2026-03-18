@@ -45,6 +45,7 @@ export interface staffDTO {
     age_group: string;
     qualification: string;
     role_in_organisation: string;
+    nursery_ids:number[];
     nursery_names: string[];
     nursery_status: string[];
 }

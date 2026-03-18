@@ -235,7 +235,7 @@ const Step4ReviewSubmit = forwardRef<
                       }`
                     }
                   >
-                    {({ selected }) => (
+                    {({ selected,active }) => (
                       <div className="flex items-center justify-between">
                         <span
                           className={`block truncate ${
@@ -245,7 +245,7 @@ const Step4ReviewSubmit = forwardRef<
                           {title}
                         </span>
                         {selected && (
-                          <CheckIcon className="w-5 h-5 text-white" />
+                          <CheckIcon className={`w-5 h-5 ${active?"text-white":"text-green-600"}`} />
                         )}
                       </div>
                     )}
@@ -374,7 +374,7 @@ const Step4ReviewSubmit = forwardRef<
                       }`
                     }
                   >
-                    {({ selected }) => (
+                    {({ selected,active }) => (
                       <div className="flex items-center justify-between">
                         <span
                           className={`block truncate ${
@@ -384,7 +384,7 @@ const Step4ReviewSubmit = forwardRef<
                           {nur.name}
                         </span>
                         {selected && (
-                          <CheckIcon className="w-5 h-5 text-white" />
+                          <CheckIcon className={`w-5 h-5 ${active?"text-white":"text-green-600"}`} />
                         )}
                       </div>
                     )}

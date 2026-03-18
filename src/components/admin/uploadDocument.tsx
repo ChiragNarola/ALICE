@@ -34,6 +34,7 @@ interface DocumentItem {
 }
 
 interface NamespaceItem {
+  id: number;
   title: string;
   name: string;
 }
@@ -54,15 +55,16 @@ export default function UploadedDocsList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDocs, setSelectedDocs] = useState<number[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [selectedNamespaceId, setSelectedNameSpaceId] = useState<number | null>(null);
 
   const allowedExtensions = ["pdf", "docx", "txt", "xlsx", "pptx"];
   const MAX_FILE_SIZE_MB = 10;
 
   // Fetch documents
-  const fetchUploadedDocs = async () => {
+  const fetchUploadedDocs = async (nameSpaceId: number) => {
     try {
       setLoading(true);
-      const response = await listDocuments();
+      const response = await listDocuments(nameSpaceId);
 
       if (response?.Data) {
         // Map response to match DocumentItem interface
@@ -85,8 +87,6 @@ export default function UploadedDocsList() {
     }
   };
 
-
-
   // Fetch namespaces
   const fetchNamespaces = async () => {
     try {
@@ -105,13 +105,16 @@ export default function UploadedDocsList() {
   };
 
   useEffect(() => {
-    fetchUploadedDocs();
     fetchNamespaces();
   }, []);
 
   useEffect(() => {
+    selectedNamespaceId && fetchUploadedDocs(selectedNamespaceId);
+  }, [selectedNamespace]);
+  useEffect(() => {
     if (namespaces.length > 0 && !selectedNamespace) {
       setSelectedNamespace(namespaces[0].name);
+      setSelectedNameSpaceId(namespaces[0].id);
       setNamespaceError("");
     }
   }, [namespaces]);
@@ -171,7 +174,7 @@ export default function UploadedDocsList() {
         setUploadedFile(null);
         setSelectedUploadNamespace("");
         setModalOpen(false);
-        fetchUploadedDocs();
+        selectedNamespaceId && fetchUploadedDocs(selectedNamespaceId);
       } else {
         toast.error(response.data.results[0].error || "Failed to upload file", { autoClose: 3000 });
       }
@@ -204,7 +207,7 @@ export default function UploadedDocsList() {
       if (response?.IsSuccess) {
         toast.success("Selected documents deleted successfully!", { autoClose: 3000 });
         setSelectedDocs([]); // Clear selection
-        fetchUploadedDocs(); // Refresh document list
+        selectedNamespaceId && fetchUploadedDocs(selectedNamespaceId); // Refresh document list
       } else {
         toast.error(response?.Message || "Failed to delete selected documents", { autoClose: 3000 });
         setSelectedDocs([])

@@ -88,7 +88,11 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
       };
 
       if (role === 'staff' && nurseryId) {
-        payload.nursery_id = [nurseryId];
+        const selectedNursery = nurseries.find(n => n.id === nurseryId);
+        if (selectedNursery == null) {
+          throw new Error("Invalid nursery selected");
+        }
+        payload.nursery = selectedNursery.nursery_name;
       }
       const response = await inviteSingleUser(payload);
       if (response.IsSuccess) {
@@ -201,11 +205,10 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                 <div className="flex border-b border-gray-200 mt-4 mb-6">
                   <button
                     onClick={() => setActiveTab('single')}
-                    className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === 'single'
-                        ? 'border-[#134e4a] text-[#134e4a]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'single'
+                      ? 'border-[#134e4a] text-[#134e4a]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <UserPlusIcon className="w-4 h-4" />
@@ -214,11 +217,10 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                   </button>
                   <button
                     onClick={() => setActiveTab('bulk')}
-                    className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === 'bulk'
-                        ? 'border-[#134e4a] text-[#134e4a]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={`flex-1 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'bulk'
+                      ? 'border-[#134e4a] text-[#134e4a]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <ArrowUpTrayIcon className="w-4 h-4" />
@@ -349,7 +351,7 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                 {activeTab === 'bulk' && (
                   <form onSubmit={handleBulkSubmit} className="space-y-4">
                     <div className="text-sm text-gray-600 mb-2">
-                       Upload a CSV file containing user details. Ensure your file matches the required template.
+                      Upload a CSV file containing user details. Ensure your file matches the required template.
                     </div>
                     
                     <button
@@ -357,7 +359,7 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                       onClick={downloadTemplate}
                       className="text-sm text-[#134e4a] hover:text-[#0f3e3b] font-medium flex items-center gap-1 mb-4"
                     >
-                       <DocumentTextIcon className="w-4 h-4"/> Download CSV Template
+                      <DocumentTextIcon className="w-4 h-4" /> Download CSV Template
                     </button>
 
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative">
@@ -370,9 +372,9 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                       />
                       <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mb-2" />
                       {file ? (
-                         <div className="text-sm font-medium text-indigo-600 text-center">
-                           Selected: {file.name}
-                         </div>
+                        <div className="text-sm font-medium text-indigo-600 text-center">
+                          Selected: {file.name}
+                        </div>
                       ) : (
                         <div className="text-sm text-gray-500 text-center">
                           <span className="font-semibold text-[#134e4a]">Click to upload</span> or drag and drop<br />

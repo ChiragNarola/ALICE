@@ -62,13 +62,20 @@ export const logoutUser = async (sessionUUID: string): Promise<APIResponse<null>
   }
 };
 
-export const exportUsers = async (params: DateParams): Promise<Blob> => {
+export const exportUsers = async (params: {
+  start_date?: string,
+  end_date?: string,
+}): Promise<Blob> => {
   try {
+    const queryParams: any = {};
+
+    if (params.start_date)
+      queryParams.start_date = params.start_date;
+    if (params.end_date)
+      queryParams.end_date = params.end_date;
+
     const response = await axiosInstance.get("admin/export-users", {
-      params: {
-        start_date: params.start_date,
-        end_date: params.end_date,
-      },
+      params: queryParams,
       responseType: "blob",
     });
     return response.data;
@@ -890,9 +897,9 @@ export const countOthers = async (): Promise<APIResponse<string>> => {
 };
 
 
-export const listDocuments = async (): Promise<APIResponse<DocumentDTO[]>> => {
+export const listDocuments = async (namespaceId: number): Promise<APIResponse<DocumentDTO[]>> => {
   try {
-    const res = await axiosInstance.get("admin/listDocuments");
+    const res = await axiosInstance.get(`admin/listDocuments?namespace_id=${namespaceId}`);
     return res.data;
   } catch (error: any) {
     throw (
@@ -1247,7 +1254,7 @@ export const addHoliday = async (
 };
 
 
-export const createNursery = async (data:CreateNurseryDTO): Promise<APIResponse<any>> => {
+export const createNursery = async (data: CreateNurseryDTO): Promise<APIResponse<any>> => {
   // const urlEncoded = new URLSearchParams();
   // formData.forEach((value, key) => {
   //   urlEncoded.append(key, value.toString());
@@ -1310,7 +1317,7 @@ export const updateAliceAnswer = async (
   try {
     const response = await axiosInstance.put<APIResponse<UpdateFAQ>>(
       `/admin/alice_answer`,
-      payload, 
+      payload,
       {
         headers: { "Content-Type": "application/json" },
       }
@@ -1346,7 +1353,7 @@ export const updateNursery = async (
   try {
     const response = await axiosInstance.put<APIResponse<UpdateNursery>>(
       `/admin/nursery`,
-      payload, 
+      payload,
       {
         headers: { "Content-Type": "application/json" },
       }
@@ -1372,8 +1379,8 @@ export const deleteNursery = async (id: number): Promise<APIResponse<any>> => {
 
 export const hasPin = async (email: string): Promise<boolean> => {
   try {
-    const response = await axiosInstance.get("/users/has-pin", { 
-      params: { email } 
+    const response = await axiosInstance.get("/users/has-pin", {
+      params: { email }
     });
 
     return response.data?.Data?.has_pin ?? false;
@@ -1402,7 +1409,7 @@ export const getStaffNurseryStatus = async (): Promise<
 
 export const updateStaffNurseryStatus = async (payload: {
   user_id: number;
-  nursery_id: number;
+  nursery_id: number[];
   status: string;
 }): Promise<APIResponse<any>> => {
   try {
@@ -1427,29 +1434,13 @@ export interface InviteUserPayload {
   contact_number: string;
   location: string;
   role: string[];
-  nursery_id?: number[];
+  nursery?: string;
 }
 
 export const inviteSingleUser = async (data: InviteUserPayload): Promise<APIResponse<any>> => {
   try {
-    const formData = new FormData();
-    formData.append('email', data.email);
-    formData.append('first_name', data.first_name);
-    formData.append('last_name', data.last_name);
-    formData.append('contact_number', data.contact_number);
-    formData.append('location', data.location);
-
-    // The UI sends a single role, so we take the first element.
-    data.role.forEach(role => {
-      formData.append('role', role);
-    });
-    // The UI sends a single nursery_id for staff.
-    if (data.nursery_id && data.nursery_id.length > 0) {
-      formData.append('nursery_id', String(data.nursery_id[0]));
-    }
-
-    const response = await axiosInstance.post('admin/create-user', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+    const response = await axiosInstance.post('admin/create-user', data, {
+      headers: { 'Content-Type': 'application/json' }
     });
     return response.data;
   } catch (error: any) {
@@ -1463,8 +1454,8 @@ export const inviteSingleUser = async (data: InviteUserPayload): Promise<APIResp
 
 export const inviteBulkUsers = async (formData: FormData): Promise<APIResponse<any>> => {
   try {
-    const response = await axiosInstance.post('admin/bulk-create-users', formData, { 
-        headers: { 'Content-Type': 'multipart/form-data' }
+    const response = await axiosInstance.post('admin/bulk-create-users', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   } catch (error: any) {
@@ -1480,6 +1471,24 @@ export const inviteBulkUsers = async (formData: FormData): Promise<APIResponse<a
 export const guestChatRequest = async (chatRequest: ChatRequest): Promise<APIResponse<any>> => {
   try {
     const response = await axiosInstance.post('freeChat', chatRequest, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send invitation",
+    };
+  }
+}
+
+export const assignNursery = async (params: {
+  user_id: number;
+  nursery_id: number[];
+}) => {
+  try {
+    const response = await axiosInstance.post('admin/assign-nursery', params, {
       headers: { 'Content-Type': 'application/json' }
     });
     return response.data;

@@ -338,6 +338,7 @@ const ChildBasicInformation: React.FC = () => {
               role_in_organisation: staff_response.Data.role_in_organisation || "",
               qualification: staff_response.Data.qualification || "",
               age_group: staff_response.Data.age_group || "1-5",
+              nursery:staff_response.Data.nursery_ids || [],
               nurseryName: nurseryNames,
 
               // other_role: staff_response.Data.

@@ -39,11 +39,6 @@ export default function PinLogin() {
         formData.append("username", savedEmail!);
         formData.append("password", pin); // Using PIN as password
         formData.append("login_type", "pin");
-        console.log("FormData contents:");
-            for (const [key, value] of formData.entries()) {
-            console.log(key, value);
-            }
-
         const response = await login(formData, true);
 
         if (response?.IsSuccess) {

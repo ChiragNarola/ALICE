@@ -144,6 +144,17 @@ export default function StaffNurseryList() {
       r.nurseries.some((n) => n.nursery_name.toLowerCase().includes(q))
     );
   });
+  const refreshStaffList = async () => {
+    setCurrentPage(1);
+    await fetchStaffNursery();
+  };
+  const handleModalClose = async (shouldRefresh?: boolean) => {
+    setIsModalOpen(false);
+
+    if (shouldRefresh) {
+      await refreshStaffList();
+    }
+  };
 
   const totalRecords = filteredRows.length;
   const totalPages = Math.ceil(totalRecords / pageSize);
@@ -156,7 +167,7 @@ export default function StaffNurseryList() {
     setModalOpen(true);
   };
 
-  const openNurseryModal=(row: GroupedStaffRow) => {
+  const openNurseryModal = (row: GroupedStaffRow) => {
     setSelectedRow(row);
     setIsModalOpen(true);
   }
@@ -166,7 +177,7 @@ export default function StaffNurseryList() {
     try {
       const res = await updateStaffNurseryStatus({
         user_id: selectedRow.user_id,
-        nursery_id,
+        nursery_id: [nursery_id],
         status: action,
       });
 
@@ -206,24 +217,21 @@ export default function StaffNurseryList() {
       toast.error("Failed to update");
     }
   };
-  
+
   const handleBulkChange = async (action: "approved" | "rejected") => {
     if (!selectedRow) return;
 
     const pendingNurseries = selectedRow.nurseries.filter(
       (n) => (n.status || "").toLowerCase() === "pending"
-    );
+    ).map(x => x.nursery_id);
 
     if (pendingNurseries.length === 0) return;
-
     try {
-      for (const n of pendingNurseries) {
-        await updateStaffNurseryStatus({
-          user_id: selectedRow.user_id,
-          nursery_id: n.nursery_id,
-          status: action,
-        });
-      }
+      await updateStaffNurseryStatus({
+        user_id: selectedRow.user_id,
+        nursery_id: pendingNurseries,
+        status: action,
+      });
       toast.success(`All pending have been ${action}!`);
 
       setSelectedRow((prev) => {
@@ -423,7 +431,7 @@ export default function StaffNurseryList() {
       )}
       <AssignNurseryModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleModalClose}
         userId={selectedRow?.user_id}
         existingNursery={selectedRow?.nurseries}
       />

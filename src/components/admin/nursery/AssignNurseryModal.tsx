@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline";
-import { getNursery } from "../../../api/api-services";
-import { toast } from "react-toastify";
+import { getNursery, assignNursery } from "../../../api/api-services";
+import { Bounce, toast } from "react-toastify";
 
 interface Nursery {
     nursery_id: number;
@@ -11,7 +11,7 @@ interface Nursery {
 
 interface AssignNurseryModalProps {
     open: boolean;
-    onClose: () => void;
+    onClose: (shouldRefresh?: boolean) => void;
     userId?: number;
     existingNursery?: Nursery[];
 }
@@ -29,7 +29,6 @@ export default function AssignNurseryModal({
     useEffect(() => {
         if (open) {
             fetchNurseryList();
-
             const ids = existingNursery.map((n) => n.nursery_id);
             setSelectedNursery(ids);
         }
@@ -59,12 +58,29 @@ export default function AssignNurseryModal({
 
     const handleSave = async () => {
         try {
-            const payload = { userId, selectedNursery };
-            
-            // API example
-            // await updateUserNursery(userId, selectedNursery)
-
-            onClose();
+            if (!userId) return;
+            const newNursery = selectedNursery.filter(
+                (id) => !existingNursery.some(n => n.nursery_id === id)
+            );
+            const payload = {
+                user_id: userId,
+                nursery_id: newNursery
+            };
+            const result = await assignNursery(payload);
+            if (result.IsSuccess) {
+                onClose(true);
+                toast.success('Nusery assigned successfully', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Bounce,
+                });
+            }
         } catch (err: any) {
             console.error(err);
             toast.error(err?.Message || "Failed to add nursery.");
@@ -78,7 +94,7 @@ export default function AssignNurseryModal({
             <div className="bg-white w-[500px] rounded-xl p-6 shadow-xl">
                 <div className="flex justify-between items-center mb-5">
                     <h2 className="text-lg font-semibold">Assign Nursery</h2>
-                    <button onClick={onClose}>✕</button>
+                    <button onClick={() => onClose(false)}>✕</button>
                 </div>
 
                 {loading ? (
@@ -132,12 +148,12 @@ export default function AssignNurseryModal({
                                                             }`
                                                         }
                                                     >
-                                                        {({ selected }) => (
+                                                        {({ selected, active }) => (
                                                             <div className="flex justify-between">
                                                                 <span>{nur.nursery_name}</span>
 
                                                                 {selected && (
-                                                                    <CheckIcon className="w-5 h-5 text-white" />
+                                                                    <CheckIcon className={`w-5 h-5 ${active ? "text-white" : "text-green-600"}`} />
                                                                 )}
                                                             </div>
                                                         )}
@@ -151,7 +167,7 @@ export default function AssignNurseryModal({
                         </Listbox >
                         < div className="flex justify-end gap-3 mt-6" >
                             <button
-                                onClick={onClose}
+                                onClick={() => onClose(false)}
                                 className="px-4 py-2 border rounded-lg">
                                 Cancel
                             </button>
