@@ -20,7 +20,7 @@ type Message = {
 };
 
 const GuestChatPage: React.FC = () => {
-  const { messages, setHasAskedQuestion } = useChat();
+  const { messages } = useChat();
   const [requiresSignUp, setRequiresSignUp] = useState<boolean>(false);
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
@@ -50,6 +50,7 @@ const GuestChatPage: React.FC = () => {
       theme: "light",
       transition: Bounce,
       onClose(reason) {
+        console.log("Toast closed due to:", reason);
         navigate("/signup");
       },
     })
@@ -60,7 +61,7 @@ const GuestChatPage: React.FC = () => {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
       if (!sessionStorage.getItem("session_uuid")) {
-          sessionStorage.setItem("session_uuid", uuidv4());
+        sessionStorage.setItem("session_uuid", uuidv4());
       }
     }
   }, [chatBordUniqueId]);
@@ -87,8 +88,8 @@ const GuestChatPage: React.FC = () => {
     const mappedMessages: Message[] = messages.map(msg => ({
       id: msg.id,
       from: msg.from,
-      u_question: msg.u_question, 
-      ai_answer: msg.ai_answer,  
+      u_question: msg.u_question,
+      ai_answer: msg.ai_answer,
       user_response: msg.user_response ?? null,
       actions: msg.actions ?? true,
     }));
@@ -192,7 +193,7 @@ const GuestChatPage: React.FC = () => {
   return (
     <main className="flex-1 flex px-2 gap-5 w-full max-w-5xl m-auto relative transition-all duration-700 ease-in-out">
       <section className="flex-1 pr-5 h-[calc(100vh-140px)] relative mt-10">
-        <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction}/>
+        <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction} />
         <ChatInput
           onSend={handleSendMessage}
           setMessage={setMessage}
