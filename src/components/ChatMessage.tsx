@@ -18,6 +18,7 @@ interface ChatMessageProps {
     user_response?: string | null; // "like", "dislike", or null
     chatBordUniqueId: string;
     onReact?: (id: number, reaction: "like" | "dislike" | null) => void; // NEW
+    count?:number;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -29,7 +30,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     userimg,
     user_response,
     chatBordUniqueId,
-    onReact
+    onReact,
+    count
 }) => {
     // console.log("user q is:", u_question);
     // console.log("ai answer is:", ai_answer);
@@ -308,6 +310,20 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
                 <ThumbsDown className="w-4 h-4" stroke="currentColor" fill={disliked ? "red" : "none"} />
               </button>
             </Tippy>
+            <div className="flex items-center gap-2 w-full">
+  {typeof count === "number" && (
+<span
+  className={`ml-auto text-xs px-2 py-0.5 rounded-md ${
+    count === 0
+      ? "text-red-600 bg-red-50"
+      : "text-gray-600 bg-gray-100"
+  }`}
+>      {count === 0
+        ? "No messages left"
+        : `${count} message${count > 1 ? "s" : ""} remaining`}
+    </span>
+  )}
+</div>
           </>
         )}
 

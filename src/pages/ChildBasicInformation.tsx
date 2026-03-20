@@ -3,7 +3,7 @@ import Step1ChildInfo from '../components/Step1ChildInfo';
 import Step2GuidanceTopics from '../components/Step2GuidanceTopics';
 import Step3CurrentConcerns from '../components/Step3CurrentConcerns';
 import Step4ReviewSubmit from '../components/Step4ReviewSubmit';
-import { submitStaffDetails, insertChildDetails, updateChildDetails, getChildDetailsForLoginUser, getStaffDetailsForLoginUser, updatestaffDetails } from '../api/api-services';
+import { submitStaffDetails, insertChildDetails, updateChildDetails, getChildDetailsForLoginUser, getStaffDetailsForLoginUser, updatestaffDetails, migrateFreeChat } from '../api/api-services';
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,6 +41,23 @@ const ChildBasicInformation: React.FC = () => {
     { id: 3, name: 'Your experience information', isCompleted: false },
   ]);
 
+    useEffect(() => {
+        const sessionId = localStorage.getItem("session_uuid");
+        if (!sessionId || !user?.id) return;
+
+        const migrate = async () => {
+            try {
+                await migrateFreeChat({ user_id: user.id, session_id: sessionId });
+                localStorage.removeItem("session_uuid");
+                localStorage.removeItem("messages_left");
+                localStorage.removeItem("signupRequired");
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        migrate();
+    }, [user?.id]);
 
   const messageRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);

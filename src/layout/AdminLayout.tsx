@@ -43,7 +43,6 @@ const AdminLayout: React.FC<DashboardLayoutProps> = ({ requireAuth = true }) => 
     new_password: "",
     confirm_password: "",
   });
-  const disableCancleButton = false;
   useEffect(() => {
     if (authMeta?.mustChangePassword) {
       setShowChangePassword(true);

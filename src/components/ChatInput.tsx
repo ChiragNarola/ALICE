@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+
 
 interface ChatInputProps {
   onSend: (e: React.FormEvent<HTMLFormElement>, file?: File | null) => void;
@@ -17,7 +17,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
   searching,
   recommendedQuestionsList
 }) => {
-  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
