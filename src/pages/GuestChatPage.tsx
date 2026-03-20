@@ -24,7 +24,12 @@ const GuestChatPage: React.FC = () => {
   const [requiresSignUp, setRequiresSignUp] = useState<boolean>(false);
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
-  const [chatBordUniqueId, setChatboardUniqueId] = useState("");
+  const [count, setCount] = useState(() => {
+    const stored = localStorage.getItem("message_count");
+    const signUpRequired = localStorage.getItem("signupRequired");
+    return stored !== null || signUpRequired == "true" ? (Number(stored) || 0) : 3;
+  });
+  const [chatBordUniqueId, setChatboardUniqueId] = useState(localStorage.getItem("session_uuid"));
   const [searching, IsSearching] = useState(false);
   const { startTracking, stopTracking } = useChatActivity();
   const [showModal, setShowModal] = useState(false);
@@ -40,13 +45,23 @@ const GuestChatPage: React.FC = () => {
       user_response: null,
     },
   ]);
-
   useEffect(() => {
+    localStorage.setItem('messages_left', String(count));
+    if (count === 0) {
+      setRequiresSignUp(true);
+    }
+  }, [count]);
+  useEffect(() => {
+    const sessionId = localStorage.getItem("session_uuid");
+    if (sessionId) {
+      setChatboardUniqueId(sessionId);
+      return;
+    }
     if (!chatBordUniqueId) {
       const uniqueId = uuidv4();
       setChatboardUniqueId(uniqueId);
-      if (!sessionStorage.getItem("session_uuid")) {
-        sessionStorage.setItem("session_uuid", uuidv4());
+      if (!localStorage.getItem("session_uuid")) {
+        localStorage.setItem("session_uuid", uniqueId);
       }
     }
   }, [chatBordUniqueId]);
@@ -93,12 +108,11 @@ const GuestChatPage: React.FC = () => {
     if (requiresSignUp) {
       setModalMessage("You have exceeded your trial limit. Please sign up to continue.");
       setRedirectTo("/signup");
+      localStorage.setItem("signupRequired", "true");
       setShowModal(true);
       return;
     }
     IsSearching(true);
-
-    const sessionId = localStorage.getItem("chat_session_id") || "";
 
     const userMessageText = file ? `${message} [File: ${file.name}]` : message;
     const tempId = Date.now();
@@ -117,7 +131,7 @@ const GuestChatPage: React.FC = () => {
       if (file) {
         const formData = new FormData();
         formData.append("message", message);
-        if (sessionId) formData.append("session_id", sessionId);
+        if (chatBordUniqueId) formData.append("session_id", chatBordUniqueId);
         formData.append("file", file);
 
         const res = await fetch(import.meta.env.VITE_API_CHAT_API_URL, {
@@ -131,25 +145,25 @@ const GuestChatPage: React.FC = () => {
       else {
         responseData = await guestChatRequest({
           message,
-          session_id: sessionId || undefined
+          session_id: chatBordUniqueId || undefined
         });
+        setCount(prev => Math.max(prev - 1, 0));
       }
-
-      if (responseData.session_id) {
-        localStorage.setItem("chat_session_id", responseData.session_id);
+      if (responseData && responseData.toLowerCase().includes("expired")) {
+        setCount(0);
+        setModalMessage("You have exceeded your trial limit. Please sign up to continue.");
+        setRedirectTo("/signup");
+        localStorage.setItem("signupRequired", "true");
+        setShowModal(true);
+        return;
       }
-
       setChatMessages(prev =>
         prev.map(m =>
           m.id === tempId + 1
-            ? { ...m, ai_answer: responseData.message, actions: true }
+            ? { ...m, ai_answer: responseData, actions: true }
             : m
         )
       );
-
-      if (responseData.requires_signup) {
-        setRequiresSignUp(true);
-      }
 
     } catch (err) {
       console.error("Error while streaming:", err);
@@ -180,7 +194,7 @@ const GuestChatPage: React.FC = () => {
   return (
     <main className="flex-1 flex px-2 gap-5 w-full max-w-5xl m-auto relative transition-all duration-700 ease-in-out">
       <section className="flex-1 pr-5 h-[calc(100vh-140px)] relative mt-10">
-        <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction} />
+        <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} count={count} onReact={updateMessageReaction} />
         <ChatInput
           onSend={handleSendMessage}
           setMessage={setMessage}
@@ -189,7 +203,6 @@ const GuestChatPage: React.FC = () => {
           recommendedQuestionsList={[]}
           isNewChat={chatMessages.length <= 1}
         />
-
         {showModal && (
           <Modal
             title="Notice"

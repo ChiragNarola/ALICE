@@ -15,9 +15,10 @@ interface ChatMessagesProps {
   messages: Message[];
   chatBordUniqueId: string | null;
   onReact?: (id: number, reaction: "like" | "dislike" | null) => void;
+  count?:number;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId, onReact }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId,count, onReact }) => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Auto scroll to bottom when messages change
@@ -39,6 +40,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId,
             user_response={msg.user_response}
             chatBordUniqueId={chatBordUniqueId || ""}
             onReact={onReact}
+            count={count}
           />
         ))}
 

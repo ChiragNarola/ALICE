@@ -1500,3 +1500,28 @@ export const assignNursery = async (params: {
     };
   }
 }
+
+export const migrateFreeChat = async (params: {
+  user_id: number;
+  session_id: string;
+}) => {
+  try {
+    const response = await axiosInstance.post('chat/migrate-free-chat',
+      null,
+      {
+        params: {
+          user_id: params.user_id,
+          session_id: params.session_id,
+        },
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send invitation",
+    };
+  }
+}
