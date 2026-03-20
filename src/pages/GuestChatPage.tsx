@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Bounce, toast } from "react-toastify";
+import Modal from "../components/ui/Modal";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 import { useChatVisibility } from "../contexts/ChatVisibilityContext";
@@ -27,6 +27,9 @@ const GuestChatPage: React.FC = () => {
   const [chatBordUniqueId, setChatboardUniqueId] = useState("");
   const [searching, IsSearching] = useState(false);
   const { startTracking, stopTracking } = useChatActivity();
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [redirectTo, setRedirectTo] = useState("");
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       id: 0,
@@ -37,23 +40,6 @@ const GuestChatPage: React.FC = () => {
       user_response: null,
     },
   ]);
-
-  const showLimitExceededToast = () => (
-    toast.error('You have exceeded your trial limit. Please sign up to continue.', {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Bounce,
-      onClose(reason) {
-        navigate("/signup");
-      },
-    })
-  );
 
   useEffect(() => {
     if (!chatBordUniqueId) {
@@ -105,7 +91,9 @@ const GuestChatPage: React.FC = () => {
     e.preventDefault();
     if (!message.trim() && !file) return;
     if (requiresSignUp) {
-      showLimitExceededToast();
+      setModalMessage("You have exceeded your trial limit. Please sign up to continue.");
+      setRedirectTo("/signup");
+      setShowModal(true);
       return;
     }
     IsSearching(true);
@@ -192,7 +180,7 @@ const GuestChatPage: React.FC = () => {
   return (
     <main className="flex-1 flex px-2 gap-5 w-full max-w-5xl m-auto relative transition-all duration-700 ease-in-out">
       <section className="flex-1 pr-5 h-[calc(100vh-140px)] relative mt-10">
-        <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction}/>
+        <ChatMessages messages={chatMessages} chatBordUniqueId={chatBordUniqueId} onReact={updateMessageReaction} />
         <ChatInput
           onSend={handleSendMessage}
           setMessage={setMessage}
@@ -201,6 +189,28 @@ const GuestChatPage: React.FC = () => {
           recommendedQuestionsList={[]}
           isNewChat={chatMessages.length <= 1}
         />
+
+        {showModal && (
+          <Modal
+            title="Notice"
+            onClose={() => {
+              if (redirectTo) navigate(redirectTo);
+              setShowModal(false)
+            }}
+          >
+            <p className="text-gray-600 mb-4">{modalMessage}</p>
+
+            <button
+              onClick={() => {
+                if (redirectTo) navigate(redirectTo);
+                setShowModal(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            >
+              OK
+            </button>
+          </Modal>
+        )}
       </section>
     </main>
   );

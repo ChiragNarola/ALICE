@@ -58,4 +58,5 @@ export interface LoginResponseDTO {
   };
   is_children_added: boolean;
   is_staff_detail_added: boolean;
+  must_change_password:boolean;
 }
