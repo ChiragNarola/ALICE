@@ -89,7 +89,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder={`Hello ${user?.firstName}, How may I help you today?`}
+                  placeholder={`Hello, How may I help you today?`}
                   className="w-full border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-sm px-2 font-normal"
                 />
               </div>

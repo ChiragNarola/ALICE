@@ -31,7 +31,14 @@ const AdminLoginForm = () => {
 
       if (response?.IsSuccess) {
         const roles = response.Data?.user?.roles ?? [];
-
+        if (response.Data.must_change_password) {
+          const metaData = {
+            mustChangePassword: response.Data.must_change_password,
+            message: response.Message,
+            password: data.password,
+          };
+          sessionStorage.setItem("authMeta", JSON.stringify(metaData));
+        }
         if (roles.includes("admin")) {
           toast.success("Login successful");
           navigate("/admin/dashboard");

@@ -39,16 +39,24 @@ const LoginForm = () => {
         clearChild();
         const roles = response.Data?.user?.roles ?? [];
         const role = roles[0]; // assuming single role per user
+        if (response.Data.must_change_password) {
+          const metaData = {
+            mustChangePassword: response.Data.must_change_password,
+            message: response.Message,
+            password:data.password,
+          };
 
+          sessionStorage.setItem("authMeta", JSON.stringify(metaData));
+        }
         if (role === "staff" || role === "parent") {
           toast.success("Login successful");
 
           const pinSet = localStorage.getItem("pin_set");
 
           if (pinSet === "false") {
-          // Redirect into DashboardLayout so the existing PIN modal appears
-          navigate("/child-basic-info");
-          return;
+            // Redirect into DashboardLayout so the existing PIN modal appears
+            navigate("/child-basic-info");
+            return;
           }
 
           navigate("/");
@@ -77,26 +85,26 @@ const LoginForm = () => {
       </p>
 
       {savedPinEmail && savedPinSet === "true" && (
-      <div className="flex items-center justify-between gap-3 p-3 mb-6 2xl:mb-9 rounded-xl bg-[#F5FBFA] border border-alice-teal/20">
-        <div className="text-left">
-          <p className="text-[13px] lg:text-sm font-semibold text-alice-black">
-            Quick login available
-          </p>
-          <p className="text-[12px] lg:text-xs text-alice-darkgray">
-            You’ve set up a 4-digit PIN for faster access.
-          </p>
-        </div>
+        <div className="flex items-center justify-between gap-3 p-3 mb-6 2xl:mb-9 rounded-xl bg-[#F5FBFA] border border-alice-teal/20">
+          <div className="text-left">
+            <p className="text-[13px] lg:text-sm font-semibold text-alice-black">
+              Quick login available
+            </p>
+            <p className="text-[12px] lg:text-xs text-alice-darkgray">
+              You’ve set up a 4-digit PIN for faster access.
+            </p>
+          </div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/pin-login")}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-alice-teal text-[13px] lg:text-sm font-semibold text-alice-teal bg-white hover:bg-alice-teal hover:text-white transition-colors duration-200"
-        >
-          <KeyRound size={16} />
-          Use PIN
-        </button>
-      </div>
-    )}
+          <button
+            type="button"
+            onClick={() => navigate("/pin-login")}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-alice-teal text-[13px] lg:text-sm font-semibold text-alice-teal bg-white hover:bg-alice-teal hover:text-white transition-colors duration-200"
+          >
+            <KeyRound size={16} />
+            Use PIN
+          </button>
+        </div>
+      )}
 
 
       {/* Email Field */}
