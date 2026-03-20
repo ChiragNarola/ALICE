@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, UserPlusIcon, ArrowUpTrayIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, Fragment } from 'react';
+import { Dialog, Listbox, Transition } from '@headlessui/react';
+import { XMarkIcon,CheckIcon, ChevronUpDownIcon ,UserPlusIcon, ArrowUpTrayIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { inviteSingleUser, inviteBulkUsers, getNursery, type InviteUserPayload } from '../../../api/api-services';
 import type { NurseryDTO } from '../../../routes/models/response/Response';
 import { toast } from 'react-toastify';
@@ -15,12 +15,16 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const roleOptions = [
+    { id: 'parent', name: 'Parent' },
+    { id: 'staff', name: 'Staff' },
+    { id: 'admin', name: 'Admin' }
+  ];
   // Single Invite State
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('parent');
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(['parent']);
   const [contactNumber, setContactNumber] = useState('');
   const [location, setLocation] = useState('');
   const [nurseries, setNurseries] = useState<NurseryDTO[]>([]);
@@ -33,7 +37,7 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
     setFirstName('');
     setLastName('');
     setEmail('');
-    setRole('parent');
+    setSelectedRoles(['parent']);
     setContactNumber('');
     setLocation('');
     setNurseryId('');
@@ -66,11 +70,11 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
 
   const handleSingleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firstName || !lastName || !email || !role || !contactNumber || !location) {
+    if (!firstName || !lastName || !email || selectedRoles.length === 0 || !contactNumber || !location) {
       setError("Please fill in all fields.");
       return;
     }
-    if (role === 'staff' && !nurseryId) {
+    if (selectedRoles.includes('staff') && !nurseryId) {
       setError("Please select a nursery for the staff member.");
       return;
     }
@@ -84,10 +88,9 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
         last_name: lastName,
         contact_number: contactNumber,
         location,
-        role: [role] 
+        role: selectedRoles
       };
-
-      if (role === 'staff' && nurseryId) {
+      if (selectedRoles.includes('staff') && nurseryId) {
         const selectedNursery = nurseries.find(n => n.id === nurseryId);
         if (selectedNursery == null) {
           throw new Error("Invalid nursery selected");
@@ -130,11 +133,11 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const formData = new FormData();
       formData.append("file", file);
-      
+
       const response = await inviteBulkUsers(formData);
       if (response.IsSuccess) {
         onSuccess();
@@ -187,7 +190,7 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900 flex justify-between items-center"
@@ -295,20 +298,75 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                      <select
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        className="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:border-[#134e4a] focus:ring-1 focus:ring-[#134e4a] outline-none"
-                      >
-                        <option value="parent">Parent</option>
-                        <option value="staff">Staff</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </div>
+                    <>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Role
+                      </label>
 
-                    {role === 'staff' && (
+                      <Listbox value={selectedRoles} onChange={setSelectedRoles} multiple>
+                        {({ open }) => (
+                          <div className="relative">
+
+                            {/* Button */}
+                            <Listbox.Button className="relative w-full px-4 py-3 text-left border rounded-lg">
+                              <span className="block truncate">
+                                {selectedRoles.length > 0
+                                  ? roleOptions
+                                    .filter(r => selectedRoles.includes(r.id))
+                                    .map(r => r.name)
+                                    .join(", ")
+                                  : "Select role"}
+                              </span>
+
+                              <span className="absolute inset-y-0 right-3 flex items-center">
+                                <ChevronUpDownIcon className="w-5 h-5 text-gray-400" />
+                              </span>
+                            </Listbox.Button>
+
+                            {/* Dropdown */}
+                            <Transition
+                              as={Fragment}
+                              show={open}
+                              leave="transition ease-in duration-100"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                            >
+                              <Listbox.Options className="absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg bg-white border shadow-lg">
+
+                                {roleOptions.map((role) => (
+                                  <Listbox.Option
+                                    key={role.id}
+                                    value={role.id}
+                                    className={({ active }) =>
+                                      `cursor-pointer select-none py-2 px-4 ${active
+                                        ? "bg-alice-teal text-white"
+                                        : "text-gray-700"
+                                      }`
+                                    }
+                                  >
+                                    {({ selected, active }) => (
+                                      <div className="flex justify-between">
+                                        <span>{role.name}</span>
+
+                                        {selected && (
+                                          <CheckIcon
+                                            className={`w-5 h-5 ${active ? "text-white" : "text-green-600"
+                                              }`}
+                                          />
+                                        )}
+                                      </div>
+                                    )}
+                                  </Listbox.Option>
+                                ))}
+
+                              </Listbox.Options>
+                            </Transition>
+                          </div>
+                        )}
+                      </Listbox>
+                    </>
+
+                    {selectedRoles.includes('staff') && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nursery</label>
                         <select
@@ -353,7 +411,7 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                     <div className="text-sm text-gray-600 mb-2">
                       Upload a CSV file containing user details. Ensure your file matches the required template.
                     </div>
-                    
+
                     <button
                       type="button"
                       onClick={downloadTemplate}
