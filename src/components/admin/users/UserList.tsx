@@ -15,13 +15,13 @@ export default function UserList() {
     const [pageSize, setPageSize] = useState(5);
     const [users, setUsers] = useState<DisplayUser[]>([]);
     const [loading, setLoading] = useState(false);
-    const [sendingInvitation, setSendingInvitation] = useState<boolean>(false);
+    const [sendingInvitation, setSendingInvitation] = useState<any>(null);
     // Modal state
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const handleInvitation = async (userEmail: string) => {
         try {
-            setSendingInvitation(true);
+            setSendingInvitation(userEmail);
             const response = await reInviteUser(userEmail);
             if (response.IsSuccess) {
                 toast.success(response?.Message, {
@@ -70,7 +70,7 @@ export default function UserList() {
         }
         finally {
             setTimeout(() =>
-                setSendingInvitation(false)
+                setSendingInvitation(null)
                 , 1000);
         }
     }
@@ -220,7 +220,6 @@ export default function UserList() {
                             <Th>Role</Th>
                             <Th>Last Login</Th>
                             <Th>User Created</Th>
-                            <Th>Re-invite User</Th>
                         </tr>
                     </thead>
                     <tbody>
@@ -257,12 +256,28 @@ export default function UserList() {
                                             </span>
                                         </Td>
                                         <Td>
-                                            {user.lastLogin
-                                                ? new Date(user.lastLogin).toLocaleDateString("en-GB", {
-                                                    day: "2-digit",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                }) : "-"}
+                                            {user.lastLogin && new Date(user.lastLogin).toLocaleDateString("en-GB", {
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric",
+                                            })}
+                                            {user.lastLogin == null && user.roles.some(role => ['staff', 'parent'].includes(role)) &&
+                                                <button
+                                                    className={`mx-7 w-8 h-8 flex items-center justify-center
+                                                    rounded-md text-teal-800 hover:bg-teal-800 hover:text-white
+                                                    transition focus:outline-none
+                                                        ${sendingInvitation===user.email ? "cursor-progress opacity-50" : "cursor-pointer"}`}
+                                                    disabled={sendingInvitation===user.email}
+                                                    title="Re-Invite User"
+                                                    onClick={() => handleInvitation(user.email)}
+                                                >
+                                                    {sendingInvitation===user.email ? (
+                                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                                    ) : (
+                                                        <Send className="w-5 h-5" />
+                                                    )}
+                                                </button>
+                                            }
                                         </Td>
                                         <Td className="text-gray-600">
                                             {user.createdAt
@@ -272,22 +287,6 @@ export default function UserList() {
                                                     year: "numeric",
                                                 }) : "-"
                                             }
-                                        </Td>
-                                        <Td>
-                                            <button
-                                                className={`mx-7 w-8 h-8 flex items-center justify-center
-                rounded-md text-teal-800 hover:bg-teal-800 hover:text-white
-                transition focus:outline-none
-                ${sendingInvitation ? "cursor-progress opacity-50" : "cursor-pointer"}`}
-                                                disabled={sendingInvitation}
-                                                onClick={() => handleInvitation(user.email)}
-                                            >
-                                                {sendingInvitation ? (
-                                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                                ) : (
-                                                    <Send className="w-5 h-5" />
-                                                )}
-                                            </button>
                                         </Td>
                                     </tr>
                                 ))}

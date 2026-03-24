@@ -360,7 +360,6 @@ export default function UploadedDocsList() {
               </Th>
               <Th>Sr.No</Th>
               <Th>Document Name</Th>
-              <Th>Linked Tags</Th>
               <Th className="text-center">View File</Th>
             </tr>
           </thead>
@@ -400,17 +399,6 @@ export default function UploadedDocsList() {
                   </Td>
                   <Td>{(currentPage - 1) * pageSize + index + 1}</Td>
                   <Td className="font-medium text-gray-900">{doc.fileName}</Td>
-                  <Td>
-                    <div className="flex flex-wrap gap-1">
-                      {doc.namespaces
-                        .filter((ns) => ns !== selectedNamespace)
-                        .map((ns, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
-                            {namespaces.find((n) => n.name === ns)?.title || ns}
-                          </span>
-                        ))}
-                    </div>
-                  </Td>
                   <Td className="flex justify-center items-center">
                     <button onClick={() => openFile(doc.url)}
                       className="w-8 h-8 flex items-center justify-center rounded-md
