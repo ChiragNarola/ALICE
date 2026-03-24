@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { Users, Search, UserPlus, Download } from "lucide-react";
-import { getUserList } from "../../../api/api-services";
+import { Users, Search, UserPlus, Download, Send, Loader2 } from "lucide-react";
+import { getUserList, reInviteUser } from "../../../api/api-services";
 import type { DisplayUser } from "../../../routes/models/response/Response";
 import InviteUserModal from "./InviteUserModal";
 import ExportUsersModal from "./ExportUsersModal";
-import { toast } from "react-toastify";
+import { Bounce, toast } from "react-toastify";
 
 export default function UserList() {
     const [search, setSearch] = useState("");
@@ -15,11 +15,65 @@ export default function UserList() {
     const [pageSize, setPageSize] = useState(5);
     const [users, setUsers] = useState<DisplayUser[]>([]);
     const [loading, setLoading] = useState(false);
-    
+    const [sendingInvitation, setSendingInvitation] = useState<boolean>(false);
     // Modal state
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const handleInvitation = async (userEmail: string) => {
+        try {
+            setSendingInvitation(true);
+            const response = await reInviteUser(userEmail);
+            if (response.IsSuccess) {
+                toast.success(response?.Message, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    delay: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Bounce,
+                });
+            } else {
+                toast.error(response?.Message || "Failed to Re-invite the user", {
+                    position: "top-right",
+                    autoClose: 2000,
+                    delay: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    transition: Bounce,
+                });
+            }
+        }
+        catch (error: any) {
 
+            toast.error(error.Data.includes(400)
+                ? "User already activated, cannot re-invite"
+                : "Something went wrong", {
+                position: "top-right",
+                autoClose: 2000,
+                delay: 1000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
+        }
+        finally {
+            setTimeout(() =>
+                setSendingInvitation(false)
+                , 1000);
+        }
+    }
     const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
@@ -89,7 +143,7 @@ export default function UserList() {
                         </p>
                     </div>
                 </div>
-                
+
                 <div className="flex space-x-3">
                     {/* Export Button */}
                     <button
@@ -166,6 +220,7 @@ export default function UserList() {
                             <Th>Role</Th>
                             <Th>Last Login</Th>
                             <Th>User Created</Th>
+                            <Th>Re-invite User</Th>
                         </tr>
                     </thead>
                     <tbody>
@@ -207,7 +262,7 @@ export default function UserList() {
                                                     day: "2-digit",
                                                     month: "short",
                                                     year: "numeric",
-                                                }): "-"}
+                                                }) : "-"}
                                         </Td>
                                         <Td className="text-gray-600">
                                             {user.createdAt
@@ -217,6 +272,22 @@ export default function UserList() {
                                                     year: "numeric",
                                                 }) : "-"
                                             }
+                                        </Td>
+                                        <Td>
+                                            <button
+                                                className={`mx-7 w-8 h-8 flex items-center justify-center
+                rounded-md text-teal-800 hover:bg-teal-800 hover:text-white
+                transition focus:outline-none
+                ${sendingInvitation ? "cursor-progress opacity-50" : "cursor-pointer"}`}
+                                                disabled={sendingInvitation}
+                                                onClick={() => handleInvitation(user.email)}
+                                            >
+                                                {sendingInvitation ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                ) : (
+                                                    <Send className="w-5 h-5" />
+                                                )}
+                                            </button>
                                         </Td>
                                     </tr>
                                 ))}
@@ -240,14 +311,14 @@ export default function UserList() {
             />
 
             {/* Invite Modal */}
-            <InviteUserModal 
+            <InviteUserModal
                 isOpen={isInviteModalOpen}
                 onClose={() => setIsInviteModalOpen(false)}
                 onSuccess={handleInviteSuccess}
             />
 
             {/* Export Modal */}
-            <ExportUsersModal 
+            <ExportUsersModal
                 isOpen={isExportModalOpen}
                 onClose={() => setIsExportModalOpen(false)}
             />

@@ -1525,3 +1525,23 @@ export const migrateFreeChat = async (params: {
     };
   }
 }
+
+export const reInviteUser = async (userEmail: string) => {
+  try {
+    const response = await axiosInstance.post(`admin/reinvite-user`,
+      null,
+      {
+        params: {
+          email:userEmail,
+        },
+        headers: { 'Content-Type': 'application/json' },
+      });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send invitation",
+    };
+  }
+}
