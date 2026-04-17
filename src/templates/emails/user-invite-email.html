@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invite to Alice</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background-color: #134e4a;
+            padding: 12px 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 70px;
+            /* Increased header height */
+        }
+
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .content {
+            padding: 40px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .content h2 {
+            color: #1a1a1a;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .content p {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #134e4a;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 35px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0f3e3b;
+        }
+
+        .footer {
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .brand-text {
+            color: #134e4a;
+            font-weight: bold;
+        }
+
+        .password-box {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 30px 0;
+            text-align: center;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .password-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .password-value {
+            display: block;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: #134e4a;
+            letter-spacing: 3px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="./favicon.ico" alt="Alice Logo"
+                style="height: 80px; width: auto; display: block; margin: 0 auto;">
+            <h1 style="display: none;">ALICE</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <h2>Hello {{user_name}},</h2>
+            <p>
+                You have been invited to join <span class="brand-text">ALICE</span>, the All-round Learning, Insights &
+                Childcare Expert.
+            </p>
+            <p>
+                ALICE has been created by childcare experts to support you with ideas, inspiration and guidance to help
+                your child learn, play and develop.
+            </p>
+            <p style="margin-bottom: 10px;">
+                <strong>You can ask ALICE for:</strong>
+            </p>
+            <ul style="margin: 0 0 24px 20px; padding: 0; list-style-type: disc;">
+                <li style="margin-bottom: 8px;">Activity ideas tailored to your child's age and interests</li>
+                <li style="margin-bottom: 8px;">Simple ways to support learning at home</li>
+                <li style="margin-bottom: 8px;">Inspiration for play, routines and everyday moments</li>
+                <li style="margin-bottom: 0;">Answers to those questions you're not quite sure who to ask</li>
+            </ul>
+            <p>
+                Simply click below and use your **temporary password** to log in:
+            </p>
+
+            <div class="password-box">
+                <span class="password-label">Your Temporary Password</span>
+                <span class="password-value">{{temporary_password}}</span>
+            </div>
+
+            <div class="button-container">
+                <a href="{{join_url}}" class="button">Access Alice Platform</a>
+            </div>
+
+            <p style="margin-top: 35px; font-size: 14px; color: #94a3b8;">
+                If the button above does not work, copy and paste the following link into your browser:
+                <br>
+                <a href="{{join_url}}" style="color: #134e4a; word-break: break-all;">{{join_url}}</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2026 Alice Management System. All rights reserved.</p>
+            <p>This is an automated email, please do not reply.</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -4,6 +4,8 @@ import { XMarkIcon,CheckIcon, ChevronUpDownIcon ,UserPlusIcon, ArrowUpTrayIcon, 
 import { inviteSingleUser, inviteBulkUsers, getNursery, type InviteUserPayload } from '../../../api/api-services';
 import type { NurseryDTO } from '../../../routes/models/response/Response';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../../contexts/AuthContext';
+import EmailPreview from './EmailPreview';
 
 interface InviteUserModalProps {
   isOpen: boolean;
@@ -33,6 +35,10 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
   // Bulk Invite State
   const [file, setFile] = useState<File | null>(null);
 
+  // Preview State
+  const [showPreview, setShowPreview] = useState(false);
+  const { user } = useAuth();
+
   const resetState = () => {
     setFirstName('');
     setLastName('');
@@ -45,6 +51,7 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
     setError(null);
     setLoading(false);
     setActiveTab('single');
+    setShowPreview(false);
   };
 
   useEffect(() => {
@@ -383,6 +390,26 @@ export default function InviteUserModal({ isOpen, onClose, onSuccess }: InviteUs
                           ))}
                         </select>
                       </div>
+                    )}
+
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setShowPreview(!showPreview)}
+                        className="text-sm font-medium text-[#134e4a] hover:underline flex items-center gap-1"
+                      >
+                        <DocumentTextIcon className="w-4 h-4" />
+                        {showPreview ? 'Hide Email Preview' : 'Show Email Preview'}
+                      </button>
+                    </div>
+
+                    {showPreview && (
+                      <EmailPreview
+                        userName={firstName || '[User Name]'}
+                        inviterName={user ? `${user.firstName} ${user.lastName}` : 'An Alice Admin'}
+                        joinUrl="https://alice-platform.com/signup/..."
+                        temporaryPassword="jCOJi5upL8o"
+                      />
                     )}
 
                     <div className="mt-6 flex justify-end gap-3">

@@ -25,6 +25,10 @@ import StaffNurseryList from "../components/admin/users/StaffNurseryList";
 import FAQ from "../components/admin/faq";
 import PinLogin from "../components/PinLoginScreen";
 import GuestChatPage from "../pages/GuestChatPage";
+import WaitlistPage from "../components/admin/users/WaitlistPage";
+import CollaborationContainer from "../components/admin/collaboration/CollaborationContainer";
+import UserDetails from "../pages/admin/UserDetails";
+
 
 export default function AppRouter() {
     return (
@@ -50,24 +54,30 @@ export default function AppRouter() {
                 </Route>
             </Route>
 
-            {/* Admin routes */}
-            <Route path="/admin" element={<AdminWelcomeSection />}>
-                <Route index element={<Navigate to="login" replace />} />
-                <Route path="login" element={<AdminLogin />} />
-            </Route>
+            {/* Admin routes - Public (Login) */}
+            <Route path="/admin">
+                <Route element={<AdminWelcomeSection />}>
+                    <Route index element={<Navigate to="login" replace />} />
+                    <Route path="login" element={<AdminLogin />} />
+                </Route>
 
-            <Route element={<RoleBasedRoute allowedRoles={["admin"]} />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="user" element={<UserList />} />
-                    <Route path="staff" element={<StaffList />} />
-                    <Route path="staff-nursery" element={<StaffNurseryList />} />
-                    <Route path="concerns" element={<ConcernList />} />
-                    <Route path="area-of-interest" element={<AreaofinterestList />} />
-                    <Route path="documents" element={<UploadedDocsList />} />
-                    <Route path="holiday-calendar" element={<HolidayList />} />
-                    <Route path="nursery" element={<Nursery />} />
-                    <Route path="faq" element={ <FAQ/>}/>
+                {/* Admin routes - Protected (Dashboard, Managed Pages) */}
+                <Route element={<RoleBasedRoute allowedRoles={["admin"]} />}>
+                    <Route element={<AdminLayout />}>
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="user" element={<UserList />} />
+                        <Route path="staff" element={<StaffList />} />
+                        <Route path="staff-nursery" element={<StaffNurseryList />} />
+                        <Route path="concerns" element={<ConcernList />} />
+                        <Route path="area-of-interest" element={<AreaofinterestList />} />
+                        <Route path="documents" element={<UploadedDocsList />} />
+                        <Route path="holiday-calendar" element={<HolidayList />} />
+                        <Route path="nursery" element={<Nursery />} />
+                        <Route path="faq" element={<FAQ />} />
+                        <Route path="waitlist" element={<WaitlistPage />} />
+                        <Route path="collaboration" element={<CollaborationContainer />} />
+                        <Route path="user/:id" element={<UserDetails />} />
+                    </Route>
                 </Route>
             </Route>
 

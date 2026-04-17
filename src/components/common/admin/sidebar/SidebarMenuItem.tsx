@@ -44,15 +44,15 @@ export function SidebarMenuItem({
     <div>
       <Component
         className={`
-          flex w-full items-center gap-2 rounded-md px-2 py-3 text-sm font-semibold
+          flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium
           transition-colors duration-200
           ${isActive
-            ? "bg-[#dbfff3b7]  text-[#008080]"
-            : "text-[#333333] hover:bg-teal-100"}             
+            ? "bg-alice-teal/10 text-alice-teal"
+            : "text-gray-600 hover:bg-gray-50"}             
           ${collapsed ? "justify-center" : ""}
         `}
       >
-        <Icon className={`h-4 w-4 shrink-0 ${collapsed ? "mr-0" : "mr-2"} ${isActive ? "text-[#008080]" : ""}`} />
+        <Icon className={`h-4 w-4 shrink-0 ${collapsed ? "mr-0" : "mr-2"} ${isActive ? "text-alice-teal" : "text-gray-400 opacity-70"}`} />
         {!collapsed && (
           <>
             <span className="flex-1 truncate text-left">{item.title}</span>

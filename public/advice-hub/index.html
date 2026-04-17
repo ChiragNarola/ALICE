@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alice Advice Hub | Childcare Guidance</title>
+    <meta name="description" content="Expert guidance on childcare, funding, and child development from Alice AI.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container flex-between">
+            <div class="logo">
+                <span class="logo-text">ALICE</span>
+                <span class="logo-subtext">Advice Hub</span>
+            </div>
+            <button class="mobile-nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav">
+                <a href="#">Explore Nurseries</a>
+                <a href="/signup" class="btn-primary">Get Started</a>
+            </nav>
+            <div class="nav-overlay"></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container text-center">
+                <h1>Welcome to the Alice Advice Hub</h1>
+                <p>Expert guidance on childcare, funding, and child development.</p>
+                <div class="search-container">
+                    <input type="text" placeholder="Search articles, guides, and tips..." class="search-input">
+                    <button class="search-btn">Search</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-guides">
+            <div class="container">
+                <h2 class="section-title">Essential Parent Guides</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-tag">Funding</div>
+                        <h3>Applying for 15/30 Hours Funding</h3>
+                        <p>Learn how to navigate government childcare support in England and Wales.</p>
+                        <a href="guide.html?type=funding" class="read-more">Read Guide &rarr;</a>
+                    </div>
+                    <div class="card">
+                        <div class="card-tag">Costs</div>
+                        <h3>Nursery Cost Calculator</h3>
+                        <p>Estimate your weekly and monthly childcare expenses based on your location.</p>
+                        <a href="guide.html?type=costs" class="read-more">Calculate Now &rarr;</a>
+                    </div>
+                    <div class="card">
+                        <div class="card-tag">Waiting Lists</div>
+                        <h3>Beating the Waiting List</h3>
+                        <p>Pro-tips on securing a spot at your top nursery choice early.</p>
+                        <a href="guide.html?type=waiting-lists" class="read-more">View Tips &rarr;</a>
+                    </div>
+                    <!-- Hidden cards -->
+                    <div class="card more-guides hidden">
+                        <div class="card-tag">Settling In</div>
+                        <h3>Helping Your Child Settle Into Nursery</h3>
+                        <p>Smooth transitions for toddlers: how to manage separation anxiety.</p>
+                        <a href="guide.html?type=settling-in" class="read-more">Read Guide &rarr;</a>
+                    </div>
+                    <div class="card more-guides hidden">
+                        <div class="card-tag">Health</div>
+                        <h3>Nursery Illness Policies & Attendance</h3>
+                        <p>Understanding when to keep your child home and how nurseries track health.</p>
+                        <a href="guide.html?type=health" class="read-more">View Guide &rarr;</a>
+                    </div>
+                    <div class="card more-guides hidden">
+                        <div class="card-tag">Milestones</div>
+                        <h3>Tracking Early Years Milestones</h3>
+                        <p>What to expect in the first 5 years: development, speech, and movement.</p>
+                        <a href="guide.html?type=milestones" class="read-more">Read More &rarr;</a>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 40px;">
+                    <button id="toggle-guides" class="btn-outline">View All Guides</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="article-grid">
+            <div class="container">
+                <div class="flex-between section-header">
+                    <h2 class="section-title">Latest Articles</h2>
+                </div>
+                <div class="grid">
+                    <!-- Article 1 -->
+                    <div class="article-item">
+                        <div class="article-image"
+                            style="background-image: url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1000&auto=format&fit=crop');">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-cat">Development</span>
+                            <h4>The Importance of Play in Early Years</h4>
+                            <p>How structured and unstructured play shapes cognitive milestones.</p>
+                        </div>
+                    </div>
+                    <!-- Article 2 -->
+                    <div class="article-item">
+                        <div class="article-image"
+                            style="background-image: url('https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?q=80&w=1000&auto=format&fit=crop');">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-cat">Health</span>
+                            <h4>Healthy Meal Planning for Toddlers</h4>
+                            <p>Ensuring balanced nutrition for picky eaters during transitions.</p>
+                        </div>
+                    </div>
+                    <!-- Article 3 -->
+                    <div class="article-item">
+                        <div class="article-image"
+                            style="background-image: url('https://images.unsplash.com/photo-1484665754804-74b091211472?q=80&w=1000&auto=format&fit=crop');">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-cat">Education</span>
+                            <h4>Choosing Between Full-Time and Sessional Care</h4>
+                            <p>What fits your family workflow best? A breakdown of options.</p>
+                        </div>
+                    </div>
+                    <!-- Hidden Articles -->
+                    <div class="article-item more-articles hidden">
+                        <div class="article-image"
+                            style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1000&auto=format&fit=crop');">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-cat">Outdoor Learning</span>
+                            <h4>The Benefits of Forest Schools</h4>
+                            <p>Why nature-based learning is gaining popularity in early childhood.</p>
+                        </div>
+                    </div>
+                    <div class="article-item more-articles hidden">
+                        <div class="article-image"
+                            style="background-image: url('https://images.unsplash.com/photo-1543333309-8745823ed60b?q=80&w=1000&auto=format&fit=crop');">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-cat">Language</span>
+                            <h4>Encouraging Early Speech and Communication</h4>
+                            <p>Simple ways to support your child's first words through interactive play.</p>
+                        </div>
+                    </div>
+                    <div class="article-item more-articles hidden">
+                        <div class="article-image"
+                            style="background-image: url('https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=1000&auto=format&fit=crop');">
+                        </div>
+                        <div class="article-content">
+                            <span class="article-cat">Technology</span>
+                            <h4>Managing Screen Time in the Early Years</h4>
+                            <p>Expert advice on healthy digital habits and educational content.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 40px;">
+                    <button id="toggle-articles" class="btn-outline">View All Articles</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq">
+            <div class="container narrow">
+                <h2 class="section-title text-center">Frequently Asked Questions</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">When should I start looking for a nursery?</div>
+                        <div class="accordion-body">Most parents start looking 12 months in advance, especially in
+                            high-demand areas.</div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">What is Tax-Free Childcare?</div>
+                        <div class="accordion-body">A government scheme that pays up to £2,000 per child per year
+                            towards childcare costs.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container grid">
+            <div class="footer-brand">
+                <div class="logo">ALICE</div>
+                <p>Your co-pilot in parenting. expert-led guidance for every milestone.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Cost Calculator</a></li>
+                    <li><a href="#">Funding Guides</a></li>
+                    <li><a href="#">Nursery Search</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>About</h4>
+                <ul>
+                    <li><a href="#">Our Vision</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container text-center copyright">
+            &copy; 2026 ALICE Childcare Hub. All rights reserved.
+        </div>
+    </footer>
+
+    <!--
+        ╔══════════════════════════════════════════════════════╗
+        ║          Alice Chatbot Plugin Integration            ║
+        ║                                                      ║
+        ║  To use this plugin in OTHER projects, copy these   ║
+        ║  two script tags, change apiUrl & signupUrl.        ║
+        ╚══════════════════════════════════════════════════════╝
+    -->
+    <script>
+        window.AliceChatConfig = {
+            apiUrl:         '/api/v1/nuuri-chat',   // proxied to backend via Vite
+            signupUrl:      '/signup',
+            maxMessages:    3,
+            title:          'Alice AI Guide',
+            welcomeMessage: "Hello! I'm Alice, your childcare guide. How can I help?",
+            primaryColor:   '#1D7A74',
+        };
+
+        // Mobile Nav Toggle logic
+        const navToggle = document.querySelector('.mobile-nav-toggle');
+        const nav = document.querySelector('.nav');
+        const overlay = document.querySelector('.nav-overlay');
+
+        if (navToggle && nav && overlay) {
+            const toggleMenu = () => {
+                nav.classList.toggle('active');
+                navToggle.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+            };
+
+            navToggle.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+
+            // Close menu when clicking a link
+            nav.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    nav.classList.remove('active');
+                    navToggle.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+
+        // Toggle logic for showing all cards/articles
+        function setupToggle(btnId, classToToggle) {
+            const btn = document.getElementById(btnId);
+            const items = document.querySelectorAll(classToToggle);
+            if (btn && items.length > 0) {
+                btn.addEventListener('click', () => {
+                    const isHidden = items[0].classList.contains('hidden');
+                    items.forEach(item => item.classList.toggle('hidden'));
+                    btn.textContent = isHidden ? 'Show Less' : (btnId === 'toggle-guides' ? 'View All Guides' : 'View All Articles');
+                });
+            }
+        }
+
+        setupToggle('toggle-guides', '.more-guides');
+        setupToggle('toggle-articles', '.more-articles');
+    </script>
+    <script src="/alice-plugin.js"></script>
+
+</body>
+
+</html>
