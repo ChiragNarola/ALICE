@@ -1541,3 +1541,57 @@ export const reInviteUser = async (userEmail: string) => {
     };
   }
 }
+
+
+export const createPartner = async (params: any) => {
+  try {
+    const response = await axiosInstance.post("accessCode/partners", params, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to create partner",
+    };
+  }
+};
+
+
+export const getPartners = async (params?: {
+  active_only?: boolean;
+  skip?: number;
+  limit?: number;
+}) => {
+  try {
+    const response = await axiosInstance.get("accessCode/partners", {
+      params: {
+        active_only: params?.active_only ?? true,
+        skip: params?.skip ?? 0,
+        limit: params?.limit ?? 100,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch partners",
+    };
+  }
+};
+
+export const getPartnerById = async (partnerId: number) => {
+  try {
+    const response = await axiosInstance.get(`accessCode/partners/${partnerId}`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch partner",
+    };
+  }
+};

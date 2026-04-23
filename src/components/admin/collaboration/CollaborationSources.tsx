@@ -1,172 +1,323 @@
-import React, { useState } from "react";
-import { Plus, Users, BadgeCheck, Hourglass, Activity, Mail } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Users,
+  BadgeCheck,
+  Hourglass,
+  Activity,
+} from "lucide-react";
+
 import Button from "../../ui/Button";
+import {
+  createPartner,
+  getPartners,
+  getPartnerById,
+} from "../../../api/api-services";
+
+import { toast } from "react-toastify";
 
 interface Source {
-    id: number;
-    name: string;
-    referredCount: number;
-    color: string;
-    email: string;
-    code: string;
+  id: number;
+  name: string;
+  referredCount: number;
+  color: string;
+  email: string;
+  code: string;
 }
 
+interface PartnerDetails {
+  total_users: number;
+  approved_users: number;
+  pending_users: number;
+  active_partners: number;
+  top_performer?: string;
+}
+
+const colors = ["rose", "amber", "sky", "violet"];
+
 const CollaborationSources: React.FC = () => {
-    const [sources, setSources] = useState<Source[]>([
-        { id: 1, name: "NUURI", referredCount: 124, color: "bg-emerald-500", email: "contact@nuuri.com", code: "NUURI78" },
-        { id: 2, name: "ABC Nursery", referredCount: 56, color: "bg-indigo-500", email: "info@abcnursery.co.uk", code: "ABC99" },
-    ]);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(null);
+  const [partnerDetails, setPartnerDetails] = useState<PartnerDetails | null>(null);
 
-    const [isAdding, setIsAdding] = useState(false);
-    const [newSource, setNewSource] = useState({ name: "", email: "" });
+  const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
-    const handleAddSource = (e: React.FormEvent) => {
-        e.preventDefault();
-        const code = (newSource.name.slice(0, 3).toUpperCase() + Math.floor(100 + Math.random() * 900));
-        const added: Source = {
-            id: Date.now(),
-            name: newSource.name,
-            referredCount: 0,
-            color: `bg-${["rose", "amber", "sky", "violet"][Math.floor(Math.random() * 4)]}-500`,
-            email: newSource.email,
-            code: code,
-        };
-        setSources([...sources, added]);
-        setNewSource({ name: "", email: "" });
+  const [newSource, setNewSource] = useState({
+    name: "",
+    website_url: "",
+    description: "",
+    contact_name: "",
+    contact_email: "",
+    contact_phone: "",
+  });
+
+  // ---------------- FETCH LIST ----------------
+  const fetchSources = async () => {
+    try {
+      setInitialLoading(true);
+
+      const res = await getPartners();
+
+      if (res?.IsSuccess) {
+        const mapped: Source[] =
+          res.Data?.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            email: item.email,
+            referredCount: item.referred_count ?? 0,
+            code: item.code ?? "",
+            color: `bg-${colors[Math.floor(Math.random() * colors.length)]}-500`,
+          })) || [];
+
+        setSources(mapped);
+      } else {
+        toast.error(res?.Message || "Failed to load partners");
+      }
+    } catch (err: any) {
+      toast.error(err?.Message || "Error fetching partners");
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSources();
+  }, []);
+
+  // ---------------- SELECT PARTNER ----------------
+  const handleSelectPartner = async (id: number) => {
+    setSelectedPartnerId(id);
+
+    try {
+      const res = await getPartnerById(id);
+
+      if (res?.IsSuccess) {
+        setPartnerDetails(res.Data);
+      } else {
+        toast.error(res?.Message || "Failed to load partner details");
+      }
+    } catch (err: any) {
+      toast.error(err?.Message || "Error loading details");
+    }
+  };
+
+  // ---------------- CREATE PARTNER ----------------
+  const handleAddSource = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newSource.name || !newSource.contact_email) {
+      toast.error("Name and email are required");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await createPartner(newSource);
+
+      if (res?.IsSuccess) {
+        toast.success("Partner created successfully");
+
+        await fetchSources();
+
+        setNewSource({
+          name: "",
+          website_url: "",
+          description: "",
+          contact_name: "",
+          contact_email: "",
+          contact_phone: "",
+        });
+
         setIsAdding(false);
-    };
+      } else {
+        toast.error(res?.Message || "Failed to create partner");
+      }
+    } catch (err: any) {
+      toast.error(err?.Message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10 p-4 md:p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Sources List & Form (Left 2 columns) */}
-            <div className="lg:col-span-2 space-y-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900 px-1">Active Sources</h3>
-                        <p className="text-sm text-gray-400 px-1">Manage active partnerships and referral links.</p>
-                    </div>
-                    <button
-                        onClick={() => setIsAdding(!isAdding)}
-                        className={`
-                            border-2 border-dashed border-gray-200 rounded-2xl md:rounded-3xl p-4 md:p-5 flex items-center space-x-3 md:space-x-4 
-                            text-alice-teal hover:border-alice-teal hover:bg-alice-teal/5 hover:shadow-lg transition-all duration-300
-                            ${isAdding ? "border-alice-teal bg-alice-teal/5" : ""}
-                        `}
-                    >
-                        <div className="p-1.5 md:p-2 bg-alice-teal/10 rounded-lg md:rounded-xl">
-                            <Plus className="w-5 h-5 md:w-6 md:h-6" />
-                        </div>
-                        <span className="font-semibold text-xs md:text-sm tracking-wide text-alice-teal whitespace-nowrap">Add source</span>
-                    </button>
-                </div>
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 max-w-[1600px] mx-auto">
 
-                {/* Sources Chips */}
-                <div className="flex flex-wrap gap-4">
-                    {sources.map((source) => (
-                        <div 
-                            key={source.id} 
-                            className="w-full bg-white border border-gray-200 rounded-2xl p-4 md:p-5 flex items-center space-x-4 shadow-sm hover:shadow-md transition-all duration-300 group cursor-default"
-                        >
-                            <div className={`w-2.5 h-10 rounded-full ${source.color} shadow-sm group-hover:scale-110 transition-transform`} />
-                            <div>
-                                <div className="flex items-center gap-3">
-                                    <span className="font-semibold text-gray-900 text-base">{source.name}</span>
-                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-semibold rounded uppercase tracking-wider">
-                                        {source.code}
-                                    </span>
-                                </div>
-                                <p className="text-[10px] text-gray-400 font-semibold mt-0.5 uppercase tracking-wider">{source.referredCount} Users Referred</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+      {/* LEFT SIDE */}
+      <div className="lg:col-span-2 space-y-8">
 
-                {/* Inline Form */}
-                {isAdding && (
-                    <form 
-                        onSubmit={handleAddSource}
-                        className="bg-gray-50/50 rounded-2xl border border-gray-100 p-6 space-y-4 animate-in zoom-in-95 duration-300"
-                    >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500 ml-1">Source Name</label>
-                                <div className="relative">
-                                    <Users className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                    <input 
-                                        required
-                                        placeholder="e.g. Wonderland Nursery"
-                                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-alice-teal focus:outline-none text-sm"
-                                        value={newSource.name}
-                                        onChange={e => setNewSource({...newSource, name: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500 ml-1">Contact Email</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                    <input 
-                                        required
-                                        type="email"
-                                        placeholder="partner@example.com"
-                                        className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-alice-teal focus:outline-none text-sm"
-                                        value={newSource.email}
-                                        onChange={e => setNewSource({...newSource, email: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex justify-end pt-2">
-                            <Button type="submit" className="bg-alice-teal text-white px-10 py-3 rounded-xl shadow-lg shadow-alice-teal/20 hover:-translate-y-0.5 transition-all">
-                                Generate Source
-                            </Button>
-                        </div>
-                    </form>
-                )}
-            </div>
+        {/* HEADER */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold">Active Sources</h3>
+            <p className="text-sm text-gray-400">Manage partners</p>
+          </div>
 
-            {/* Stats Panel (Right Column) */}
-            <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 px-1">Source Performance</h3>
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 space-y-8 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-8">
-                        <div className="flex items-center gap-4">
-                            <div className="p-2.5 bg-alice-teal text-white rounded-xl shadow-lg shadow-alice-teal/20">
-                                <Users className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Partner Hub</p>
-                                <h4 className="text-2xl md:text-3xl font-semibold text-gray-900 tracking-tight">1,248</h4>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-5 bg-alice-teal/5 rounded-2xl border border-alice-teal/10 text-center group hover:scale-[1.02] transition-transform shadow-sm">
-                        <p className="text-[10px] text-alice-teal uppercase font-semibold tracking-widest mb-1 opacity-80">Top Performer</p>
-                        <p className="text-lg font-semibold text-gray-900 leading-tight">NUURI Kindergarten</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4">
-                        {[
-                            { label: "Approved Users", val: "842", icon: BadgeCheck, color: "text-emerald-600", bg: "bg-emerald-50/50" },
-                            { label: "Pending Review", val: "156", icon: Hourglass, color: "text-amber-600", bg: "bg-amber-50/50" },
-                            { label: "Active Partners", val: "12", icon: Activity, color: "text-indigo-600", bg: "bg-indigo-50/50" },
-                        ].map((stat, i) => (
-                            <div key={i} className={`flex items-center justify-between p-4 ${stat.bg} rounded-2xl border border-gray-100 shadow-sm hover:scale-[1.02] transition-transform group`}>
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-xl bg-white ${stat.color} shadow-sm group-hover:rotate-6 transition-transform`}>
-                                        <stat.icon className="w-4 h-4" />
-                                    </div>
-                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{stat.label}</span>
-                                </div>
-                                <span className="text-xl font-semibold text-gray-900">{stat.val}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+          <button
+            onClick={() => setIsAdding((prev) => !prev)}
+            className="border-2 border-dashed border-gray-200 rounded-2xl p-4 flex items-center gap-2 text-alice-teal"
+          >
+            <Plus className="w-5 h-5" />
+            Add source
+          </button>
         </div>
-    );
+
+        {/* FORM (NOW ON TOP) */}
+        {isAdding && (
+          <form
+            onSubmit={handleAddSource}
+            className="w-full bg-gray-50/50 rounded-2xl border border-gray-100 p-6 space-y-4"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <input
+                placeholder="Name"
+                className="p-2 border rounded"
+                value={newSource.name}
+                onChange={(e) =>
+                  setNewSource({ ...newSource, name: e.target.value })
+                }
+              />
+
+              <input
+                placeholder="Website URL"
+                className="p-2 border rounded"
+                value={newSource.website_url}
+                onChange={(e) =>
+                  setNewSource({ ...newSource, website_url: e.target.value })
+                }
+              />
+
+              <input
+                placeholder="Contact Name"
+                className="p-2 border rounded"
+                value={newSource.contact_name}
+                onChange={(e) =>
+                  setNewSource({ ...newSource, contact_name: e.target.value })
+                }
+              />
+
+              <input
+                placeholder="Contact Email"
+                className="p-2 border rounded"
+                value={newSource.contact_email}
+                onChange={(e) =>
+                  setNewSource({ ...newSource, contact_email: e.target.value })
+                }
+              />
+
+              <input
+                placeholder="Contact Phone"
+                className="p-2 border rounded"
+                value={newSource.contact_phone}
+                onChange={(e) =>
+                  setNewSource({ ...newSource, contact_phone: e.target.value })
+                }
+              />
+
+              <textarea
+                placeholder="Description"
+                className="p-2 border rounded md:col-span-2"
+                value={newSource.description}
+                onChange={(e) =>
+                  setNewSource({ ...newSource, description: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="bg-gray-100 px-6 py-2 rounded"
+              >
+                Cancel
+              </button>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-alice-teal text-white px-6 py-2 rounded"
+              >
+                {loading ? "Creating..." : "Generate Source"}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {/* LIST */}
+        {initialLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="flex flex-wrap gap-4">
+            {sources.map((source) => (
+              <div
+                key={source.id}
+                onClick={() => handleSelectPartner(source.id)}
+                className={`cursor-pointer w-full border rounded-xl p-4 flex items-center gap-4 ${
+                  selectedPartnerId === source.id
+                    ? "border-alice-teal bg-alice-teal/5"
+                    : "bg-white"
+                }`}
+              >
+                <div className={`w-2 h-10 rounded ${source.color}`} />
+
+                <div>
+                  <div className="flex gap-2 items-center">
+                    <span className="font-semibold">{source.name}</span>
+                    <span className="text-xs bg-gray-100 px-2 rounded">
+                      {source.code}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {source.referredCount} users
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT PANEL */}
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold">Source Performance</h3>
+
+        {!partnerDetails ? (
+          <p className="text-gray-400">Select a partner</p>
+        ) : (
+          <div className="bg-white border rounded-xl p-6 space-y-6">
+
+            <div className="flex gap-3 items-center border-b pb-4">
+              <Users />
+              <div>
+                <p className="text-xs text-gray-400">Partner Hub</p>
+                <h2 className="text-xl font-bold">
+                  {partnerDetails.total_users}
+                </h2>
+              </div>
+            </div>
+
+            <div className="text-center bg-teal-50 p-4 rounded">
+              <p className="text-xs text-teal-600">Top Performer</p>
+              <p className="font-semibold">
+                {partnerDetails.top_performer ?? "N/A"}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <p>Approved: {partnerDetails.approved_users}</p>
+              <p>Pending: {partnerDetails.pending_users}</p>
+              <p>Active: {partnerDetails.active_partners}</p>
+            </div>
+
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default CollaborationSources;
