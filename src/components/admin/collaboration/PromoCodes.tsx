@@ -71,6 +71,16 @@ const PromoCodes: React.FC = () => {
                         <h3 className="text-xl md:text-2xl font-semibold text-gray-900">Create Promo Code</h3>
                         <p className="text-sm text-gray-500 mt-1">Setup new automated distribution rules.</p>
                     </div>
+                    <div className="ml-auto space-y-3 items-end">
+                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">
+                            Source Partner
+                        </label>
+                        <AliceSelect
+                            value={form.source}
+                            onChange={val => setForm({ ...form, source: val })}
+                            options={sourceOptions}
+                        />
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-8">
@@ -97,14 +107,6 @@ const PromoCodes: React.FC = () => {
                             />
                             <span className="absolute right-5 top-4 font-semibold text-gray-300">%</span>
                         </div>
-                    </div>
-                    <div className="space-y-3">
-                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Source Partner</label>
-                        <AliceSelect 
-                            value={form.source}
-                            onChange={val => setForm({...form, source: val})}
-                            options={sourceOptions}
-                        />
                     </div>
                     <div className="space-y-3">
                         <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Expiry Date</label>

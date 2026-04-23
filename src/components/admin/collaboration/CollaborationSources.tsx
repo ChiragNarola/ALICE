@@ -45,6 +45,19 @@ const CollaborationSources: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900 px-1">Active Sources</h3>
                         <p className="text-sm text-gray-400 px-1">Manage active partnerships and referral links.</p>
                     </div>
+                    <button
+                        onClick={() => setIsAdding(!isAdding)}
+                        className={`
+                            border-2 border-dashed border-gray-200 rounded-2xl md:rounded-3xl p-4 md:p-5 flex items-center space-x-3 md:space-x-4 
+                            text-alice-teal hover:border-alice-teal hover:bg-alice-teal/5 hover:shadow-lg transition-all duration-300
+                            ${isAdding ? "border-alice-teal bg-alice-teal/5" : ""}
+                        `}
+                    >
+                        <div className="p-1.5 md:p-2 bg-alice-teal/10 rounded-lg md:rounded-xl">
+                            <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                        </div>
+                        <span className="font-semibold text-xs md:text-sm tracking-wide text-alice-teal whitespace-nowrap">Add source</span>
+                    </button>
                 </div>
 
                 {/* Sources Chips */}
@@ -52,7 +65,7 @@ const CollaborationSources: React.FC = () => {
                     {sources.map((source) => (
                         <div 
                             key={source.id} 
-                            className="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 flex items-center space-x-4 shadow-sm hover:shadow-md transition-all duration-300 group cursor-default"
+                            className="w-full bg-white border border-gray-200 rounded-2xl p-4 md:p-5 flex items-center space-x-4 shadow-sm hover:shadow-md transition-all duration-300 group cursor-default"
                         >
                             <div className={`w-2.5 h-10 rounded-full ${source.color} shadow-sm group-hover:scale-110 transition-transform`} />
                             <div>
@@ -66,20 +79,6 @@ const CollaborationSources: React.FC = () => {
                             </div>
                         </div>
                     ))}
-
-                    <button 
-                        onClick={() => setIsAdding(!isAdding)}
-                        className={`
-                            border-2 border-dashed border-gray-200 rounded-2xl md:rounded-3xl p-4 md:p-5 flex items-center space-x-3 md:space-x-4 
-                            text-alice-teal hover:border-alice-teal hover:bg-alice-teal/5 hover:shadow-lg transition-all duration-300
-                            ${isAdding ? "border-alice-teal bg-alice-teal/5" : ""}
-                        `}
-                    >
-                        <div className="p-1.5 md:p-2 bg-alice-teal/10 rounded-lg md:rounded-xl">
-                            <Plus className="w-5 h-5 md:w-6 md:h-6" />
-                        </div>
-                        <span className="font-semibold text-xs md:text-sm tracking-wide text-alice-teal whitespace-nowrap">Add source</span>
-                    </button>
                 </div>
 
                 {/* Inline Form */}
