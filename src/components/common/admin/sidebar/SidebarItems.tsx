@@ -74,6 +74,16 @@ export const useSidebarItems = (): SidebarItem[] => {
       href: "/admin/nursery",
     },
     {
+      title: "Waitlist",
+      icon: Users,
+      href: "/admin/waitlist",
+    },
+    {
+      title: "Collaboration",
+      icon: Users,
+      href: "/admin/collaboration",
+    },
+    {
       title: "FAQ",
       icon: BadgeQuestionMark ,
       href: "/admin/faq"

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
 import { Users, Search, UserPlus, Download, Send, Loader2 } from "lucide-react";
@@ -9,6 +10,7 @@ import ExportUsersModal from "./ExportUsersModal";
 import { Bounce, toast } from "react-toastify";
 
 export default function UserList() {
+    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [selectedRole, setSelectedRole] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -220,6 +222,7 @@ export default function UserList() {
                             <Th>Role</Th>
                             <Th>Last Login</Th>
                             <Th>User Created</Th>
+                            <Th>Action</Th>
                         </tr>
                     </thead>
                     <tbody>
@@ -287,6 +290,14 @@ export default function UserList() {
                                                     year: "numeric",
                                                 }) : "-"
                                             }
+                                        </Td>
+                                        <Td>
+                                            <button 
+                                                onClick={() => navigate(`/admin/user/${user.id}`)}
+                                                className="px-3 py-1 bg-alice-teal/10 text-alice-teal text-xs font-bold rounded-lg hover:bg-alice-teal hover:text-white transition-colors"
+                                            >
+                                                View Details
+                                            </button>
                                         </Td>
                                     </tr>
                                 ))}

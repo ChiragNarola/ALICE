@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Guide | Alice Advice Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .guide-header {
+            padding: 80px 0 40px;
+            background-color: var(--soft-pink);
+            text-align: center;
+        }
+
+        .guide-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--white);
+            color: var(--primary-teal);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .guide-content {
+            padding: 60px 0;
+        }
+
+        .guide-body {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .guide-body h2 {
+            margin: 40px 0 20px;
+            color: var(--primary-teal);
+        }
+
+        .guide-body p {
+            margin-bottom: 24px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 30px;
+            color: var(--primary-teal);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .featured-img {
+            width: 100%;
+            height: 400px;
+            border-radius: var(--border-radius);
+            object-fit: cover;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container flex-between">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <span class="logo-text">ALICE</span>
+                    <span class="logo-subtext">Advice Hub</span>
+                </a>
+            </div>
+            <button class="mobile-nav-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="/signup" class="btn-primary">Get Started</a>
+            </nav>
+            <div class="nav-overlay"></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="guide-header">
+            <div class="container">
+                <a href="index.html" class="back-link">&larr; Back to Hub</a>
+                <div id="guide-tag" class="guide-tag">Expert Guide</div>
+                <h1 id="guide-title">Loading Guide...</h1>
+            </div>
+        </section>
+
+        <section class="guide-content">
+            <div class="container">
+                <div class="guide-body">
+                    <img id="guide-img" src="https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?q=80&w=1000&auto=format&fit=crop" alt="Guide Image" class="featured-img">
+                    <div id="guide-text">
+                        <p>Loading the latest expert advice just for you...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container grid">
+            <div class="footer-brand">
+                <div class="logo">ALICE</div>
+                <p>Your co-pilot in parenting. expert-led guidance for every milestone.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Cost Calculator</a></li>
+                    <li><a href="#">Funding Guides</a></li>
+                    <li><a href="#">Nursery Search</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>About</h4>
+                <ul>
+                    <li><a href="#">Our Vision</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container text-center copyright">
+            &copy; 2026 ALICE Childcare Hub. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        const content = {
+            'funding': {
+                tag: 'Funding',
+                title: 'Applying for 15/30 Hours Funding',
+                img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1000&auto=format&fit=crop',
+                body: `
+                    <h2>Understanding Government Support</h2>
+                    <p>Navigating the various childcare funding options can be overwhelming for parents. In England, the government provides several schemes to help with the costs of childcare, including 15 and 30 hours of free childcare for eligible families.</p>
+                    <h2>Who is eligible?</h2>
+                    <p>Eligibility depends on several factors: the age of your child, your employment status, and your income level. Generally, all 3 to 4-year-olds are entitled to 15 hours of free childcare, while working parents may be eligible for an additional 15 hours (making 30 total).</p>
+                    <h2>How to Apply</h2>
+                    <p>You can apply for your 30 hours code via the Childcare Service on Gov.uk. It's important to apply in the term before your child becomes eligible to ensure you have your code ready for your nursery.</p>
+                `
+            },
+            'costs': {
+                tag: 'Costs',
+                title: 'Nursery Cost Calculator Guide',
+                img: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?q=80&w=1000&auto=format&fit=crop',
+                body: `
+                    <h2>Budgeting for Childcare</h2>
+                    <p>One of the biggest concerns for new parents is the cost of nursery care. Understanding how fees are structured and what extras might be charged is crucial for accurate financial planning.</p>
+                    <h2>What's included in the fees?</h2>
+                    <p>Fees typically cover the cost of care and education. However, some nurseries may charge extra for meals, nappies, and specialized activities like yoga or music classes. Always ask for a full breakdown of costs.</p>
+                    <h2>How to use our calculator</h2>
+                    <p>Our upcoming interactive calculator will help you estimate monthly costs based on your location and the number of hours your child will attend. Stay tuned for this feature!</p>
+                `
+            },
+             'waiting-lists': {
+                tag: 'Waiting Lists',
+                title: 'Beating the Nursery Waiting List',
+                img: 'https://images.unsplash.com/photo-1484665754804-74b091211472?q=80&w=1000&auto=format&fit=crop',
+                body: `
+                    <h2>Plan Ahead</h2>
+                    <p>In high-demand areas, popular nurseries can have waiting lists spanning over a year. The key to securing your first choice is early research and prompt application.</p>
+                    <h2>Pro-Tips for Securing a Spot</h2>
+                    <p>Visit multiple nurseries to understand their culture. Stay in touch with the nursery manager and ensure all your paperwork is submitted correctly. Sometimes, flexibility on start dates or specific days can help you move up the list.</p>
+                `
+            },
+            'settling-in': {
+                tag: 'Settling In',
+                title: 'Helping Your Child Settle Into Nursery',
+                img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1000&auto=format&fit=crop',
+                body: `
+                    <h2>Easing the Transition</h2>
+                    <p>Starting nursery is a big milestone for both child and parent. Preparation is key to making this transition as possible.</p>
+                    <h2>The Orientation Process</h2>
+                    <p>Most nurseries offer settling-in sessions. These gradual entries allow your child to become familiar with their new environment and key person while you are still nearby.</p>
+                    <h2>Managing Separation Anxiety</h2>
+                    <p>It's natural for children (and parents!) to feel some anxiety. Establish a consistent goodbye routine and trust that the nursery staff are experts in comforting your child.</p>
+                `
+            },
+            'health': {
+                tag: 'Health',
+                title: 'Nursery Illness Policies & Attendance',
+                img: 'https://images.unsplash.com/photo-1543333309-8745823ed60b?q=80&w=1000&auto=format&fit=crop',
+                body: `
+                    <h2>When to Keep Your Child Home</h2>
+                    <p>Understanding your nursery's illness policy is essential for maintaining a healthy environment for all children and staff. Most nurseries follow strict guidance on exclusion periods for common childhood illnesses.</p>
+                    <h2>Common Guidelines</h2>
+                    <p>Typically, children must be 48 hours clear of any vomiting or diarrhea before returning. For high temperatures, most nurseries require a child to be fever-free without medication for 24 hours.</p>
+                    <h2>Communicating with the Nursery</h2>
+                    <p>Always inform your nursery as soon as possible if your child will be absent. This helps them track any potential outbreaks and adjust their staffing accordingly.</p>
+                `
+            },
+            'milestones': {
+                tag: 'Milestones',
+                title: 'Tracking Early Years Milestones',
+                img: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=1000&auto=format&fit=crop',
+                body: `
+                    <h2>Celebrating Every Achievement</h2>
+                    <p>Every child develops at their own pace, but there are certain milestones that provide a helpful framework for tracking progress in areas like speech, movement, and social skills.</p>
+                    <h2>Key Areas of Development</h2>
+                    <p>In the first five years, children make rapid progress in physical coordination, cognitive understanding, and emotional regulation. Your nursery's "Key Person" system is designed to observe and support these individual milestones.</p>
+                    <h2>Working Together</h2>
+                    <p>Regular parent-teacher meetings and daily handovers are great opportunities to share achievements from home and nursery. If you ever have concerns, your nursery manager or health visitor can provide expert guidance.</p>
+                `
+            }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type') || 'funding';
+        const data = content[type] || content['funding'];
+
+        document.getElementById('guide-tag').textContent = data.tag;
+        document.getElementById('guide-title').textContent = data.title;
+        document.getElementById('guide-img').src = data.img;
+        document.getElementById('guide-text').innerHTML = data.body;
+
+        // Mobile Nav Toggle logic (copied from index)
+        const navToggle = document.querySelector('.mobile-nav-toggle');
+        const nav = document.querySelector('.nav');
+        const overlay = document.querySelector('.nav-overlay');
+
+        if (navToggle && nav && overlay) {
+            const toggleMenu = () => {
+                nav.classList.toggle('active');
+                navToggle.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+            };
+            navToggle.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+        }
+    </script>
+    <script>
+        window.AliceChatConfig = {
+            apiUrl:         '/api/v1/freeChat',
+            signupUrl:      '/signup',
+            maxMessages:    3,
+            title:          'Alice AI Guide',
+            welcomeMessage: "Hello! I'm Alice, your childcare guide on this topic. How can I help?",
+            primaryColor:   '#1D7A74',
+        };
+    </script>
+    <script src="/alice-plugin.js"></script>
+</body>
+</html>
