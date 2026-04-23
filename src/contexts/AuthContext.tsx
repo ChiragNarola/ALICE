@@ -38,10 +38,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (
-    formData: FormData,
+    data: { username: string; password: string },
     rememberMe = false
   ): Promise<APIResponse<LoginResponseDTO> | null> => {
-    const result = await loginUser(formData);
+    const result = await loginUser(data);
 
     if (result?.IsSuccess) {
       const { user: u, access_token, token_type, session_uuid } = result.Data;

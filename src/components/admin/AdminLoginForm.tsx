@@ -27,7 +27,7 @@ const AdminLoginForm = () => {
       formData.append("username", data.username);
       formData.append("password", data.password);
 
-      const response = await login(formData, rememberMe);
+      const response = await login({ username: data.username, password: data.password }, rememberMe)
 
       if (response?.IsSuccess) {
         const roles = response.Data?.user?.roles ?? [];

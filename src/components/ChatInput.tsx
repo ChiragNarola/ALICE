@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 
-
 interface ChatInputProps {
   onSend: (e: React.FormEvent<HTMLFormElement>, file?: File | null) => void;
   message: string;
@@ -8,6 +7,7 @@ interface ChatInputProps {
   searching: boolean;
   recommendedQuestionsList: React.ReactNode[];
   isNewChat: boolean;
+  creditsExhausted?: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -15,56 +15,57 @@ const ChatInput: React.FC<ChatInputProps> = ({
   message,
   setMessage,
   searching,
-  recommendedQuestionsList
+  recommendedQuestionsList,
+  creditsExhausted = false,
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
   };
 
-  // Remove selected file
   const handleRemoveFile = () => {
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Send message + file
   const handleSend = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!message.trim() && !file) return; // prevent empty send
+    if (!message.trim() && !file) return;
+    if (creditsExhausted) return;
     onSend(e, file);
-
-    // Clear file and message after sending
     setFile(null);
     setMessage("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const isDisabled = searching || creditsExhausted;
+
   return (
     <>
       <div className="w-full flex flex-col absolute bottom-0 px-2">
 
-      {/* Recommended Questions — only when new chat and has questions */}
-      {recommendedQuestionsList?.length > 0 && (
-        <div className="w-full flex flex-col gap-2 px-2 mb-2">
-          <div className="flex flex-nowrap gap-2 w-full">
-            {recommendedQuestionsList}
+        {/* Recommended Questions */}
+        {recommendedQuestionsList?.length > 0 && (
+          <div className="w-full flex flex-col gap-2 px-2 mb-2">
+            <div className="flex flex-nowrap gap-2 w-full">
+              {recommendedQuestionsList}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
         {/* Input Form */}
         <form
           onSubmit={handleSend}
           className="w-full bg-white rounded-xl border border-alice-gray p-2 flex flex-col gap-2"
         >
           <div className="flex flex-col gap-1">
+
             {/* File Preview */}
-            {file && (
+            {file && !creditsExhausted && (
               <div className="flex items-center gap-2 animate-fade-in">
                 <div className="flex items-center justify-between bg-white border border-gray-300 rounded-2xl shadow-sm px-3 py-2 w-full max-w-xs transition-all duration-300 hover:shadow-md">
                   <div className="flex-1 truncate text-gray-900 font-medium text-sm">
@@ -82,22 +83,34 @@ const ChatInput: React.FC<ChatInputProps> = ({
             )}
 
             <div className="flex gap-4 sm:gap-6 items-center">
+
               {/* Input Box */}
               <div className="flex-1">
                 <input
                   type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={`Hello, How may I help you today?`}
-                  className="w-full border-none outline-none bg-transparent text-alice-black placeholder:text-alice-black/50 text-sm px-2 font-normal"
+                  value={creditsExhausted ? "" : message}
+                  onChange={(e) => !creditsExhausted && setMessage(e.target.value)}
+                  disabled={isDisabled}
+                  placeholder={
+                    creditsExhausted
+                      ? "Subscribe to continue chatting..."
+                      : "Hello, How may I help you today?"
+                  }
+                  className={`w-full border-none outline-none bg-transparent text-sm px-2 font-normal
+                    ${creditsExhausted
+                      ? "text-gray-400 placeholder:text-gray-400 cursor-not-allowed"
+                      : "text-alice-black placeholder:text-alice-black/50"
+                    }`}
                 />
               </div>
 
               {/* File Upload Button */}
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="bg-gray-200 w-[38px] h-[38px] p-2 rounded-full flex items-center justify-center text-gray-600 transition hover:bg-gray-300"
+                onClick={() => !creditsExhausted && fileInputRef.current?.click()}
+                disabled={isDisabled}
+                className={`bg-gray-200 w-[38px] h-[38px] p-2 rounded-full flex items-center justify-center text-gray-600 transition
+                  ${isDisabled ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-300"}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -126,9 +139,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
               {/* Send Button */}
               <button
                 type="submit"
-                disabled={searching}
+                disabled={isDisabled}
                 className={`bg-alice-teal w-[38px] h-[38px] p-2 rounded-full flex items-center justify-center text-white transition 
-              ${searching ? "opacity-60 cursor-not-allowed" : "hover:bg-teal-700"}`}
+                  ${isDisabled ? "opacity-40 cursor-not-allowed" : "hover:bg-teal-700"}`}
               >
                 {searching ? (
                   <svg
@@ -170,7 +183,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </form>
       </div>
     </>
-
   );
 };
 

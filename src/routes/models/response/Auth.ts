@@ -27,7 +27,7 @@ export interface StaffDetails {
 export interface AuthContextType {
   user: AuthUser | null;
   login: (
-    formData: FormData,
+    data: { username: string; password: string },
     rememberMe?: boolean
   ) => Promise<APIResponse<LoginResponseDTO> | null>;
   logout: () => void;

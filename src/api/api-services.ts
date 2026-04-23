@@ -26,17 +26,13 @@ export interface DocumentDTO {
 }
 
 //Auth
-export const loginUser = async (formData: FormData) => {
+export const loginUser = async (data: any) => {
   const response = await axiosInstance.post(
     "/users/login",
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" }
-    }
+    data // JSON
   );
   return response.data;
 };
-
 
 
 

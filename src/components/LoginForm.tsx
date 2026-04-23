@@ -29,11 +29,13 @@ const LoginForm = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("username", data.username);
-      formData.append("password", data.password);
-
-      const response = await login(formData, rememberMe);
+      const response = await login(
+        {
+          username: data.username,
+          password: data.password,
+        },
+        rememberMe
+      );
 
       if (response?.IsSuccess) {
         clearChild();
