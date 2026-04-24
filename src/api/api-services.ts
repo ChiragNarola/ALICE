@@ -1583,15 +1583,18 @@ export const getPartners = async (params?: {
   }
 };
 
-export const getPartnerById = async (partnerId: number) => {
+
+export const getPartnerStats = async (partnerId: number) => {
   try {
-    const response = await axiosInstance.get(`accessCode/partners/${partnerId}`);
+    const response = await axiosInstance.get(
+      `accessCode/partners/${partnerId}/stats`
+    );
     return response.data;
   } catch (error: any) {
     throw error?.response?.data ?? {
       IsSuccess: false,
       Data: null,
-      Message: "Failed to fetch partner",
+      Message: "Failed to fetch partner stats",
     };
   }
 };
