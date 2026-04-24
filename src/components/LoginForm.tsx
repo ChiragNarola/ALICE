@@ -14,7 +14,7 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // NEW state
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -24,7 +24,6 @@ const LoginForm = () => {
 
   const savedPinSet = localStorage.getItem("pin_set");
   const savedPinEmail = localStorage.getItem("user_email");
-
 
   const onSubmit = async (data: LoginFormInputs) => {
     setLoading(true);
@@ -40,23 +39,23 @@ const LoginForm = () => {
       if (response?.IsSuccess) {
         clearChild();
         const roles = response.Data?.user?.roles ?? [];
-        const role = roles[0]; // assuming single role per user
+        const role = roles[0];
+
         if (response.Data.must_change_password) {
           const metaData = {
             mustChangePassword: response.Data.must_change_password,
             message: response.Message,
-            password:data.password,
+            password: data.password,
           };
-
           sessionStorage.setItem("authMeta", JSON.stringify(metaData));
         }
+
         if (role === "staff" || role === "parent") {
           toast.success("Login successful");
 
           const pinSet = localStorage.getItem("pin_set");
 
           if (pinSet === "false") {
-            // Redirect into DashboardLayout so the existing PIN modal appears
             navigate("/child-basic-info");
             return;
           }
@@ -86,6 +85,7 @@ const LoginForm = () => {
         Welcome back! Please enter your details
       </p>
 
+      {/* PIN Quick Login — only if pin is set */}
       {savedPinEmail && savedPinSet === "true" && (
         <div className="flex items-center justify-between gap-3 p-3 mb-6 2xl:mb-9 rounded-xl bg-[#F5FBFA] border border-alice-teal/20">
           <div className="text-left">
@@ -93,10 +93,9 @@ const LoginForm = () => {
               Quick login available
             </p>
             <p className="text-[12px] lg:text-xs text-alice-darkgray">
-              You’ve set up a 4-digit PIN for faster access.
+              You've set up a 4-digit PIN for faster access.
             </p>
           </div>
-
           <button
             type="button"
             onClick={() => navigate("/pin-login")}
@@ -107,7 +106,6 @@ const LoginForm = () => {
           </button>
         </div>
       )}
-
 
       {/* Email Field */}
       <div className="mb-6">
@@ -143,7 +141,6 @@ const LoginForm = () => {
             Password <span className="text-red-500">*</span>
           </span>
         </label>
-
         <input
           {...register("password", {
             required: "Password is required",
@@ -156,7 +153,6 @@ const LoginForm = () => {
           placeholder="Password"
           className="w-full pr-12 px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
         />
-
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
@@ -164,7 +160,6 @@ const LoginForm = () => {
         >
           {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
         </button>
-
         {errors.password && (
           <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
         )}
@@ -181,20 +176,22 @@ const LoginForm = () => {
           />
           Keep me logged in
         </label>
-        <a
-          href="/forgotpassword"
+
+        <NavLink
+          to="/forgotpassword"
           className="text-alice-teal font-semibold text-[14px] lg:text-base hover:underline"
         >
           Forgot Password?
-        </a>
+        </NavLink>
       </div>
 
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}
         className={`w-full bg-alice-teal hover:bg-teal-800 text-base text-white font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-colors ease-in-out duration-300 mb-6 2xl:mb-9
-    ${loading ? "opacity-70 cursor-not-allowed" : ""}
-  `}
+          ${loading ? "opacity-70 cursor-not-allowed" : ""}
+        `}
       >
         {loading ? (
           <div className="flex items-center justify-center gap-2">
@@ -206,8 +203,9 @@ const LoginForm = () => {
         )}
       </button>
 
+      {/* Sign Up Link */}
       <p className="text-center text-[14px] lg:text-base text-alice-black font-semibold mt-4">
-        Don’t have an account?{" "}
+        Don't have an account?{" "}
         <NavLink
           to="/signup"
           className="text-alice-teal font-medium hover:underline"
@@ -216,24 +214,26 @@ const LoginForm = () => {
         </NavLink>
       </p>
 
-      <div className="mt-6 flex flex-col items-center">
-        <div className="relative w-full flex items-center justify-center mb-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-alice-gray"></div>
+      {/* Guest Button — hidden for registered users */}
+      {!savedPinEmail && (
+        <div className="mt-6 flex flex-col items-center">
+          <div className="relative w-full flex items-center justify-center mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-alice-gray"></div>
+            </div>
+            <div className="relative px-4 bg-[#FEFCF8] text-sm text-alice-darkgray font-medium">
+              OR
+            </div>
           </div>
-          <div className="relative px-4 bg-[#FEFCF8] text-sm text-alice-darkgray font-medium">
-            OR
-          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/guest-chat")}
+            className="w-full border-2 border-alice-teal text-alice-teal hover:bg-alice-teal hover:text-white text-base font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-all ease-in-out duration-300"
+          >
+            Try as Guest
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => navigate("/guest-chat")}
-          className="w-full border-2 border-alice-teal text-alice-teal hover:bg-alice-teal hover:text-white text-base font-semibold py-[14px] lg:py-[18px] rounded-[12px] transition-all ease-in-out duration-300"
-        >
-          Try as Guest
-        </button>
-      </div>
+      )}
     </form>
   );
 };

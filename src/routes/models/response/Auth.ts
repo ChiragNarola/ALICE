@@ -27,13 +27,14 @@ export interface StaffDetails {
 export interface AuthContextType {
   user: AuthUser | null;
   login: (
-    data: { username: string; password: string },
+    data: LoginPayload,
     rememberMe?: boolean
   ) => Promise<APIResponse<LoginResponseDTO> | null>;
-  logout: () => void;
+
+  logout: () => Promise<void>;
   isLoading: boolean;
   showSetPinAfterLogin: boolean;
-  setShowSetPinAfterLogin: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowSetPinAfterLogin: (val: boolean) => void;
 }
 
 export interface APIResponse<T> {
@@ -60,3 +61,9 @@ export interface LoginResponseDTO {
   is_staff_detail_added: boolean;
   must_change_password:boolean;
 }
+
+export type LoginPayload = {
+  username: string;
+  password: string;
+  login_type?: "pin" | "password";
+};

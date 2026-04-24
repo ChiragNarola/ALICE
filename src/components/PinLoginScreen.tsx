@@ -1,4 +1,3 @@
-// PinLogin.tsx
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -24,22 +23,29 @@ export default function PinLogin() {
       return;
     }
 
+    if (!savedEmail) {
+      toast.error("Email not found. Please login again.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const formDataPin = new FormData();
-      formDataPin.append("email", savedEmail || "");
-      formDataPin.append("pin", pin);
-
-      const res = await verifyPin(formDataPin);
-
+      // ✅ FIX 1: Send JSON instead of FormData
+      const res = await verifyPin({
+        email: savedEmail,
+        pin: pin,
+      });
 
       if (res?.IsSuccess) {
-        // PIN valid → automatically log in
-        const formData = new FormData();
-        formData.append("username", savedEmail!);
-        formData.append("password", pin); // Using PIN as password
-        formData.append("login_type", "pin");
-        const response = await login(formData, true);
+        // ✅ FIX 2: Send JSON for login as well
+        const response = await login(
+          {
+            username: savedEmail,
+            password: pin,
+            login_type: "pin",
+          },
+          true
+        );
 
         if (response?.IsSuccess) {
           toast.success("Logged in via PIN");
@@ -82,7 +88,6 @@ export default function PinLogin() {
           </button>
         </div>
 
-        {/* PIN Login */}
         <button
           type="submit"
           disabled={loading}
@@ -91,7 +96,6 @@ export default function PinLogin() {
           {loading ? "Checking..." : "Login with PIN"}
         </button>
 
-        {/* Normal Login Button */}
         <button
           type="button"
           onClick={() => navigate("/login")}
@@ -100,6 +104,6 @@ export default function PinLogin() {
           Login with Email & Password
         </button>
       </form>
-</div>
+    </div>
   );
 }

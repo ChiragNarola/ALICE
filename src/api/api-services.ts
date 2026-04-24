@@ -26,11 +26,12 @@ export interface DocumentDTO {
 }
 
 //Auth
-export const loginUser = async (data: any) => {
-  const response = await axiosInstance.post(
-    "/users/login",
-    data // JSON
-  );
+export const loginUser = async (data: {
+  username: string;
+  password: string;
+  login_type?: "pin" | "password";
+}) => {
+  const response = await axiosInstance.post("/users/login", data);
   return response.data;
 };
 
@@ -1132,16 +1133,11 @@ export const setPin = async (pin: string): Promise<APIResponse<null>> => {
   }
 };
 
-export const verifyPin = async (formData: FormData): Promise<APIResponse<null>> => {
+export const verifyPin = async (data: { email: string; pin: string }): Promise<APIResponse<null>> => {
   try {
     const response = await axiosInstance.post<APIResponse<null>>(
       "/users/verify_pin",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      data // ✅ JSON
     );
 
     return response.data;

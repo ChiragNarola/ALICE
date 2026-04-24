@@ -7,6 +7,7 @@ import type {
   AuthUser,
   APIResponse,
   LoginResponseDTO,
+  LoginPayload
 } from "../routes/models/response/Auth";
 // import { useNavigate } from "react-router-dom";
 
@@ -38,9 +39,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (
-    data: { username: string; password: string },
+    data: LoginPayload,
     rememberMe = false
   ): Promise<APIResponse<LoginResponseDTO> | null> => {
+
     const result = await loginUser(data);
 
     if (result?.IsSuccess) {
@@ -61,27 +63,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       setUser(userData);
 
-      // Clear session only
       sessionStorage.clear();
 
-      // Store session or persistent auth
       const storage = rememberMe ? localStorage : sessionStorage;
       storage.setItem("auth_user", JSON.stringify(userData));
       storage.setItem("auth_token", access_token);
       storage.setItem("session_uuid", session_uuid);
 
-      // Always store email for PIN login
       localStorage.setItem("user_email", u.email);
 
-      const pin = await hasPin(u.email); // true/false
-      // console.log("PIN existence check for", u.email, ":", pin);
-      if (!pin) {
-        localStorage.setItem("pin_set", "false");
-        setShowSetPinAfterLogin(true);
-      } else {
-        localStorage.setItem("pin_set", "true");
+      if (data.login_type !== "pin") {
+        const pin = await hasPin(u.email);
+
+        if (!pin) {
+          localStorage.setItem("pin_set", "false");
+          setShowSetPinAfterLogin(true);
+        } else {
+          localStorage.setItem("pin_set", "true");
+        }
       }
     }
+
     return result;
   };
 
