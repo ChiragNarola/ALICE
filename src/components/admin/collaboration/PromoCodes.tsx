@@ -330,7 +330,10 @@ const PromoCodes: React.FC = () => {
                 {codes.map((pc) => {
                   const displayStatus = getStatusDisplay(pc.status);
                   const isActionLoading = actionLoadingId === pc.id;
-
+                  const usagePercent =
+                    pc.max_uses && pc.max_uses > 0
+                      ? Math.min((pc.current_uses / pc.max_uses) * 100, 100)
+                      : 0;
                   return (
                     <tr key={pc.id} className="hover:bg-white transition-all duration-300 group border-b border-gray-100 last:border-none">
                       <Td className="py-5">
@@ -347,10 +350,10 @@ const PromoCodes: React.FC = () => {
 
                       {/* Value — free_credit if available, else dash until Stripe wired */}
                       <Td className="py-5">
-                        <span className="text-xl font-semibold text-gray-900 group-hover:text-alice-teal transition-colors">
-                          {pc.free_credit ? `£${pc.free_credit}` : "—"}
-                        </span>
-                      </Td>
+  <span className="text-xl font-semibold text-gray-900 group-hover:text-alice-teal transition-colors">
+    {usagePercent.toFixed(0)}%
+  </span>
+</Td>
 
                       {/* Utilization */}
                       <Td className="py-5">
