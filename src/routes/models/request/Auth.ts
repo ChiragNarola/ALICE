@@ -16,5 +16,6 @@ export interface SignupFormInputs {
     confirmPassword: string;
 
     country?: string;
+    code?: string;
 };
 

@@ -274,6 +274,22 @@ const onSubmit = async (data: SignupFormInputs) => {
       </div>
       {errors.role && <p className="text-red-500 text-sm mt-[-12px] mb-4">{errors.role.message}</p>}
 
+      {/* Access Code (Optional) */}
+      <div className="mb-6">
+        <label className="block text-left text-[14px] lg:text-base font-semibold text-alice-black relative ms-[12px] mt-[2px]">
+          <span className="bg-[#FEFCF8] px-[5px]">
+            Access Code
+          </span>
+        </label>
+
+        <input
+          {...register('code')}
+          type="text"
+          placeholder="Enter access code (if any)"
+          className="w-full px-5 py-[14px] lg:py-[18px] border border-alice-gray rounded-[12px] focus:outline-none focus:border-alice-teal mt-[-10px] lg:mt-[-12px] bg-[#FEFCF8] placeholder:text-alice-darkgray text-alice-black text-[14px] lg:text-base font-normal"
+        />
+      </div>
+
       {/* Submit Button */}
       <button
         type="submit"

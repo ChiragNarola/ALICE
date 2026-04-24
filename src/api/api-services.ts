@@ -1598,3 +1598,127 @@ export const getPartnerStats = async (partnerId: number) => {
     };
   }
 };
+
+export const createAccessCode = async (payload: {
+  code: string;
+  partner_id: number;
+  max_uses: number;
+  valid_from: string;
+  valid_until?: string;
+  description?: string;
+  free_credit?: number;
+  target_group?: string;
+}) => {
+  try {
+    const response = await axiosInstance.post("/accessCode/codes", payload);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to create access code",
+    };
+  }
+};
+
+export const listPartnerCodes = async (
+  partnerId: number,
+  activeOnly: boolean = true
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/accessCode/partners/${partnerId}/codes`,
+      { params: { active_only: activeOnly } }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch partner codes",
+    };
+  }
+};
+
+export const deactivateAccessCode = async (codeId: number) => {
+  try {
+    const response = await axiosInstance.put(
+      `/accessCode/codes/${codeId}/deactivate`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to deactivate access code",
+    };
+  }
+};
+
+export const reactivateAccessCode = async (codeId: number) => {
+  try {
+    const response = await axiosInstance.post(
+      `/accessCode/access-codes/${codeId}/reactivate`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to reactivate access code",
+    };
+  }
+};
+
+export const getWaitlist = async (params?: {
+  partner_id?: number;
+  skip?: number;
+  limit?: number;
+}) => {
+  try {
+    const response = await axiosInstance.get("/accessCode/waitlist", {
+      params: {
+        partner_id: params?.partner_id,
+        skip: params?.skip ?? 0,
+        limit: params?.limit ?? 100,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch waitlist",
+    };
+  }
+};
+
+export const approveWaitlistUser = async (userId: number) => {
+  try {
+    const response = await axiosInstance.post("/accessCode/waitlist/approve", {
+      user_id: userId,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to approve user",
+    };
+  }
+};
+
+export const bulkApproveWaitlistUsers = async (userIds: number[]) => {
+  try {
+    const response = await axiosInstance.post("/accessCode/waitlist/approve/bulk", {
+      user_ids: userIds,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to bulk approve users",
+    };
+  }
+};
