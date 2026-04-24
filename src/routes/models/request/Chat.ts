@@ -29,18 +29,18 @@ export interface ChatMessageUI {
     ts?: string;
 }
 
-export interface ApiMessage {
+export type ApiMessage = {
     id: number;
-    is_deleted: boolean;
-    user_id: number;
-    user_response: string | null;
+    message: string;
+    message_type: "user" | "ai";
     created_at: string;
-    updated_at: string;
-    is_testdata: boolean;
-    u_question: string;
-    ai_answer: string;
+    updated_at?: string;
     conversation_id: number;
-}
+    conversation_uuid: string;
+    document_name: string | null;
+    feedback: string | null;
+    user_id: number;
+};
 
 export interface QuestionDTO {
     user_id: number;

@@ -68,34 +68,41 @@ export const ChatProvider = ({ children }: { children: any }) => {
 };
 
     const mapApiToUI = (api: ApiMessage[]): ChatMessageUI[] => {
-        return api.flatMap((m) => {
+        const grouped: { [key: number]: { user?: ApiMessage; ai?: ApiMessage } } = {};
+
+        // Group by id since user+ai share the same id
+        api.forEach((m) => {
+            if (!grouped[m.id]) grouped[m.id] = {};
+            if (m.message_type === "user") grouped[m.id].user = m;
+            if (m.message_type === "ai") grouped[m.id].ai = m;
+        });
+
+        return Object.values(grouped).flatMap(({ user, ai }) => {
             const messages: ChatMessageUI[] = [];
 
-            // user message
-            if (m.u_question) {
+            if (user) {
                 messages.push({
-                    id: m.id,          // DB id, used for API
-                    key: `${m.id}-user`, // unique for React
+                    id: user.id,
+                    key: `${user.id}-user`,
                     from: "user",
-                    u_question: m.u_question,
+                    u_question: user.message,   // ✅ map message → u_question
                     ai_answer: "",
-                    ts: m.created_at,
+                    ts: user.created_at,
                     actions: true,
-                    user_response: m.user_response,
+                    user_response: user.feedback ?? null,
                 });
             }
 
-            // AI message
-            if (m.ai_answer) {
+            if (ai) {
                 messages.push({
-                    id: m.id,          // DB id, used for API
-                    key: `${m.id}-ai`,  // unique for React
+                    id: ai.id,
+                    key: `${ai.id}-ai`,
                     from: "alice",
                     u_question: "",
-                    ai_answer: m.ai_answer,
-                    ts: m.updated_at ?? m.created_at,
+                    ai_answer: ai.message,      // ✅ map message → ai_answer
+                    ts: ai.updated_at ?? ai.created_at,
                     actions: true,
-                    user_response: m.user_response,
+                    user_response: ai.feedback ?? null,
                 });
             }
 
