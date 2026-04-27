@@ -42,8 +42,13 @@ const WaitlistPage: React.FC = () => {
   const PAGE_SIZE = 10;
 
   const [totalCount, setTotalCount] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [approvedCount, setApprovedCount] = useState(0);
+
+  // Global counts — always unfiltered
+  const [globalCounts, setGlobalCounts] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+  });
 
   // ---------------- FETCH PARTNERS ----------------
   useEffect(() => {
@@ -62,6 +67,25 @@ const WaitlistPage: React.FC = () => {
     fetchPartners();
   }, []);
 
+  // ---------------- FETCH GLOBAL COUNTS ----------------
+  const fetchCounts = async (partnerId?: number) => {
+    try {
+      const [allRes, pendingRes, approvedRes] = await Promise.all([
+        getWaitlist({ partner_id: partnerId, skip: 0, limit: 1 }),
+        getWaitlist({ partner_id: partnerId, skip: 0, limit: 1, status: "waitlist" }),
+        getWaitlist({ partner_id: partnerId, skip: 0, limit: 1, status: "active" }),
+      ]);
+
+      setGlobalCounts({
+        total:    allRes?.IsSuccess      ? (allRes.Data.total ?? 0)      : 0,
+        pending:  pendingRes?.IsSuccess  ? (pendingRes.Data.total ?? 0)  : 0,
+        approved: approvedRes?.IsSuccess ? (approvedRes.Data.total ?? 0) : 0,
+      });
+    } catch (e) {
+      console.error("fetchCounts error:", e);
+    }
+  };
+
   // ---------------- FETCH WAITLIST ----------------
   const fetchWaitlist = async (
     partnerId?: number,
@@ -69,10 +93,8 @@ const WaitlistPage: React.FC = () => {
     status?: string
   ) => {
     setLoading(true);
-    setTotalCount(0);       // ← reset
-    setPendingCount(0);     // ← reset
-    setApprovedCount(0);    // ← reset
-    setUsers([]);           // ← reset
+    setTotalCount(0);
+    setUsers([]);
     try {
       const apiStatus =
         status === "Pending"
@@ -85,11 +107,11 @@ const WaitlistPage: React.FC = () => {
         partner_id: partnerId,
         skip: (page - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,
-        status: apiStatus,   // ← this was missing!
+        status: apiStatus,
       });
 
       if (res?.IsSuccess) {
-        const { users: rawUsers, total, pending_count, approved_count } = res.Data;
+        const { users: rawUsers, total } = res.Data;
 
         const mapped: WaitlistUser[] = rawUsers.map((u: any) => ({
           id: u.id,
@@ -105,8 +127,6 @@ const WaitlistPage: React.FC = () => {
 
         setUsers(mapped);
         setTotalCount(total ?? 0);
-        setPendingCount(pending_count ?? 0);
-        setApprovedCount(approved_count ?? 0);
       } else {
         toast.error(res?.Message || "Failed to load waitlist");
       }
@@ -121,6 +141,7 @@ const WaitlistPage: React.FC = () => {
   useEffect(() => {
     if (partners.length === 0) return;
     const found = partners.find((p) => p.name === sourceFilter);
+    fetchCounts(found?.id);
     fetchWaitlist(found?.id, currentPage, statusFilter);
   }, [sourceFilter, statusFilter, partners, currentPage]);
 
@@ -163,8 +184,8 @@ const WaitlistPage: React.FC = () => {
       const res = await approveWaitlistUser(id);
       if (res?.IsSuccess) {
         toast.success("User approved successfully");
-        // refresh current page so counts stay accurate
         const found = partners.find((p) => p.name === sourceFilter);
+        fetchCounts(found?.id);
         fetchWaitlist(found?.id, currentPage, statusFilter);
       } else {
         toast.error(res?.Message || "Failed to approve user");
@@ -184,8 +205,8 @@ const WaitlistPage: React.FC = () => {
       if (res?.IsSuccess) {
         toast.success(res?.Message || "Users approved successfully");
         setSelectedIds([]);
-        // refresh current page so counts stay accurate
         const found = partners.find((p) => p.name === sourceFilter);
+        fetchCounts(found?.id);
         fetchWaitlist(found?.id, currentPage, statusFilter);
       } else {
         toast.error(res?.Message || "Bulk approve failed");
@@ -219,10 +240,10 @@ const WaitlistPage: React.FC = () => {
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total", val: totalCount, color: "bg-alice-teal", icon: Clock, shadow: "shadow-alice-teal/20" },
-          { label: "Pending", val: pendingCount, color: "bg-amber-500", icon: LayoutGrid, shadow: "shadow-amber-500/20" },
-          { label: "Approved", val: approvedCount, color: "bg-emerald-500", icon: LayoutGrid, shadow: "shadow-emerald-500/20" },
-          { label: "Partners", val: partners.length, color: "bg-indigo-500", icon: LayoutGrid, shadow: "shadow-indigo-500/20" },
+          { label: "Total",    val: globalCounts.total,    color: "bg-alice-teal", icon: Clock,        shadow: "shadow-alice-teal/20" },
+          { label: "Pending",  val: globalCounts.pending,  color: "bg-amber-500",  icon: LayoutGrid,   shadow: "shadow-amber-500/20" },
+          { label: "Approved", val: globalCounts.approved, color: "bg-emerald-500",icon: LayoutGrid,   shadow: "shadow-emerald-500/20" },
+          { label: "Partners", val: partners.length,       color: "bg-indigo-500", icon: LayoutGrid,   shadow: "shadow-indigo-500/20" },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-5 hover:shadow-md transition-all duration-300 group">
             <div className={`p-3 ${stat.color} text-white rounded-xl shadow-lg ${stat.shadow} group-hover:rotate-12 transition-transform`}>
@@ -427,14 +448,11 @@ const WaitlistPage: React.FC = () => {
 
                 {/* Page number buttons */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((page) => {
-                    // Always show first, last, current, and neighbours
-                    return (
-                      page === 1 ||
-                      page === totalPages ||
-                      Math.abs(page - currentPage) <= 1
-                    );
-                  })
+                  .filter((page) =>
+                    page === 1 ||
+                    page === totalPages ||
+                    Math.abs(page - currentPage) <= 1
+                  )
                   .reduce<(number | "...")[]>((acc, page, idx, arr) => {
                     if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
                       acc.push("...");
