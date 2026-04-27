@@ -6,7 +6,9 @@ import {
   FileText,
   School,
   CalendarDays,
-  BadgeQuestionMark 
+  BadgeQuestionMark,
+  Handshake,
+  Clock
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -75,12 +77,12 @@ export const useSidebarItems = (): SidebarItem[] => {
     },
     {
       title: "Waitlist",
-      icon: Users,
+      icon: Clock,
       href: "/admin/waitlist",
     },
     {
       title: "Collaboration",
-      icon: Users,
+      icon: Handshake,
       href: "/admin/collaboration",
     },
     {

@@ -1670,6 +1670,7 @@ export const getWaitlist = async (params?: {
   partner_id?: number;
   skip?: number;
   limit?: number;
+  status?: string;
 }) => {
   try {
     const response = await axiosInstance.get("/accessCode/waitlist", {

@@ -17,6 +17,7 @@ interface WaitlistUser {
   email: string;
   partnerId: number;
   partnerName: string;
+  role: string;
   accessCode: string;
   joinedDate: string;
   status: "Pending" | "Approved";
@@ -36,10 +37,13 @@ const WaitlistPage: React.FC = () => {
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [sourceFilter, setSourceFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("Pending");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
-  const [hasNextPage, setHasNextPage] = useState(false);
+
+  const [totalCount, setTotalCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [approvedCount, setApprovedCount] = useState(0);
 
   // ---------------- FETCH PARTNERS ----------------
   useEffect(() => {
@@ -59,66 +63,88 @@ const WaitlistPage: React.FC = () => {
   }, []);
 
   // ---------------- FETCH WAITLIST ----------------
-  const fetchWaitlist = async (partnersList: PartnerOption[], partnerId?: number, page: number = 1) => {
+  const fetchWaitlist = async (
+    partnerId?: number,
+    page: number = 1,
+    status?: string
+  ) => {
     setLoading(true);
+    setTotalCount(0);       // ← reset
+    setPendingCount(0);     // ← reset
+    setApprovedCount(0);    // ← reset
+    setUsers([]);           // ← reset
     try {
-        const res = await getWaitlist({
+      const apiStatus =
+        status === "Pending"
+          ? "waitlist"
+          : status === "Approved"
+          ? "active"
+          : undefined;
+
+      const res = await getWaitlist({
         partner_id: partnerId,
         skip: (page - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,
-        });
+        status: apiStatus,   // ← this was missing!
+      });
 
-        if (res?.IsSuccess) {
-        const mapped: WaitlistUser[] = (res.Data as any[]).map((u) => ({
-            id: u.id,
-            name: `${u.first_name} ${u.last_name}`.trim(),
-            email: u.email,
-            partnerId: u.partner_id,
-            partnerName:
-            partnersList.find((p) => p.id === u.partner_id)?.name ?? "Direct",
-            accessCode: u.access_code_used ?? "—",
-            joinedDate: u.created_at,
-            status: "Pending" as const,
+      if (res?.IsSuccess) {
+        const { users: rawUsers, total, pending_count, approved_count } = res.Data;
+
+        const mapped: WaitlistUser[] = rawUsers.map((u: any) => ({
+          id: u.id,
+          name: `${u.first_name} ${u.last_name}`.trim(),
+          email: u.email,
+          partnerId: u.partner_id,
+          partnerName: u.partner_name ?? "Direct",
+          role: u.role ?? "—",
+          accessCode: u.access_code_used ?? "—",
+          joinedDate: u.created_at,
+          status: u.status === "waitlist" ? "Pending" : "Approved",
         }));
-        setUsers(mapped);
-        setHasNextPage(mapped.length === PAGE_SIZE);
-        } else {
-        toast.error(res?.Message || "Failed to load waitlist");
-        }
-    } catch (err: any) {
-        toast.error(err?.Message || "Error fetching waitlist");
-    } finally {
-        setLoading(false);
-    }
-    };
 
-    // ── update the useEffect that calls fetchWaitlist ──────────────────
-    useEffect(() => {
+        setUsers(mapped);
+        setTotalCount(total ?? 0);
+        setPendingCount(pending_count ?? 0);
+        setApprovedCount(approved_count ?? 0);
+      } else {
+        toast.error(res?.Message || "Failed to load waitlist");
+      }
+    } catch (err: any) {
+      toast.error(err?.Message || "Error fetching waitlist");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------- TRIGGER FETCH ----------------
+  useEffect(() => {
     if (partners.length === 0) return;
     const found = partners.find((p) => p.name === sourceFilter);
-    fetchWaitlist(partners, found?.id, currentPage);
-    }, [sourceFilter, partners, currentPage]);
+    fetchWaitlist(found?.id, currentPage, statusFilter);
+  }, [sourceFilter, statusFilter, partners, currentPage]);
 
-
+  // ---------------- FILTER HANDLERS ----------------
   const handleSourceChange = (val: string) => {
     setSourceFilter(val);
     setCurrentPage(1);
     setSelectedIds([]);
-    };
+  };
 
-    // ── page change handler ────────────────────────────────────────────
+  const handleStatusChange = (val: string) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
+    setSelectedIds([]);
+  };
+
   const handlePageChange = (page: number) => {
     if (page < 1) return;
-    if (page > currentPage && !hasNextPage) return;
+    if (page > Math.ceil(totalCount / PAGE_SIZE)) return;
     setCurrentPage(page);
     setSelectedIds([]);
-    };
+  };
 
   // ---------------- SELECTION ----------------
-  const filteredUsers = users.filter(
-    (u) => statusFilter === "All" || u.status === statusFilter
-  );
-
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
@@ -126,8 +152,8 @@ const WaitlistPage: React.FC = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredUsers.length) setSelectedIds([]);
-    else setSelectedIds(filteredUsers.map((u) => u.id));
+    if (selectedIds.length === users.length) setSelectedIds([]);
+    else setSelectedIds(users.map((u) => u.id));
   };
 
   // ---------------- APPROVE SINGLE ----------------
@@ -137,9 +163,9 @@ const WaitlistPage: React.FC = () => {
       const res = await approveWaitlistUser(id);
       if (res?.IsSuccess) {
         toast.success("User approved successfully");
-        setUsers((prev) =>
-          prev.map((u) => (u.id === id ? { ...u, status: "Approved" } : u))
-        );
+        // refresh current page so counts stay accurate
+        const found = partners.find((p) => p.name === sourceFilter);
+        fetchWaitlist(found?.id, currentPage, statusFilter);
       } else {
         toast.error(res?.Message || "Failed to approve user");
       }
@@ -157,12 +183,10 @@ const WaitlistPage: React.FC = () => {
       const res = await bulkApproveWaitlistUsers(selectedIds);
       if (res?.IsSuccess) {
         toast.success(res?.Message || "Users approved successfully");
-        setUsers((prev) =>
-          prev.map((u) =>
-            selectedIds.includes(u.id) ? { ...u, status: "Approved" } : u
-          )
-        );
         setSelectedIds([]);
+        // refresh current page so counts stay accurate
+        const found = partners.find((p) => p.name === sourceFilter);
+        fetchWaitlist(found?.id, currentPage, statusFilter);
       } else {
         toast.error(res?.Message || "Bulk approve failed");
       }
@@ -173,13 +197,8 @@ const WaitlistPage: React.FC = () => {
     }
   };
 
-  // ---------------- STATS ----------------
-  const stats = {
-    total: users.length,
-    pending: users.filter((u) => u.status === "Pending").length,
-    approved: users.filter((u) => u.status === "Approved").length,
-    partners: partners.length,
-  };
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const hasNextPage = currentPage < totalPages;
 
   return (
     <div className="p-4 md:p-10 space-y-8 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -197,13 +216,13 @@ const WaitlistPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Row — fixed 4 cards */}
+      {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Waiting", val: stats.total, color: "bg-alice-teal", icon: Clock, shadow: "shadow-alice-teal/20" },
-          { label: "Pending", val: stats.pending, color: "bg-amber-500", icon: LayoutGrid, shadow: "shadow-amber-500/20" },
-          { label: "Approved", val: stats.approved, color: "bg-emerald-500", icon: LayoutGrid, shadow: "shadow-emerald-500/20" },
-          { label: "Partners", val: stats.partners, color: "bg-indigo-500", icon: LayoutGrid, shadow: "shadow-indigo-500/20" },
+          { label: "Total", val: totalCount, color: "bg-alice-teal", icon: Clock, shadow: "shadow-alice-teal/20" },
+          { label: "Pending", val: pendingCount, color: "bg-amber-500", icon: LayoutGrid, shadow: "shadow-amber-500/20" },
+          { label: "Approved", val: approvedCount, color: "bg-emerald-500", icon: LayoutGrid, shadow: "shadow-emerald-500/20" },
+          { label: "Partners", val: partners.length, color: "bg-indigo-500", icon: LayoutGrid, shadow: "shadow-indigo-500/20" },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-5 hover:shadow-md transition-all duration-300 group">
             <div className={`p-3 ${stat.color} text-white rounded-xl shadow-lg ${stat.shadow} group-hover:rotate-12 transition-transform`}>
@@ -217,11 +236,11 @@ const WaitlistPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Filters & Table container */}
+      {/* Filters & Table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden min-h-[500px]">
         <div className="p-6 md:p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-50/30">
 
-          {/* Source filter — dropdown */}
+          {/* Source filter */}
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Partner Source</span>
             <AliceSelect
@@ -229,22 +248,19 @@ const WaitlistPage: React.FC = () => {
               onChange={handleSourceChange}
               options={[
                 { label: "All Partners", value: "All" },
-                ...partners.map((p) => ({
-                  label: `${p.name} (${users.filter((u) => u.partnerName === p.name).length})`,
-                  value: p.name,
-                })),
+                ...partners.map((p) => ({ label: p.name, value: p.name })),
               ]}
             />
           </div>
 
-          {/* Status filter — keep original tabs */}
+          {/* Status filter */}
           <div className="flex flex-wrap items-center gap-4">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</span>
             <div className="flex bg-gray-200/50 p-1 rounded-xl">
               {["All", "Pending", "Approved"].map((f) => (
                 <button
                   key={f}
-                  onClick={() => setStatusFilter(f)}
+                  onClick={() => handleStatusChange(f)}
                   className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                     statusFilter === f
                       ? "bg-white text-alice-teal shadow-sm"
@@ -289,7 +305,7 @@ const WaitlistPage: React.FC = () => {
         <div className="p-4 md:p-8 overflow-x-auto">
           {loading ? (
             <p className="text-gray-400 text-sm">Loading waitlist...</p>
-          ) : filteredUsers.length === 0 ? (
+          ) : users.length === 0 ? (
             <p className="text-gray-400 text-sm">No users found.</p>
           ) : (
             <Table>
@@ -299,7 +315,7 @@ const WaitlistPage: React.FC = () => {
                     <input
                       type="checkbox"
                       className="w-5 h-5 rounded border-gray-300 text-alice-teal focus:ring-alice-teal cursor-pointer"
-                      checked={selectedIds.length === filteredUsers.length && filteredUsers.length > 0}
+                      checked={selectedIds.length === users.length && users.length > 0}
                       onChange={toggleSelectAll}
                     />
                   </Th>
@@ -312,7 +328,7 @@ const WaitlistPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50/50 transition-all duration-200 border-b border-gray-100 last:border-none group">
                     <Td className="py-5 px-6 text-center">
                       <input
@@ -333,16 +349,22 @@ const WaitlistPage: React.FC = () => {
                       </div>
                     </Td>
 
-                    {/* Source — partner name */}
                     <Td className="py-4">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-600">
+                      <span className="max-w-[180px] truncate px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
                         {user.partnerName}
                       </span>
                     </Td>
 
-                    {/* Role — blank for now, API doesn't return it */}
                     <Td className="py-4">
-                      <span className="text-gray-300 text-xs">—</span>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-semibold capitalize ${
+                        user.role === "staff"
+                          ? "bg-indigo-50 text-indigo-600"
+                          : user.role === "parent"
+                          ? "bg-blue-50 text-blue-600"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        {user.role || "—"}
+                      </span>
                     </Td>
 
                     <Td className="py-4">
@@ -378,11 +400,7 @@ const WaitlistPage: React.FC = () => {
                             : "text-gray-400 cursor-default"
                         }`}
                       >
-                        {actionLoadingId === user.id
-                          ? "..."
-                          : user.status === "Pending"
-                          ? "Approve"
-                          : "Done"}
+                        {actionLoadingId === user.id ? "..." : user.status === "Pending" ? "Approve" : ""}
                       </button>
                     </Td>
                   </tr>
@@ -390,36 +408,36 @@ const WaitlistPage: React.FC = () => {
               </tbody>
             </Table>
           )}
+
           {/* Pagination */}
-            {filteredUsers.length > 0 && (
+          {totalCount > 0 && (
             <div className="flex items-center justify-between pt-6">
-                <p className="text-xs text-gray-400">Page {currentPage}</p>
-
-                <div className="flex items-center gap-2">
+              <p className="text-xs text-gray-400">
+                Page {currentPage} of {totalPages} — {totalCount} total
+              </p>
+              <div className="flex items-center gap-2">
                 <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded text-sm hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded text-sm hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    <ChevronLeft className="w-4 h-4" />
-                    Prev
+                  <ChevronLeft className="w-4 h-4" />
+                  Prev
                 </button>
-
                 <span className="w-8 h-8 flex items-center justify-center rounded bg-alice-teal text-white text-sm font-medium">
-                    {currentPage}
+                  {currentPage}
                 </span>
-
                 <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={!hasNextPage}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded text-sm hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!hasNextPage}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded text-sm hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
+                  Next
+                  <ChevronRight className="w-4 h-4" />
                 </button>
-                </div>
+              </div>
             </div>
-            )}
+          )}
         </div>
       </div>
     </div>
