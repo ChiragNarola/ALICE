@@ -1678,6 +1678,7 @@ export const getWaitlist = async (params?: {
         partner_id: params?.partner_id,
         skip: params?.skip ?? 0,
         limit: params?.limit ?? 100,
+        status: params?.status,
       },
     });
     return response.data;

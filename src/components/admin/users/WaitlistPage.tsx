@@ -424,9 +424,44 @@ const WaitlistPage: React.FC = () => {
                   <ChevronLeft className="w-4 h-4" />
                   Prev
                 </button>
-                <span className="w-8 h-8 flex items-center justify-center rounded bg-alice-teal text-white text-sm font-medium">
-                  {currentPage}
-                </span>
+
+                {/* Page number buttons */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    // Always show first, last, current, and neighbours
+                    return (
+                      page === 1 ||
+                      page === totalPages ||
+                      Math.abs(page - currentPage) <= 1
+                    );
+                  })
+                  .reduce<(number | "...")[]>((acc, page, idx, arr) => {
+                    if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
+                      acc.push("...");
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    item === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="px-1 text-gray-400 text-sm">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => handlePageChange(item as number)}
+                        className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-all ${
+                          currentPage === item
+                            ? "bg-alice-teal text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={!hasNextPage}
