@@ -165,7 +165,9 @@ const WaitlistPage: React.FC = () => {
     setSelectedIds([]);
   };
 
-  // ---------------- SELECTION ----------------
+  // ---------------- SELECTION (pending only) ----------------
+  const pendingUsers = users.filter((u) => u.status === "Pending");
+
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
@@ -173,8 +175,12 @@ const WaitlistPage: React.FC = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === users.length) setSelectedIds([]);
-    else setSelectedIds(users.map((u) => u.id));
+    const pendingIds = pendingUsers.map((u) => u.id);
+    if (selectedIds.length === pendingIds.length && pendingIds.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(pendingIds);
+    }
   };
 
   // ---------------- APPROVE SINGLE ----------------
@@ -222,17 +228,17 @@ const WaitlistPage: React.FC = () => {
   const hasNextPage = currentPage < totalPages;
 
   return (
-    <div className="p-4 md:p-10 space-y-8 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 pb-8">
-        <div className="flex items-center space-x-4">
-          <div className="p-2.5 bg-alice-teal text-white rounded-xl shadow-xl shadow-alice-teal/20">
-            <Clock className="w-6 h-6" />
+      <div className="flex items-center justify-between border-b pb-4">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <Clock className="w-6 h-6 text-indigo-600" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Waitlist Management</h1>
-            <p className="text-sm text-gray-500 mt-1">Review and approve new partner registrations.</p>
+            <h1 className="text-2xl font-semibold text-gray-800">Waitlist Management</h1>
+            <p className="text-sm text-gray-500">Review and approve new partner registrations.</p>
           </div>
         </div>
       </div>
@@ -240,10 +246,10 @@ const WaitlistPage: React.FC = () => {
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total",    val: globalCounts.total,    color: "bg-alice-teal", icon: Clock,        shadow: "shadow-alice-teal/20" },
-          { label: "Pending",  val: globalCounts.pending,  color: "bg-amber-500",  icon: LayoutGrid,   shadow: "shadow-amber-500/20" },
-          { label: "Approved", val: globalCounts.approved, color: "bg-emerald-500",icon: LayoutGrid,   shadow: "shadow-emerald-500/20" },
-          { label: "Partners", val: partners.length,       color: "bg-indigo-500", icon: LayoutGrid,   shadow: "shadow-indigo-500/20" },
+          { label: "Total",    val: globalCounts.total,    color: "bg-alice-teal", icon: Clock,      shadow: "shadow-alice-teal/20" },
+          { label: "Pending",  val: globalCounts.pending,  color: "bg-amber-500",  icon: LayoutGrid, shadow: "shadow-amber-500/20" },
+          { label: "Approved", val: globalCounts.approved, color: "bg-emerald-500",icon: LayoutGrid, shadow: "shadow-emerald-500/20" },
+          { label: "Partners", val: partners.length,       color: "bg-indigo-500", icon: LayoutGrid, shadow: "shadow-indigo-500/20" },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-5 hover:shadow-md transition-all duration-300 group">
             <div className={`p-3 ${stat.color} text-white rounded-xl shadow-lg ${stat.shadow} group-hover:rotate-12 transition-transform`}>
@@ -332,11 +338,15 @@ const WaitlistPage: React.FC = () => {
             <Table>
               <thead>
                 <tr className="bg-gray-50/50 border-none">
+                  {/* Header checkbox — selects all pending only */}
                   <Th className="w-16 py-5 px-6 text-center">
                     <input
                       type="checkbox"
                       className="w-5 h-5 rounded border-gray-300 text-alice-teal focus:ring-alice-teal cursor-pointer"
-                      checked={selectedIds.length === users.length && users.length > 0}
+                      checked={
+                        pendingUsers.length > 0 &&
+                        selectedIds.length === pendingUsers.length
+                      }
                       onChange={toggleSelectAll}
                     />
                   </Th>
@@ -351,13 +361,19 @@ const WaitlistPage: React.FC = () => {
               <tbody>
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50/50 transition-all duration-200 border-b border-gray-100 last:border-none group">
+
+                    {/* Row checkbox — only for Pending */}
                     <Td className="py-5 px-6 text-center">
-                      <input
-                        type="checkbox"
-                        className="w-5 h-5 rounded border-gray-300 text-alice-teal focus:ring-alice-teal cursor-pointer"
-                        checked={selectedIds.includes(user.id)}
-                        onChange={() => toggleSelect(user.id)}
-                      />
+                      {user.status === "Pending" ? (
+                        <input
+                          type="checkbox"
+                          className="w-5 h-5 rounded border-gray-300 text-alice-teal focus:ring-alice-teal cursor-pointer"
+                          checked={selectedIds.includes(user.id)}
+                          onChange={() => toggleSelect(user.id)}
+                        />
+                      ) : (
+                        <span className="w-5 h-5 block" /> // empty placeholder to keep alignment
+                      )}
                     </Td>
 
                     <Td className="py-4">

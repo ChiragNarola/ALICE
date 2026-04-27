@@ -16,21 +16,17 @@ const CollaborationContainer: React.FC = () => {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-        <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-alice-teal/10 rounded-xl">
-            <Handshake className="w-6 h-6 text-alice-teal" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Collaboration Management
-            </h1>
-            <p className="text-sm text-gray-500">
-              Manage partners, referral codes, and shared materials.
-            </p>
+        <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <Handshake className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-800">Collaboration Management</h1>
+              <p className="text-sm text-gray-500">Manage partners, referral codes, and shared materials.</p>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Tabs */}
       <div className="flex space-x-1 bg-gray-100/50 p-1 rounded-xl w-full sm:w-fit">

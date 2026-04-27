@@ -7,6 +7,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Handshake,
 } from "lucide-react";
 import Button from "../../ui/Button";
 import { createPartner, getPartners, getPartnerStats } from "../../../api/api-services";
@@ -165,13 +166,6 @@ const CollaborationSources: React.FC = () => {
     }
   };
 
-  const capacityUsed = partnerDetails
-    ? Math.min(
-        (partnerDetails.current_user_count / partnerDetails.user_limit) * 100,
-        100
-      )
-    : 0;
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 max-w-[1600px] mx-auto">
 
@@ -180,9 +174,14 @@ const CollaborationSources: React.FC = () => {
 
         {/* HEADER */}
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Active Sources</h3>
-            <p className="text-sm text-gray-400">Manage partners</p>
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <Handshake className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">Active Sources</h3>
+              <p className="text-sm text-gray-500">Manage partners</p>
+            </div>
           </div>
 
           <button
@@ -279,14 +278,14 @@ const CollaborationSources: React.FC = () => {
                   <div className={`w-2 h-10 rounded ${source.color}`} />
                   <div className="flex-1">
                     <div className="flex gap-2 items-center">
-                      <span className="font-semibold">{source.name}</span>
+                      <span className="font-semibold text-gray-800">{source.name}</span>
                       {source.code && (
                         <span className="text-xs bg-gray-100 px-2 rounded">
                           {source.code}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">{source.referredCount} users</p>
+                    <p className="text-xs text-gray-500">{source.referredCount} users</p>
                   </div>
                 </div>
               ))}
@@ -295,7 +294,7 @@ const CollaborationSources: React.FC = () => {
             {/* PAGINATION */}
             {(hasPrevPage || hasNextPage) && (
               <div className="flex items-center justify-between pt-2">
-                <p className="text-xs text-gray-400">Page {currentPage}</p>
+                <p className="text-xs text-gray-500">Page {currentPage}</p>
 
                 <div className="flex items-center gap-2">
                   <button
@@ -328,12 +327,20 @@ const CollaborationSources: React.FC = () => {
 
       {/* RIGHT PANEL */}
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold">Source Performance</h3>
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <Activity className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">Source Performance</h3>
+            <p className="text-sm text-gray-500">Click a partner to view stats</p>
+          </div>
+        </div>
 
         {statsLoading ? (
-          <p className="text-gray-400 text-sm">Loading stats...</p>
+          <p className="text-gray-500 text-sm">Loading stats...</p>
         ) : !partnerDetails ? (
-          <p className="text-gray-400 text-sm">Select a partner to view stats</p>
+          <p className="text-gray-500 text-sm">Select a partner to view stats</p>
         ) : (
           <div className="bg-white border rounded-xl p-6 space-y-6">
 
@@ -347,8 +354,8 @@ const CollaborationSources: React.FC = () => {
             <div className="flex gap-3 items-center border-b pb-4">
               <Users className="text-gray-400 w-5 h-5" />
               <div>
-                <p className="text-xs text-gray-400">Total Users</p>
-                <h2 className="text-xl font-bold">{partnerDetails.current_user_count}</h2>
+                <p className="text-xs text-gray-500">Total Users</p>
+                <h2 className="text-xl font-bold text-gray-800">{partnerDetails.current_user_count}</h2>
               </div>
             </div>
 
@@ -359,7 +366,7 @@ const CollaborationSources: React.FC = () => {
                   <BadgeCheck className="w-4 h-4 text-green-500" />
                   Active Users
                 </div>
-                <span className="font-semibold">{partnerDetails.active_users}</span>
+                <span className="font-semibold text-gray-800">{partnerDetails.active_users}</span>
               </div>
 
               <div className="flex justify-between items-center">
@@ -367,7 +374,7 @@ const CollaborationSources: React.FC = () => {
                   <Hourglass className="w-4 h-4 text-amber-500" />
                   Waitlist
                 </div>
-                <span className="font-semibold">{partnerDetails.waitlist_count}</span>
+                <span className="font-semibold text-gray-800">{partnerDetails.waitlist_count}</span>
               </div>
 
               <div className="flex justify-between items-center">
@@ -375,7 +382,7 @@ const CollaborationSources: React.FC = () => {
                   <Activity className="w-4 h-4 text-sky-500" />
                   Active Codes
                 </div>
-                <span className="font-semibold">
+                <span className="font-semibold text-gray-800">
                   {partnerDetails.active_codes}/{partnerDetails.total_codes}
                 </span>
               </div>
