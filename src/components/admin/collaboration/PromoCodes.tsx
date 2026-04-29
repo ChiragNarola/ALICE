@@ -230,20 +230,20 @@ const PromoCodes: React.FC = () => {
             />
           </div>
 
-          {/* Discount — UI only for now, Stripe side not wired yet */}
+          {/* Free chat */}
           <div className="space-y-3">
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">
-              Discount (%)
+              Free Questions
             </label>
             <div className="relative">
               <input
                 type="number"
-                placeholder="0"
+                placeholder="1" min={1}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-alice-teal/10 transition-all font-semibold text-gray-900"
                 value={form.discount}
                 onChange={(e) => setForm({ ...form, discount: e.target.value })}
               />
-              <span className="absolute right-5 top-4 font-semibold text-gray-300">%</span>
+              <span className="absolute right-5 top-4 font-semibold text-gray-300">Free Chats</span>
             </div>
           </div>
 
@@ -251,7 +251,7 @@ const PromoCodes: React.FC = () => {
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Expiry Date</label>
             <div className="relative">
               <input
-                type="date"
+                type="date" min={new Date().toISOString().split('T')[0]}
                 className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-alice-teal/10 transition-all font-semibold text-gray-700"
                 value={form.expiry}
                 onChange={(e) => setForm({ ...form, expiry: e.target.value })}
@@ -260,11 +260,11 @@ const PromoCodes: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Max Uses</label>
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Max Users</label>
             <input
               required
               type="number"
-              placeholder="Unlimited"
+              placeholder="Number of users can use this code"
               className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-alice-teal/10 transition-all font-semibold text-gray-900"
               value={form.maxUses}
               onChange={(e) => setForm({ ...form, maxUses: e.target.value })}
@@ -319,7 +319,7 @@ const PromoCodes: React.FC = () => {
                 <tr className="bg-gray-100/50 border-none">
                   <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</Th>
                   <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</Th>
-                  <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Value</Th>
+                  <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Free Credits</Th>
                   <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilization</Th>
                   <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Expiry</Th>
                   <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</Th>
@@ -330,10 +330,10 @@ const PromoCodes: React.FC = () => {
                 {codes.map((pc) => {
                   const displayStatus = getStatusDisplay(pc.status);
                   const isActionLoading = actionLoadingId === pc.id;
-                  const usagePercent =
-                    pc.max_uses && pc.max_uses > 0
-                      ? Math.min((pc.current_uses / pc.max_uses) * 100, 100)
-                      : 0;
+                  // const usagePercent =
+                  //   pc.max_uses && pc.max_uses > 0
+                  //     ? Math.min((pc.current_uses / pc.max_uses) * 100, 100)
+                  //     : 0;
                   return (
                     <tr key={pc.id} className="hover:bg-white transition-all duration-300 group border-b border-gray-100 last:border-none">
                       <Td className="py-5">
@@ -350,10 +350,10 @@ const PromoCodes: React.FC = () => {
 
                       {/* Value — free_credit if available, else dash until Stripe wired */}
                       <Td className="py-5">
-  <span className="text-xl font-semibold text-gray-900 group-hover:text-alice-teal transition-colors">
-    {usagePercent.toFixed(0)}%
-  </span>
-</Td>
+                        <span className="text-xl font-semibold text-gray-900 group-hover:text-alice-teal transition-colors">
+                          {pc.free_credit}
+                        </span>
+                      </Td>
 
                       {/* Utilization */}
                       <Td className="py-5">
@@ -387,14 +387,12 @@ const PromoCodes: React.FC = () => {
                       </Td>
 
                       <Td className="py-4 md:py-5">
-                        <span className={`px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-sm ring-1 flex items-center gap-2 w-fit ${
-                          displayStatus === "Active"
-                            ? "bg-emerald-50 text-emerald-600 ring-emerald-100 shadow-emerald-100/50"
-                            : "bg-rose-50 text-rose-600 ring-rose-100 shadow-rose-100/50"
-                        }`}>
-                          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                            displayStatus === "Active" ? "bg-emerald-500" : "bg-rose-500"
-                          }`} />
+                        <span className={`px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-sm ring-1 flex items-center gap-2 w-fit ${displayStatus === "Active"
+                          ? "bg-emerald-50 text-emerald-600 ring-emerald-100 shadow-emerald-100/50"
+                          : "bg-rose-50 text-rose-600 ring-rose-100 shadow-rose-100/50"
+                          }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${displayStatus === "Active" ? "bg-emerald-500" : "bg-rose-500"
+                            }`} />
                           {displayStatus}
                         </span>
                       </Td>
@@ -409,8 +407,8 @@ const PromoCodes: React.FC = () => {
                             {isActionLoading
                               ? "..."
                               : displayStatus === "Active"
-                              ? "Revoke"
-                              : "Renew"}
+                                ? "Revoke"
+                                : "Renew"}
                           </button>
                         </div>
                       </Td>
