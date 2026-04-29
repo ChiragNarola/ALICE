@@ -8,15 +8,16 @@ interface EmailPreviewProps {
 }
 
 const EmailPreview: React.FC<EmailPreviewProps> = ({ userName, inviterName, joinUrl, temporaryPassword }) => {
+  console.log("inviterName: ", inviterName)
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-gray-50 scale-90 origin-top">
       <div className="bg-white max-w-[600px] mx-auto my-4 rounded-lg overflow-hidden shadow-sm">
         {/* Header */}
         <div style={{ backgroundColor: '#134e4a', padding: '12px 20px', textAlign: 'center', height: '70px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img 
-            src="/favicon.ico" 
-            alt="Alice Logo" 
-            style={{ height: '60px', width: 'auto', display: 'block', margin: '0 auto' }} 
+          <img
+            src="/favicon.ico"
+            alt="Alice Logo"
+            style={{ height: '60px', width: 'auto', display: 'block', margin: '0 auto' }}
             onError={(e) => {
               (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80?text=ALICE';
             }}
@@ -44,50 +45,50 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ userName, inviterName, join
           <p style={{ fontSize: '14px', marginBottom: '20px' }}>
             Simply click below and use your <strong>temporary password</strong> to log in:
           </p>
- 
-          <div style={{ 
-            backgroundColor: '#f1f5f9', 
-            border: '1px solid #e2e8f0', 
-            borderRadius: '12px', 
-            padding: '20px', 
-            margin: '20px 0', 
-            textAlign: 'center' 
+
+          <div style={{
+            backgroundColor: '#f1f5f9',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '20px',
+            margin: '20px 0',
+            textAlign: 'center'
           }}>
-            <span style={{ 
-              display: 'block', 
-              fontSize: '11px', 
-              fontWeight: 'bold', 
-              color: '#64748b', 
-              textTransform: 'uppercase', 
-              letterSpacing: '1.5px', 
-              marginBottom: '8px' 
+            <span style={{
+              display: 'block',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '1.5px',
+              marginBottom: '8px'
             }}>
               Your Temporary Password
             </span>
-            <span style={{ 
-              display: 'block', 
-              fontFamily: 'monospace', 
-              fontSize: '22px', 
-              fontWeight: 'bold', 
-              color: '#134e4a', 
-              letterSpacing: '3px' 
+            <span style={{
+              display: 'block',
+              fontFamily: 'monospace',
+              fontSize: '22px',
+              fontWeight: 'bold',
+              color: '#134e4a',
+              letterSpacing: '3px'
             }}>
               {temporaryPassword || '********'}
             </span>
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '25px' }}>
-            <a 
-              href={joinUrl} 
-              style={{ 
-                display: 'inline-block', 
-                backgroundColor: '#134e4a', 
-                color: '#ffffff', 
-                textDecoration: 'none', 
-                padding: '12px 30px', 
-                borderRadius: '8px', 
-                fontWeight: '600', 
-                fontSize: '14px' 
+            <a
+              href={joinUrl}
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#134e4a',
+                color: '#ffffff',
+                textDecoration: 'none',
+                padding: '12px 30px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '14px'
               }}
               onClick={(e) => e.preventDefault()}
             >
