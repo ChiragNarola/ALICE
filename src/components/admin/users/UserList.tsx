@@ -222,7 +222,7 @@ export default function UserList() {
                             <Th>Role</Th>
                             <Th>Last Login</Th>
                             <Th>User Created</Th>
-                            <Th>Action</Th>
+                            {/* <Th>Action</Th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -291,14 +291,14 @@ export default function UserList() {
                                                 }) : "-"
                                             }
                                         </Td>
-                                        <Td>
+                                        {/* <Td>
                                             <button 
                                                 onClick={() => navigate(`/admin/user/${user.id}`)}
                                                 className="px-3 py-1 bg-alice-teal/10 text-alice-teal text-xs font-bold rounded-lg hover:bg-alice-teal hover:text-white transition-colors"
                                             >
                                                 View Details
                                             </button>
-                                        </Td>
+                                        </Td> */}
                                     </tr>
                                 ))}
                             </>

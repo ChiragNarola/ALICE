@@ -65,7 +65,6 @@ export default function UploadedDocsList() {
     try {
       setLoading(true);
       const response = await listDocuments(nameSpaceId);
-
       if (response?.Data) {
         // Map response to match DocumentItem interface
         const formattedDocs = response.Data.map((doc: any) => ({
@@ -169,14 +168,14 @@ export default function UploadedDocsList() {
     try {
       setUploadLoading(true);
       const response = await uploadDocuments([uploadedFile!], selectedUploadNamespace);
-      if (response.data.results[0].status == 'success') {
+      if (response.Data.data.results[0].status == 'success') {
         toast.success("File uploaded successfully!", { autoClose: 3000 });
         setUploadedFile(null);
         setSelectedUploadNamespace("");
         setModalOpen(false);
         selectedNamespaceId && fetchUploadedDocs(selectedNamespaceId);
       } else {
-        toast.error(response.data.results[0].error || "Failed to upload file", { autoClose: 3000 });
+        toast.error(response.Data.data.results[0].error || "Failed to upload file", { autoClose: 3000 });
       }
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -291,9 +290,11 @@ export default function UploadedDocsList() {
           <select
             value={selectedNamespace}
             onChange={(e) => {
+              const selected = namespaces.find(ns => ns.name === e.target.value);
               setSelectedNamespace(e.target.value);
+              setSelectedNameSpaceId(selected?.id ?? null);
               setNamespaceError("");
-              setCurrentPage(1); // Reset to page 1 when namespace changes
+              setCurrentPage(1);
             }}
             disabled={namespaces.length === 0}
             className={`border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:opacity-50

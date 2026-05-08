@@ -10,7 +10,7 @@ const CollaborationContainer: React.FC = () => {
   const tabs = [
     { id: "sources" as const, label: "Sources", icon: Handshake },
     { id: "promo" as const, label: "Promo Codes", icon: Zap },
-    { id: "docs" as const, label: "Documents", icon: FileText },
+    // { id: "docs" as const, label: "Documents", icon: FileText },
   ];
 
   return (
