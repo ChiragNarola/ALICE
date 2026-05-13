@@ -31,9 +31,14 @@ interface AccessCode {
 }
 
 const targetOptions = [
-  { label: "All plans", value: "All plans" },
-  { label: "Parent plan", value: "Parent plan" },
-  { label: "Staff plan", value: "Staff plan" },
+  { label: "Parent", value: "parent" },
+  { label: "Staff", value: "staff" },
+  { label: "Both", value: "both" },
+];
+
+const planTypeOptions = [
+  { label: "Unlimited", value: "unlimited_daily_till_limit" },
+  { label: "Restricted", value: "daily" },
 ];
 
 const PromoCodes: React.FC = () => {
@@ -51,7 +56,9 @@ const PromoCodes: React.FC = () => {
     discount: "",         // UI only — not sent to API yet (Stripe side)
     expiry: "",
     maxUses: "",
-    appliesTo: "All plans",
+    appliesTo: "parent",
+    planType: "",
+    dailyChatLimit: "",
   });
 
   // ---------------- FETCH PARTNERS FOR DROPDOWN ----------------
@@ -127,18 +134,35 @@ const PromoCodes: React.FC = () => {
       return;
     }
 
+    if (!form.planType) {
+      toast.error("Please select a chat restriction type");
+      return;
+    }
+
+    if (form.planType === "daily" && !form.dailyChatLimit) {
+      toast.error("Daily limit is required for restricted plan type");
+      return;
+    }
+
     setSubmitLoading(true);
 
     try {
-      const res = await createAccessCode({
+      const payload: Record<string, any> = {
         code: form.code,
         partner_id: selectedPartnerId,
         max_uses: Number(form.maxUses),
         free_credit: Number(form.discount),
         valid_from: new Date().toISOString(),
         valid_until: form.expiry ? new Date(form.expiry).toISOString() : undefined,
-        target_group: form.appliesTo,   // backend will accept once field is added
-      });
+        target_group: form.appliesTo,
+        plan_type: form.planType,
+      };
+
+      if (form.planType === "daily") {
+        payload.daily_chat_limit = Number(form.dailyChatLimit);
+      }
+
+      const res = await createAccessCode(payload);
 
       if (res?.IsSuccess) {
         toast.success("Access code created successfully");
@@ -148,7 +172,9 @@ const PromoCodes: React.FC = () => {
           discount: "",
           expiry: "",
           maxUses: "",
-          appliesTo: "All plans",
+          appliesTo: "parent",
+          planType: "",
+          dailyChatLimit: "",
         });
       } else {
         toast.error(res?.Message || "Failed to create code");
@@ -279,6 +305,35 @@ const PromoCodes: React.FC = () => {
               options={targetOptions}
             />
           </div>
+
+          {/* Chat Restrictions */}
+          <div className="space-y-3">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Chat Restrictions</label>
+            <AliceSelect
+              value={form.planType}
+              onChange={(val) => setForm({ ...form, planType: val, dailyChatLimit: "" })}
+              options={planTypeOptions}
+            />
+          </div>
+
+          {/* Daily Limit — only shown when restricted */}
+          {form.planType === "daily" && (
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider ml-1">Daily Limit</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  required
+                  placeholder="e.g. 10"
+                  min={1}
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-alice-teal/10 transition-all font-semibold text-gray-900"
+                  value={form.dailyChatLimit}
+                  onChange={(e) => setForm({ ...form, dailyChatLimit: e.target.value })}
+                />
+                <span className="absolute right-5 top-4 font-semibold text-gray-300">Chats/day</span>
+              </div>
+            </div>
+          )}
 
           <div className="md:col-span-3 flex justify-end pt-6">
             <Button
