@@ -103,7 +103,7 @@ const AdminDashboard = () => {
   const [averageSession, setAverageSession] = useState<any>({});
   const [hourlyTrend, setHourlyTrend] = useState<HourlyTrendDTO[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
-  const [loadingHeatmap] = useState<boolean>(false);
+
   const [loadingApply, setLoadingApply] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"overview" | "activity" | "engagement" | "waitlist" | "usage">("overview");
   const [waitlistData, setWaitlistData] = useState<WaitlistAnalyticsDTO | null>(null);
@@ -541,7 +541,7 @@ const AdminDashboard = () => {
                 {stats.feedback.length > 0 ? (
                   <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
-                      <Pie data={stats.feedback} dataKey="count" nameKey="label" cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={3} cornerRadius={6} labelLine={false} label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
+                      <Pie data={stats.feedback} dataKey="count" nameKey="label" cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={3} cornerRadius={6} labelLine={false} label={({ percent }) => `${((percent || 0) * 100).toFixed(0)}%`}>
                         {stats.feedback.map((entry, index) => <Cell key={index} fill={entry.label?.toLowerCase() === 'like' ? '#10B981' : entry.label?.toLowerCase() === 'neutral' ? '#F59E0B' : '#EF4444'} />)}
                       </Pie>
                       <Tooltip />

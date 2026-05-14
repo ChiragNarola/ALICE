@@ -147,7 +147,7 @@ const PromoCodes: React.FC = () => {
     setSubmitLoading(true);
 
     try {
-      const payload: Record<string, any> = {
+      const payload: any = {
         code: form.code,
         partner_id: selectedPartnerId,
         max_uses: Number(form.maxUses),

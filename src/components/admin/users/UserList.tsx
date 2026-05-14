@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { Table, Th, Td } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
 import { Users, Search, UserPlus, Download, Send, Loader2 } from "lucide-react";
@@ -10,7 +10,7 @@ import ExportUsersModal from "./ExportUsersModal";
 import { Bounce, toast } from "react-toastify";
 
 export default function UserList() {
-    const navigate = useNavigate();
+
     const [search, setSearch] = useState("");
     const [selectedRole, setSelectedRole] = useState("");
     const [currentPage, setCurrentPage] = useState(1);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Handshake, Zap, FileText } from "lucide-react";
+import { Handshake, Zap } from "lucide-react";
 import PromoCodes from "./PromoCodes";
 import CollaborationSources from "./CollaborationSources";
 import CollaborationDocuments from "./CollaborationDocuments";
