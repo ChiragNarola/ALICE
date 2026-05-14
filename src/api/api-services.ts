@@ -817,6 +817,66 @@ export const getDailyUserRegistration = async (
   }
 };
 
+export const getWaitlistAnalytics = async (
+  params: DateParams
+): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`admin/waitlist_analytics`, {
+      params: {
+        start_date: params.start_date,
+        end_date: params.end_date,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch waitlist analytics",
+    };
+  }
+};
+
+export const getTokenUsageAnalytics = async (
+  params: DateParams
+): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`admin/token_usage_analytics`, {
+      params: {
+        start_date: params.start_date,
+        end_date: params.end_date,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch token usage analytics",
+    };
+  }
+};
+
+export const getUserRetention = async (
+  params: DateParams
+): Promise<APIResponse<any>> => {
+  try {
+    const response = await axiosInstance.get(`admin/user_retention`, {
+      params: {
+        start_date: params.start_date,
+        end_date: params.end_date,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch user retention analytics",
+    };
+  }
+};
+
 
 export const getUserRolesCount = async (): Promise<
   APIResponse<any>
