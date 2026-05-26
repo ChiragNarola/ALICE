@@ -38,7 +38,8 @@ function AppContent() {
     "/admin/nursery",
     "/admin/faq",
     "/admin/waitlist",
-    "/admin/collaboration"
+    "/admin/collaboration",
+    "/admin/notification"
   ];
 
   const [locked] = useState<boolean>(() => {

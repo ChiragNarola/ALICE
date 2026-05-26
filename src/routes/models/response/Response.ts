@@ -1,3 +1,12 @@
+export interface NotificationDto {
+    id: number;
+    title: string;
+    body: string;
+    target_type: string;
+    is_sent: boolean;
+    sent_at: string;
+    created_at: string;
+}
 export interface UserDTO {
     id: number;
     email: string;
@@ -6,6 +15,7 @@ export interface UserDTO {
     name?: string;
     roles: string[];
     created_at: string;
+    last_login_device?: string;
     last_login: string;
 }
 
@@ -15,6 +25,7 @@ export interface DisplayUser {
     email: string;
     roles: string[];
     createdAt: string;
+    loginDevice?: string;
     lastLogin: string;
 }
 
