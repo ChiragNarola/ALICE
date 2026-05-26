@@ -3,7 +3,7 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO, FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO, FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO, NotificationDto } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
@@ -1780,3 +1780,34 @@ export const bulkApproveWaitlistUsers = async (userIds: number[]) => {
     };
   }
 };
+
+//Send notification
+export const sendNotification = async (payload: {
+  title: string,
+  body: string,
+  targets: string[]
+}) => {
+  try {
+    const response = await axiosInstance.post("/notifications/send", payload);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send notification",
+    };
+  }
+}
+
+export const getPastNotification = async (): Promise<APIResponse<NotificationDto[]>> => {
+  try {
+    const response = await axiosInstance.get(`/notifications/list`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to send notification",
+    };
+  }
+}

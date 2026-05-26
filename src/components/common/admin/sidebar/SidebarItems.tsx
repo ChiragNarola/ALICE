@@ -8,7 +8,8 @@ import {
   CalendarDays,
   BadgeQuestionMark,
   Handshake,
-  Clock
+  Clock,
+  Bell
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -84,6 +85,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       title: "Collaboration",
       icon: Handshake,
       href: "/admin/collaboration",
+    },
+    {
+      title: "Notification",
+      icon: Bell,
+      href: "/admin/notification",
     },
     {
       title: "FAQ",
