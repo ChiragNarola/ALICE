@@ -9,7 +9,7 @@ import {
   BadgeQuestionMark,
   Handshake,
   Clock,
-  Bell
+  // Bell
 } from "lucide-react";
 
 export interface SidebarItemBadge {
@@ -93,7 +93,7 @@ export const useSidebarItems = (): SidebarItem[] => {
     // },
     {
       title: "FAQ",
-      icon: BadgeQuestionMark ,
+      icon: BadgeQuestionMark,
       href: "/admin/faq"
     }
     // {
