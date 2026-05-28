@@ -90,6 +90,7 @@ export default function UserList() {
                     roles: u.roles,
                     role: u.roles.join(", "),
                     createdAt: u.created_at,
+                    loginDevice: u.last_login_device,
                     lastLogin: u.last_login,
                 }));
 
@@ -264,6 +265,11 @@ export default function UserList() {
                                                 month: "short",
                                                 year: "numeric",
                                             })}
+                                            {user.loginDevice &&
+                                                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium bg-transparent text-teal-800 border border-teal-800`}>
+                                                    {user.loginDevice}
+                                                </span>
+                                            }
                                             {user.lastLogin == null && user.roles.some(role => ['staff', 'parent'].includes(role)) &&
                                                 <button
                                                     className={`mx-7 w-8 h-8 flex items-center justify-center

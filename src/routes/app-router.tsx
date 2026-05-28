@@ -28,6 +28,7 @@ import GuestChatPage from "../pages/GuestChatPage";
 import WaitlistPage from "../components/admin/users/WaitlistPage";
 import CollaborationContainer from "../components/admin/collaboration/CollaborationContainer";
 import UserDetails from "../pages/admin/UserDetails";
+import NotificationContainer from "../components/admin/notification/NotificatoinContainer";
 
 
 export default function AppRouter() {
@@ -76,6 +77,7 @@ export default function AppRouter() {
                         <Route path="faq" element={<FAQ />} />
                         <Route path="waitlist" element={<WaitlistPage />} />
                         <Route path="collaboration" element={<CollaborationContainer />} />
+                        <Route path="notification" element={<NotificationContainer />} />
                         <Route path="user/:id" element={<UserDetails />} />
                     </Route>
                 </Route>

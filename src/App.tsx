@@ -10,8 +10,12 @@ import { ChatActivityProvider } from "./contexts/ChatActivityContext";
 import { useAutoLogout } from "./hooks/autoLogout";
 import { useState, useEffect } from "react";
 import { ChatVisibilityProvider } from "./contexts/ChatVisibilityContext";
+import useFCM from "./hooks/useFCM";
+import { useAuth } from "./contexts/AuthContext";
 
 function AppContent() {
+  const { user } = useAuth();
+
   const [parsedUser, setParsedUser] = useState<any>(() => {
     const storedUser =
       sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
@@ -38,7 +42,8 @@ function AppContent() {
     "/admin/nursery",
     "/admin/faq",
     "/admin/waitlist",
-    "/admin/collaboration"
+    "/admin/collaboration",
+    "/admin/notification"
   ];
 
   const [locked] = useState<boolean>(() => {
@@ -74,8 +79,8 @@ function AppContent() {
   }, [parsedUser]);
 
   useAutoLogout(parsedUser);
+  useFCM(user); // ← uses AuthContext user
 
-  // Optional: keep checking storage in case user logs out in another tab
   useEffect(() => {
     const checkUser = () => {
       const storedUser =
@@ -101,19 +106,15 @@ function AppContent() {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <ChatActivityProvider>
-        <ChatVisibilityProvider>
-          <AuthProvider>
-            <ChildrenProvider>
-              <ChatProvider>
-                <div className={locked ? "pointer-events-none filter blur-sm" : ""}>
-                  <AppRouter />
-                </div>
-              </ChatProvider>
-            </ChildrenProvider>
-          </AuthProvider>
-        </ChatVisibilityProvider>
-      </ChatActivityProvider>
+      <ChatVisibilityProvider>
+        <ChildrenProvider>
+          <ChatProvider>
+            <div className={locked ? "pointer-events-none filter blur-sm" : ""}>
+              <AppRouter />
+            </div>
+          </ChatProvider>
+        </ChildrenProvider>
+      </ChatVisibilityProvider>
     </>
   );
 }
@@ -121,7 +122,11 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
-      <AppContent />
+      <ChatActivityProvider>   {/* ← outside AuthProvider (AuthContext depends on it) */}
+        <AuthProvider>         {/* ← outside AppContent so useAuth() works */}
+          <AppContent />
+        </AuthProvider>
+      </ChatActivityProvider>
     </Router>
   );
 }
