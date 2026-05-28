@@ -86,11 +86,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: Handshake,
       href: "/admin/collaboration",
     },
-    {
-      title: "Notification",
-      icon: Bell,
-      href: "/admin/notification",
-    },
+    // {
+    //   title: "Notification",
+    //   icon: Bell,
+    //   href: "/admin/notification",
+    // },
     {
       title: "FAQ",
       icon: BadgeQuestionMark ,
