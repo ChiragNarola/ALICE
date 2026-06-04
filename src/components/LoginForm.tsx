@@ -214,6 +214,34 @@ const LoginForm = () => {
         </NavLink>
       </p>
 
+      {/* App Download Badges */}
+      <div className="flex items-center justify-center gap-3 mt-4">
+          <a
+          href="https://play.google.com/store/apps/details?id=com.aliceAi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-transform hover:scale-105 active:scale-95"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+            alt="Get it on Google Play"
+            className="h-[38px] lg:h-[42px]"
+          />
+        </a>
+        <a
+          href=""
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-transform hover:scale-105 active:scale-95"
+        >
+          <img
+            src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+            alt="Download on the App Store"
+            className="h-[38px] lg:h-[42px]"
+          />
+        </a>
+      </div>
+
       {/* Guest Button — hidden for registered users */}
       {!savedPinEmail && (
         <div className="mt-6 flex flex-col items-center">

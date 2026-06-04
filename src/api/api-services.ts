@@ -1811,3 +1811,20 @@ export const getPastNotification = async (): Promise<APIResponse<NotificationDto
     };
   }
 }
+
+
+export const updateStaffDailyCredits = async (payload: {
+  user_id: number;
+  daily_chat_credits: number;
+}): Promise<APIResponse<null>> => {
+  try {
+    const response = await axiosInstance.put(`/staff/daily-credits`, payload); //change with real endpoint
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to update daily chat credits",
+    };
+  }
+};

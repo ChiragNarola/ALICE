@@ -5,7 +5,7 @@ import { Users, Search, Hourglass, BadgeCheck, PlusIcon } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ApproveRejectModal from "./ApproveRejectModal";
-import { getStaffNurseryStatus, updateStaffNurseryStatus } from "../../../api/api-services";
+import { getStaffNurseryStatus, updateStaffNurseryStatus, updateStaffDailyCredits } from "../../../api/api-services";
 
 import type {
   StaffNurseryStatusDTO,
@@ -24,6 +24,7 @@ interface GroupedStaffRow {
   role_in_organisation?: string | null;
   qualification?: string | null;
   created_at?: string;
+  daily_chat_credits?: number | null;
   nurseries: {
     nursery_id: number;
     nursery_name: string;
@@ -40,6 +41,8 @@ export default function StaffNurseryList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<GroupedStaffRow | null>(null);
+  const [editingCredits, setEditingCredits] = useState<{ userId: number; value: string } | null>(null);
+  const [savingCredits, setSavingCredits] = useState(false);
 
   const fetchStaffNursery = async () => {
     try {
@@ -265,6 +268,39 @@ export default function StaffNurseryList() {
     }
   };
 
+  const handleCreditsSave = async () => {
+    if (!editingCredits) return;
+    const parsed = parseInt(editingCredits.value);
+    if (isNaN(parsed) || parsed < 0) {
+      toast.error("Please enter a valid number");
+      return;
+    }
+    try {
+      setSavingCredits(true);
+      const res = await updateStaffDailyCredits({
+        user_id: editingCredits.userId,
+        daily_chat_credits: parsed,
+      });
+      if (res?.IsSuccess) {
+        toast.success("Credits updated successfully");
+        setRows((prev) =>
+          prev.map((r) =>
+            r.user_id === editingCredits.userId
+              ? { ...r, daily_chat_credits: parsed }
+              : r
+          )
+        );
+        setEditingCredits(null);
+      } else {
+        toast.error(res?.Message || "Failed to update credits");
+      }
+    } catch {
+      toast.error("Failed to update credits");
+    } finally {
+      setSavingCredits(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* HEADER */}
@@ -319,6 +355,7 @@ export default function StaffNurseryList() {
               <Th>Qualification</Th>
               <Th>Nursery Count</Th>
               <Th>Approve / Reject</Th>
+              <Th>Daily Chat Credits</Th>
             </tr>
           </thead>
 
@@ -395,6 +432,78 @@ export default function StaffNurseryList() {
                         <BadgeCheck className="w-4 h-4" />
                       </button>
                     </div>
+                  </Td>
+
+                  <Td className="align-middle">
+                    {editingCredits?.userId === row.user_id ? (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={0}
+                          autoFocus
+                          value={editingCredits.value}
+                          onChange={(e) =>
+                            setEditingCredits({ userId: row.user_id, value: e.target.value })
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleCreditsSave();
+                            if (e.key === "Escape") setEditingCredits(null);
+                          }}
+                          className="w-20 px-2 py-1 text-sm border border-indigo-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center"
+                        />
+                        <button
+                          onClick={handleCreditsSave}
+                          disabled={savingCredits}
+                          className="h-7 w-7 flex items-center justify-center rounded-md bg-teal-700 text-white hover:bg-teal-800 transition disabled:opacity-50"
+                          title="Save"
+                        >
+                          {savingCredits ? (
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setEditingCredits(null)}
+                          className="h-7 w-7 flex items-center justify-center rounded-md border border-gray-300 text-gray-500 hover:bg-gray-100 transition"
+                          title="Cancel"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                            <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold
+                          ${row.daily_chat_credits != null && row.daily_chat_credits > 0
+                            ? "bg-teal-50 text-teal-700 border border-teal-200"
+                            : "bg-gray-100 text-gray-500 border border-gray-200"
+                          }`}>
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                            <circle cx="5" cy="5" r="4.5" stroke="currentColor" strokeWidth="1" fill="none"/>
+                            <text x="5" y="7.5" textAnchor="middle" fontSize="6" fontWeight="bold" fill="currentColor">C</text>
+                          </svg>
+                          {row.daily_chat_credits ?? 0}
+                        </span>
+                        <button
+                          onClick={() =>
+                            setEditingCredits({
+                              userId: row.user_id,
+                              value: String(row.daily_chat_credits ?? 0),
+                            })
+                          }
+                          className="h-6 w-6 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:border-indigo-400 hover:text-indigo-600 transition"
+                          title="Edit credits"
+                        >
+                          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                            <path d="M7.5 1.5l2 2L3 10H1V8L7.5 1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </Td>
                 </tr>
               ))

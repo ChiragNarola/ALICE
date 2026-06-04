@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { ChatVisibilityProvider } from "./contexts/ChatVisibilityContext";
 import useFCM from "./hooks/useFCM";
 import { useAuth } from "./contexts/AuthContext";
+import FloatingAppBanner from "./components/ui/FloatingBanner";
 
 function AppContent() {
   const { user } = useAuth();
@@ -105,7 +106,9 @@ function AppContent() {
 
   return (
     <>
+    
       <ToastContainer position="top-right" autoClose={3000} />
+      <FloatingAppBanner excludedRoutes={excludedRoutes} />
       <ChatVisibilityProvider>
         <ChildrenProvider>
           <ChatProvider>
