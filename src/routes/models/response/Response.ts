@@ -6,6 +6,8 @@ export interface NotificationDto {
     is_sent: boolean;
     sent_at: string;
     created_at: string;
+    question?: string;
+    is_editable: boolean;
 }
 export interface UserDTO {
     id: number;
@@ -123,4 +125,5 @@ export interface StaffNurseryStatusDTO {
 
   nurseries: StaffNurseryAssignmentDTO[];
   created_at: string;
+  bonus_credits?: number;
 }

@@ -24,7 +24,7 @@ interface GroupedStaffRow {
   role_in_organisation?: string | null;
   qualification?: string | null;
   created_at?: string;
-  daily_chat_credits?: number | null;
+  bonus_credits?: number | null;
   nurseries: {
     nursery_id: number;
     nursery_name: string;
@@ -66,6 +66,7 @@ export default function StaffNurseryList() {
               nursery_name: "",
               status: null,
               created_at: staff.created_at,
+              bonus_credits: staff.bonus_credits,
             }];
           }
 
@@ -80,6 +81,7 @@ export default function StaffNurseryList() {
             nursery_name: n.nursery_name,
             status: n.status,
             created_at: staff.created_at,
+            bonus_credits: staff.bonus_credits,
           }));
         });
 
@@ -96,12 +98,14 @@ export default function StaffNurseryList() {
                 qualification: row.qualification,
                 created_at: row.created_at,
                 nurseries: [],
+                bonus_credits: row.bonus_credits,
               };
             }
             acc[row.user_id].nurseries.push({
               nursery_id: row.nursery_id,
               nursery_name: row.nursery_name,
               status: row.status,
+
             });
             return acc;
           }, {})
@@ -279,14 +283,14 @@ export default function StaffNurseryList() {
       setSavingCredits(true);
       const res = await updateStaffDailyCredits({
         user_id: editingCredits.userId,
-        daily_chat_credits: parsed,
+        bonus_credits: parsed,
       });
       if (res?.IsSuccess) {
         toast.success("Credits updated successfully");
         setRows((prev) =>
           prev.map((r) =>
             r.user_id === editingCredits.userId
-              ? { ...r, daily_chat_credits: parsed }
+              ? { ...r, bonus_credits: parsed }
               : r
           )
         );
@@ -355,7 +359,7 @@ export default function StaffNurseryList() {
               <Th>Qualification</Th>
               <Th>Nursery Count</Th>
               <Th>Approve / Reject</Th>
-              <Th>Daily Chat Credits</Th>
+              <Th>Chat Bonus Credits</Th>
             </tr>
           </thead>
 
@@ -478,7 +482,7 @@ export default function StaffNurseryList() {
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold
-                          ${row.daily_chat_credits != null && row.daily_chat_credits > 0
+                          ${row.bonus_credits != null && row.bonus_credits > 0
                             ? "bg-teal-50 text-teal-700 border border-teal-200"
                             : "bg-gray-100 text-gray-500 border border-gray-200"
                           }`}>
@@ -486,13 +490,13 @@ export default function StaffNurseryList() {
                             <circle cx="5" cy="5" r="4.5" stroke="currentColor" strokeWidth="1" fill="none"/>
                             <text x="5" y="7.5" textAnchor="middle" fontSize="6" fontWeight="bold" fill="currentColor">C</text>
                           </svg>
-                          {row.daily_chat_credits ?? 0}
+                          {row.bonus_credits ?? 0}
                         </span>
                         <button
                           onClick={() =>
                             setEditingCredits({
                               userId: row.user_id,
-                              value: String(row.daily_chat_credits ?? 0),
+                              value: String(row.bonus_credits ?? 0),
                             })
                           }
                           className="h-6 w-6 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:border-indigo-400 hover:text-indigo-600 transition"

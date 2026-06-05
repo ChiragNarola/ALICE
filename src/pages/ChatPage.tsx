@@ -139,6 +139,21 @@ const ChatPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
 
+  useEffect(() => {
+    const question = searchParams.get("question");
+    const isEditable = searchParams.get("auto") === "true";
+
+
+    if (!question) return;
+    window.history.replaceState({}, "", "/chat");
+
+    if (!isEditable) {
+      handlerecommendedMessage(question);
+    } else {
+      setMessage(question);
+    }
+  }, []);
+
   const handleGenerate = () => {
     const conversationUUID = searchParams.get("v");
     if (conversationUUID) {

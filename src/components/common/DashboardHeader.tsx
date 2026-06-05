@@ -4,7 +4,7 @@ import userimg from "../../assets/images/user-img.png";
 import { useNavigate } from "react-router-dom";
 import { useChatVisibility } from "../../contexts/ChatVisibilityContext";
 import { useChat } from "../../contexts/ChatContext";
-import { User, MessageCircle, LogOut, Lock, Eye, EyeOff, KeySquare } from "lucide-react";
+import { User, MessageCircle, LogOut, Lock, Eye, EyeOff, KeySquare, Bell } from "lucide-react";
 import { changePassword, setPin, updatePin } from "../../api/api-services";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/AuthContext";
@@ -388,6 +388,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               >
                 <MessageCircle className="w-5 h-5" />
                 Chat
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate("/userNotifications");
+                  setShowUserDropdown(false);
+                }}
+                className="flex items-center gap-2 w-full text-left text-base rounded-xl my-1 py-2 px-3 hover:bg-alice-teal/10 text-gray-700 hover:text-alice-teal"
+              >
+                <Bell className="w-5 h-5" />
+                Notifications
               </button>
 
               <button
