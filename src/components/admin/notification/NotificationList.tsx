@@ -74,7 +74,7 @@ export const NotificationList = ({ loading, notifications }: Prop) => {
                                     </Td>
                                     <Td>{notification.question ?? <span className="text-gray-300">—</span>}</Td>
                                     <Td>
-                                    {notification.is_editable
+                                    {!notification.is_editable
                                         ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700">Yes</span>
                                         : <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400">No</span>
                                     }
