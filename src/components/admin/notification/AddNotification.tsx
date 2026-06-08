@@ -1,4 +1,4 @@
-import { Bell, HelpCircle, Repeat2 } from "lucide-react";
+import { Bell, Repeat2 } from "lucide-react";
 import Button from "../../ui/Button";
 import React from "react";
 import AliceSelect from "../../ui/AliceSelect";

@@ -38,14 +38,24 @@ const saveDeviceToken = async (
 
 const useFCM = (user: AuthUser | null): void => {
   useEffect(() => {
-    if (!user?.token) return;
-    if (user.roles?.includes("admin")) return;
+
+    if (!user?.token) {
+      return;
+    }
+
+    if (user.roles?.includes("admin")) {
+      return;
+    }
 
     const init = async (): Promise<void> => {
       const fcmToken = await requestFCMToken();
-      if (!fcmToken) return;
+      if (!fcmToken) {
+        return;
+      }
       const storedToken = localStorage.getItem("fcm_token");
-      if (storedToken === fcmToken) return;
+      if (storedToken === fcmToken) {
+        return;
+      }
       await saveDeviceToken(fcmToken, user.token!);
       localStorage.setItem("fcm_token", fcmToken);
     };
@@ -56,7 +66,7 @@ const useFCM = (user: AuthUser | null): void => {
       const title = payload.notification?.title ?? "New Notification";
       const body = payload.notification?.body ?? "";
       const question = payload.data?.question ?? "";
-      const is_editable = payload.data?.is_editable === "true";
+      const is_editable = payload.data?.is_editable === "true" || payload.data?.is_editable === "1";
 
       const content = (
         <div style={{ cursor: question ? "pointer" : "default" }}>
@@ -83,7 +93,10 @@ const useFCM = (user: AuthUser | null): void => {
       });
     });
 
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+    };
   }, [user?.token]);
 };
 

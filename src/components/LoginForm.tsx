@@ -53,6 +53,19 @@ const LoginForm = () => {
         if (role === "staff" || role === "parent") {
           toast.success("Login successful");
 
+          const params = new URLSearchParams(window.location.search);
+          const redirectQuestion = params.get("redirect_question");
+          const redirectAuto = params.get("redirect_auto");
+          if (redirectQuestion) {
+            sessionStorage.setItem("pending_notification", JSON.stringify({
+              question: redirectQuestion,
+              is_editable: redirectAuto
+            }));
+            navigate("/chat");
+            return;
+          }
+
+
           const pinSet = localStorage.getItem("pin_set");
 
           if (pinSet === "false") {

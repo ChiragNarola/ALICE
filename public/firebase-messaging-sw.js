@@ -2,12 +2,12 @@ importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyCs3yySm4ZFDFFwqvzA1dnQU4SA-KUgEFs",
+  authDomain: "alice-50768.firebaseapp.com",
+  projectId: "alice-50768",
+  storageBucket: "alice-50768.firebasestorage.app",
+  messagingSenderId: "525322096225",
+  appId: "1:525322096225:web:4b8be95389f96e39932420",
 });
 
 const messaging = firebase.messaging();
@@ -15,30 +15,39 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   const { title, body } = payload.notification;
   const question = payload.data?.question ?? "";
-  const is_editable = payload.data?.is_editable ?? "false";
+  const is_editable = payload.data?.is_editable === "true" || payload.data?.is_editable === "1"
+    ? "true"
+    : "false";
 
-  self.registration.showNotification(title, {
-    body,
-    icon: "/logo.svg",
-    tag: "alice-notification",
-    data: { question, is_editable: isAuto },
+  // ← close any existing notification with same tag before showing new one
+  self.registration.getNotifications({ tag: "alice-notification" }).then((notifications) => {
+    notifications.forEach(n => n.close());
+    
+    self.registration.showNotification(title, {
+      body,
+      icon: "/logo.svg",
+      tag: "alice-notification",
+      renotify: false, // ← don't notify again if same tag exists
+      data: { question, is_editable },
+    });
   });
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
   const { question, is_editable } = event.notification.data ?? {};
 
-  let url = "/chat";
+  let url = "/";
   if (question) {
-    url = `/chat?question=${encodeURIComponent(question)}&auto=${is_editable}`;
+    // Save for after login
+    // Can't access sessionStorage from SW, so pass via URL to login
+    url = `/login?redirect_question=${encodeURIComponent(question)}&redirect_auto=${is_editable}`;
   }
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes("/chat") && "focus" in client) {
+        if ("focus" in client) {
           client.navigate(url);
           return client.focus();
         }
