@@ -29,6 +29,7 @@ import WaitlistPage from "../components/admin/users/WaitlistPage";
 import CollaborationContainer from "../components/admin/collaboration/CollaborationContainer";
 import UserDetails from "../pages/admin/UserDetails";
 import NotificationContainer from "../components/admin/notification/NotificatoinContainer";
+import UserNotification from "../pages/UserNotification";
 
 
 export default function AppRouter() {
@@ -52,6 +53,7 @@ export default function AppRouter() {
                 <Route element={<DashboardLayout />}>
                     <Route path="/child-basic-info" element={<ChildBasicInformation />} />
                     <Route path="/chat" element={<Chat />} />
+                    <Route path="/userNotifications" element={<UserNotification />} />
                 </Route>
             </Route>
 

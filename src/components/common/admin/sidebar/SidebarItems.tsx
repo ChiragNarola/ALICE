@@ -9,7 +9,7 @@ import {
   BadgeQuestionMark,
   Handshake,
   Clock,
-  // Bell
+  Bell
 } from "lucide-react";
 
 export interface SidebarItemBadge {

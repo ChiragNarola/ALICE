@@ -139,6 +139,36 @@ const ChatPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
 
+  useEffect(() => {
+    const question = searchParams.get("question");
+    const isEditable = searchParams.get("auto") === "true";
+
+    if (question) {
+      window.history.replaceState({}, "", "/chat");
+      if (isEditable) {
+        setMessage(question);
+      } else {
+        handlerecommendedMessage(question);
+      }
+      return;
+    }
+
+    const pending = sessionStorage.getItem("pending_notification");
+    if (pending) {
+      sessionStorage.removeItem("pending_notification");
+      const { question: pQuestion, is_editable: pEditable } = JSON.parse(pending);
+      
+      // ← wait for chat context to be ready
+      setTimeout(() => {
+        if (pEditable === "true") {
+          setMessage(pQuestion);
+        } else {
+          handlerecommendedMessage(pQuestion);
+        }
+      }, 500);
+    }
+  }, []);
+
   const handleGenerate = () => {
     const conversationUUID = searchParams.get("v");
     if (conversationUUID) {

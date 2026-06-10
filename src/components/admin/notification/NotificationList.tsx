@@ -33,6 +33,8 @@ export const NotificationList = ({ loading, notifications }: Prop) => {
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</Th>
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Body</Th>
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Target Group</Th>
+                            <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Question</Th>
+                            <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Auto-ask</Th>
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sent</Th>
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sent Date</Th>
                         </tr>
@@ -70,12 +72,23 @@ export const NotificationList = ({ loading, notifications }: Prop) => {
                                             {notification.target_type}
                                         </span>
                                     </Td>
+                                    <Td>{notification.question ?? <span className="text-gray-300">—</span>}</Td>
+                                    <Td>
+                                    {!notification.is_editable
+                                        ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700">Yes</span>
+                                        : <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400">No</span>
+                                    }
+                                    </Td>
                                     <Td>{notification.is_sent && <BadgeCheck />}</Td>
-                                    <Td>{new Date(notification.sent_at).toLocaleDateString("en-GB", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric",
-                                    })}</Td>
+                                    <Td>
+                                    {notification.sent_at
+                                        ? new Date(notification.sent_at).toLocaleDateString("en-GB", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                        })
+                                        : <span className="text-gray-300">—</span>}
+                                    </Td>
                                 </tr>
                             ))
                         )}

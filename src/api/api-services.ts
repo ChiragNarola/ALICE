@@ -1811,3 +1811,38 @@ export const getPastNotification = async (): Promise<APIResponse<NotificationDto
     };
   }
 }
+
+
+export const updateStaffDailyCredits = async (payload: {
+  user_id: number;
+  bonus_credits: number;
+}): Promise<APIResponse<null>> => {
+  try {
+    const response = await axiosInstance.put(`admin/staff/bonus-credits`, null, {
+      params: {
+        user_id: payload.user_id,
+        bonus_credits: payload.bonus_credits,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to update bonus credits",
+    };
+  }
+};
+
+export const getUserNotifications = async (): Promise<APIResponse<NotificationDto[]>> => {
+  try {
+    const response = await axiosInstance.get(`/notifications/user-notifications`);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch notifications",
+    };
+  }
+};

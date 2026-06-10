@@ -15,6 +15,8 @@ export default function NotificationContainer() {
     title: "",
     body: "",
     targetGroup: "",
+    question: "",
+    is_auto: false,
   });
 
   const fetchPastNotifications = useCallback(async () => {
@@ -60,12 +62,16 @@ export default function NotificationContainer() {
         title: form.title,
         body: form.body,
         targets,
+        question: form.question,
+        is_editable: !form.is_auto,
       };
+
+      console.log("Sending payload:", payload);
 
       const res = await sendNotification(payload);
       if (res.IsSuccess) {
         toast.success("Notification sent successfully");
-        setForm({ title: "", body: "", targetGroup: "" });
+        setForm({ title: "", body: "", targetGroup: "" , question: "", is_auto: false });
         await fetchPastNotifications();
       } else {
         toast.error(res?.Message || "Failed to send notification");
