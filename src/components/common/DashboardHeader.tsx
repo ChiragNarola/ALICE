@@ -390,7 +390,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 Chat
               </button>
 
-              <button
+              {/* <button
                 onClick={() => {
                   navigate("/userNotifications");
                   setShowUserDropdown(false);
@@ -399,7 +399,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               >
                 <Bell className="w-5 h-5" />
                 Notifications
-              </button>
+              </button> */}
 
               <button
                 onClick={() => {
