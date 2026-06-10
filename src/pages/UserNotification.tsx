@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, BellOff, Clock, Check } from "lucide-react";
+import { Bell, BellOff, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import { getUserNotifications } from "../api/api-services";
 import type { NotificationDto } from "../routes/models/response/Response";
@@ -24,12 +24,12 @@ const isYesterday = (dateStr: string) => {
   return d.toDateString() === yesterday.toDateString();
 };
 
-const isDayBefore = (dateStr: string) => {
-  const d = new Date(dateStr);
-  const dayBefore = new Date();
-  dayBefore.setDate(dayBefore.getDate() - 2);
-  return d.toDateString() === dayBefore.toDateString();
-};
+// const isDayBefore = (dateStr: string) => {
+//   const d = new Date(dateStr);
+//   const dayBefore = new Date();
+//   dayBefore.setDate(dayBefore.getDate() - 2);
+//   return d.toDateString() === dayBefore.toDateString();
+// };
 
 const getGroupLabel = (dateStr?: string): string => {
   if (!dateStr) return "Earlier";
