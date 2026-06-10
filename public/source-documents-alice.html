@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Source Documents – ALICE AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo-img {
+      width: auto;
+      height: 56px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    header .brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: #0d9488;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    .hero-label {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.85rem;
+      font-weight: 400;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+      flex-grow: 1;
+    }
+
+    /* ── INTRO BOX ── */
+    .intro-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #0d9488;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      font-size: 0.85rem;
+      color: #475569;
+      line-height: 1.75;
+    }
+
+    .intro-box strong {
+      color: #0f172a;
+    }
+
+    /* ── SEARCH ── */
+    .search-container {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      font-size: 0.9rem;
+      font-family: 'Open Sans', sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .search-input:focus {
+      border-color: #0d9488;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    /* ── DOCUMENT CARD ── */
+    .doc-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .doc-card:hover {
+      border-color: #0d9488;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.04);
+      transform: translateY(-1px);
+    }
+
+    .doc-icon-wrapper {
+      background: #f0fdfa;
+      color: #0d9488;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .doc-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .doc-info {
+      flex-grow: 1;
+    }
+
+    .doc-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .doc-description {
+      font-size: 0.83rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .doc-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .doc-meta-item svg {
+      width: 14px;
+      height: 14px;
+      color: #94a3b8;
+    }
+
+    .doc-tag {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    /* ── STATUS CONTAINERS ── */
+    .status-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+
+    .status-icon {
+      width: 48px;
+      height: 48px;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+
+    .status-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .status-subtext {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* ── LOADER ── */
+    #loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #f1f5f9;
+      border-top-color: #0d9488;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 28px 24px;
+      border-top: 1px solid #e2e8f0;
+      background: #ffffff;
+      margin-top: auto;
+    }
+
+    .footer-container {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    .footer-container a {
+      color: #0d9488;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-container a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .hero {
+        padding: 36px 20px 32px;
+      }
+
+      .container {
+        padding: 28px 16px 56px;
+      }
+
+      .footer-container {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER (Optional, commented out to match privacy & terms pages) -->
+  <!-- 
+  <header>
+    <img src="/logo.svg" alt="ALICE AI Logo" class="logo-img" />
+    <span class="brand">ALICE AI</span>
+  </header>
+  -->
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">Reference Library</div>
+    <h1>Source Documents</h1>
+    <p>ALICE AI generates responses using AI together with the educational and developmental reference materials listed below.</p>
+  </div>
+
+  <!-- CONTAINER -->
+  <div class="container">
+
+    <div class="intro-box">
+      <strong>These documents form the knowledge base for ALICE AI's responses.</strong> All materials are curated by Early Years AI Ltd and reviewed for accuracy and child-safety. AI-generated responses are for informational and educational support only and should not be considered medical, diagnostic, or clinical advice.
+    </div>
+
+    <!-- SEARCH BOX -->
+    <div class="search-container">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" id="search-input" class="search-input" placeholder="Search documents..." autocomplete="off" />
+    </div>
+
+    <!-- LOADER -->
+    <div id="loader">
+      <div class="spinner"></div>
+      <div style="font-size: 0.85rem; color: #64748b;">Loading documents...</div>
+    </div>
+
+    <!-- ERROR CONTAINER (Matches 2nd image: "Could not load documents. Please try again later.") -->
+    <div id="error-container" class="status-container">
+      <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <div class="status-text">Could not load documents. Please try again later.</div>
+    </div>
+
+    <!-- EMPTY CONTAINER -->
+    <div id="empty-container" class="status-container">
+      <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div class="status-text">No documents found matching your search.</div>
+    </div>
+
+    <!-- DOCUMENTS LIST -->
+    <div id="documents-list" style="display: none;"></div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div>&copy; 2026 Early Years AI Ltd</div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <a href="/privacy-policy.html">Privacy Policy</a>
+        <span style="color: #cbd5e1;">&middot;</span>
+        <a href="/terms.html">Terms &amp; Conditions</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    // ==========================================
+    // API Configuration
+    // ==========================================
+    const API_ENDPOINT = 'api/v1/source-documents'; 
+
+    let documentsList = [];
+
+    // Load documents on startup
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDocuments();
+
+      // Hook search input
+      const searchInput = document.getElementById('search-input');
+      searchInput.addEventListener('input', (e) => {
+        handleSearch(e.target.value);
+      });
+    });
+
+    async function loadDocuments() {
+      const listContainer = document.getElementById('documents-list');
+      const loader = document.getElementById('loader');
+      const errorContainer = document.getElementById('error-container');
+      const emptyContainer = document.getElementById('empty-container');
+      
+      // Reset visibility
+      listContainer.style.display = 'none';
+      errorContainer.style.display = 'none';
+      emptyContainer.style.display = 'none';
+      loader.style.display = 'flex';
+      
+      try {
+        // Fetch from API
+        const response = await fetch(API_ENDPOINT);
+        if (!response.ok) throw new Error("Failed to fetch documents from server");
+        
+        const result = await response.json();
+        
+        if (result && result.IsSuccess && result.Data && Array.isArray(result.Data.documents)) {
+          // Format API items into our layout items
+          documentsList = result.Data.documents.map((doc, idx) => {
+            let title = doc.name;
+            if (doc.name.includes('/')) {
+              title = doc.name.split('/').pop();
+            }
+            
+            // Clean file extensions from titles
+            const cleanTitle = title.replace(/\.[^/.]+$/, "");
+            
+            return {
+              id: idx,
+              title: cleanTitle,
+              originalName: doc.name,
+              size: formatKb(doc.size_kb),
+              lastUpdated: formatDate(doc.last_modified),
+              url: doc.url
+            };
+          });
+        } else {
+          throw new Error("Invalid API payload structure");
+        }
+        
+        loader.style.display = 'none';
+        listContainer.style.display = 'block';
+        renderDocuments(documentsList);
+      } catch (error) {
+        console.error("Error loading documents:", error);
+        loader.style.display = 'none';
+        errorContainer.style.display = 'flex';
+      }
+    }
+
+    function renderDocuments(docs) {
+      const container = document.getElementById('documents-list');
+      const emptyContainer = document.getElementById('empty-container');
+      container.innerHTML = '';
+      
+      if (docs.length === 0) {
+        emptyContainer.style.display = 'flex';
+        return;
+      }
+      
+      emptyContainer.style.display = 'none';
+      
+      docs.forEach(doc => {
+        const card = document.createElement('div');
+        card.className = 'doc-card';
+        card.style.cursor = 'pointer';
+        card.onclick = () => {
+          if (doc.url && doc.url !== '#') {
+            const extension = doc.originalName.split('.').pop().toLowerCase();
+            if (['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt'].includes(extension)) {
+              // Open Office documents via the Microsoft Online Viewer directly in a new tab to view them in-browser
+              window.open(`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(doc.url)}`, '_blank');
+            } else {
+              // Open PDFs & other browser-supported files directly in a new tab
+              window.open(doc.url, '_blank');
+            }
+          }
+        };
+        card.innerHTML = `
+          <div class="doc-icon-wrapper">
+            <svg class="doc-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div class="doc-info">
+            <div class="doc-title">${escapeHtml(doc.title)}</div>
+            <div class="doc-meta">
+              <div class="doc-meta-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span>${escapeHtml(doc.size)}</span>
+              </div>
+              <div class="doc-meta-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Updated ${escapeHtml(doc.lastUpdated)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Utilities & Formatting
+    function formatKb(sizeKb) {
+      if (sizeKb === undefined || sizeKb === null) return 'Unknown Size';
+      const num = parseFloat(sizeKb);
+      if (isNaN(num)) return sizeKb;
+      if (num >= 1024) {
+        return (num / 1024).toFixed(1) + ' MB';
+      }
+      return num.toFixed(1) + ' KB';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return 'Recent';
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      } catch (e) {
+        return 'Recent';
+      }
+    }
+
+    // Checking search input
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function handleSearch(query) {
+      const filtered = documentsList.filter(doc => 
+        (doc.title && doc.title.toLowerCase().includes(query.toLowerCase())) ||
+        (doc.originalName && doc.originalName.toLowerCase().includes(query.toLowerCase()))
+      );
+      renderDocuments(filtered);
+    }
+  </script>
+</body>
+
+</html>
