@@ -243,8 +243,8 @@ const AdminDashboard = () => {
       if (inputLike !== null) { input += inputLike; hasExplicit = true; }
       if (outputLike !== null) { output += outputLike; hasExplicit = true; }
 
-      const promptTokens = Number(item.prompt_tokens ?? item["prompt tokens"]);
-      const completionTokens = Number(item.completion_tokens ?? item["completion tokens"]);
+      const promptTokens = Number(item.input_tokens ?? item.prompt_tokens ?? item["prompt tokens"]);
+      const completionTokens = Number(item.output_tokens ?? item.completion_tokens ?? item["completion tokens"]);
 
       if (!hasExplicit && !Number.isNaN(promptTokens) && !Number.isNaN(completionTokens)) {
         const totalTokens = promptTokens + completionTokens;

@@ -732,9 +732,11 @@ export const getFeedbackRatings = async (
 
 
 interface CostEstimateDTO {
-  modelName: string;
-  totalTokens: number;
+  model_name: string;
+  "total tokens": string;
   cost: number;
+  input_tokens: string;
+  output_tokens: string;
 }
 
 export const getCostEstimate = async (

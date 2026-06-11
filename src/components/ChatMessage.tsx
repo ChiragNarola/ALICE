@@ -7,6 +7,7 @@ import { Copy, ThumbsDown, ThumbsUp,Download } from "lucide-react";
 import TypingIndicator from "./ui/TypingIndicator";
 import ReactMarkdown from "react-markdown";
 import { jsPDF } from "jspdf";
+import remarkGfm from "remark-gfm";
 
 interface ChatMessageProps {
     id?: number | undefined;
@@ -211,6 +212,7 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
                             ) : (
                                 <>
                                     <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
                                         components={{
                                             a: ({ node, ...props }) => (
                                                 <a
