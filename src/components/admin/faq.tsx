@@ -111,12 +111,12 @@ export default function FAQ() {
       setLoading(true);
       const res = await generateFAQ();
 
-      if (res?.IsSuccess && Array.isArray(res.Data)) {
-        const cleaned: FAQItem[] = res.Data.map((h: any) => ({
+      if (res?.IsSuccess && Array.isArray(res.Data?.faqs)) {
+        const cleaned: FAQItem[] = res.Data.faqs.map((h: any) => ({
           id: h.id,
-          question: h.questions,
-          AI_answer: cleanMarkdown(h.ai_response),
-          human_answer: h.alice_answer,
+          question: h.question,
+          AI_answer: h.answer,
+          human_answer: "",
         }));
 
         setFaqs(cleaned);

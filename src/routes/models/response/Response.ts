@@ -93,6 +93,19 @@ export interface FAQItem{
     human_answer: string;
 }
 
+export interface GeneratedFAQ {
+  id: number;
+  question: string;
+  answer: string;
+}
+
+export interface GenerateFAQResponse {
+  categories_processed: number;
+  total_categories: number;
+  total_faqs: number;
+  faqs: GeneratedFAQ[];
+}
+
 export interface UpdateFAQ{
     id: number;
     alice_answer:String;
