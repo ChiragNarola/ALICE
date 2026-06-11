@@ -190,9 +190,14 @@ const AdminDashboard = () => {
         waitlistRes,
         tokenUsageRes,
         retentionRes,
-      ] = results.map(r => r.status === "fulfilled" ? r.value?.Data ?? [] : []);
+      ] = results.map((r, i) => {
+        if (r.status !== "fulfilled") return i === 1 ? null : [];  // index 1 = costRes, keep null
+        return r.value?.Data ?? (i === 1 ? null : []);
+      });
 
-      const totalRevenue = costRes?.reduce((sum: number, item: any) => sum + (item.cost ?? 0), 0) || 0;
+      const totalRevenue = Array.isArray(costRes)
+        ? costRes.reduce((sum: number, item: any) => sum + (item.cost ?? 0), 0)
+        : 0;
 
       setStats({
         users: signUpsRes.length,
@@ -203,7 +208,7 @@ const AdminDashboard = () => {
           label: f.label?.toUpperCase(),
           count: f.count ?? 0
         })) || [],
-        cost: costRes || []
+        cost: Array.isArray(costRes) ? costRes : []
       });
 
       setDailyRegistration(dailyRes || []);
@@ -232,27 +237,10 @@ const AdminDashboard = () => {
   const deriveCostParts = (items: any[]) => {
     let input = 0;
     let output = 0;
-    let hasExplicit = false;
 
     for (const item of items || []) {
-      const inputLike = typeof item.input_cost === "number" ? item.input_cost
-        : typeof item.prompt_cost === "number" ? item.prompt_cost : null;
-      const outputLike = typeof item.output_cost === "number" ? item.output_cost
-        : typeof item.completion_cost === "number" ? item.completion_cost : null;
-
-      if (inputLike !== null) { input += inputLike; hasExplicit = true; }
-      if (outputLike !== null) { output += outputLike; hasExplicit = true; }
-
-      const promptTokens = Number(item.input_tokens ?? item.prompt_tokens ?? item["prompt tokens"]);
-      const completionTokens = Number(item.output_tokens ?? item.completion_tokens ?? item["completion tokens"]);
-
-      if (!hasExplicit && !Number.isNaN(promptTokens) && !Number.isNaN(completionTokens)) {
-        const totalTokens = promptTokens + completionTokens;
-        if (totalTokens > 0 && typeof item.cost === "number") {
-          input += (promptTokens / totalTokens) * item.cost;
-          output += (completionTokens / totalTokens) * item.cost;
-        }
-      }
+      input += typeof item.input_cost === "number" ? item.input_cost : 0;
+      output += typeof item.output_cost === "number" ? item.output_cost : 0;
     }
 
     return { input, output };
@@ -328,7 +316,12 @@ const AdminDashboard = () => {
                       <div className="flex flex-col">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <p className={`text-3xl font-extrabold ${color}`}>€{stats?.cost ? stats.cost.reduce((s: number, c: { cost?: number }) => s + (c.cost ?? 0), 0).toFixed(2) : "0.00"}</p>
+                            <p className={`text-3xl font-extrabold ${color}`}>
+                              €{stats?.cost ? (() => {
+                                const parts = deriveCostParts(stats.cost);
+                                return (parts.input + parts.output).toFixed(2);
+                              })() : "0.00"}
+                            </p>
                             <p className="text-xs text-gray-400 mt-1">{label}</p>
                           </div>
                           <div className={`p-2.5 rounded-xl bg-gradient-to-br ${iconBg} ring-1 ${iconRing} shadow-sm`}><Icon className="w-5 h-5 text-gray-700/80" /></div>

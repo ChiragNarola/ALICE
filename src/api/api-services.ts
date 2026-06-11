@@ -737,6 +737,8 @@ interface CostEstimateDTO {
   cost: number;
   input_tokens: string;
   output_tokens: string;
+  input_cost: number;
+  output_cost: number;
 }
 
 export const getCostEstimate = async (
