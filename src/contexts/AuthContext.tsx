@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { loginUser, logoutUser, hasPin } from "../api/api-services";
-import {useChatActivity } from "./ChatActivityContext";
+import { useChatActivity } from "./ChatActivityContext";
 import type {
   AuthContextType,
   AuthUser,
@@ -9,7 +9,6 @@ import type {
   LoginResponseDTO,
   LoginPayload
 } from "../routes/models/response/Auth";
-// import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,8 +19,7 @@ const getStoredItem = (key: string): string | null => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { resetActivityTimer } = useChatActivity(); 
-  // const navigate = useNavigate();
+  const { resetActivityTimer } = useChatActivity();
   const [showSetPinAfterLogin, setShowSetPinAfterLogin] = useState(false);
 
   useEffect(() => {
@@ -87,48 +85,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return result;
   };
 
+  const logout = async () => {
+    try {
+      const sessionUUID: string | null =
+        getStoredItem("session_uuid") || user?.sessionUUID || null;
 
+      if (sessionUUID) {
+        await logoutUser(sessionUUID);
+      }
+    } catch (error) {
+      console.error("Logout API call failed", error);
+    } finally {
+      resetActivityTimer();
 
+      // Save everything BEFORE clearing
+      const savedPin = localStorage.getItem("user_pin");
+      const savedEmail = localStorage.getItem("user_email");
+      const savedPinSet = localStorage.getItem("pin_set");
 
-const logout = async () => {
-  try {
-    const sessionUUID: string | null =
-      getStoredItem("session_uuid") || user?.sessionUUID || null;
+      setUser(null);
 
-    if (sessionUUID) {
-      await logoutUser(sessionUUID);
+      sessionStorage.clear();
+      localStorage.clear();
+
+      // Always restore email — needed to hide guest button after logout
+      if (savedEmail) {
+        localStorage.setItem("user_email", savedEmail);
+      }
+
+      // Restore PIN only if it existed
+      if (savedPin && savedEmail) {
+        localStorage.setItem("user_pin", savedPin);
+      }
+
+      // Restore pin_set flag
+      if (savedPinSet !== null) {
+        localStorage.setItem("pin_set", savedPinSet);
+      }
     }
-  } catch (error) {
-    console.error("Logout API call failed", error);
-  } finally {
-    resetActivityTimer(); // reset chat count and timer
-
-    // 🔥 Save PIN & email BEFORE clearing storage
-    const savedPin = localStorage.getItem("user_pin");
-    const savedEmail = localStorage.getItem("user_email");
-    const savedPinSet = localStorage.getItem("pin_set");
-
-    setUser(null);
-
-    // Clear everything
-    sessionStorage.clear();
-    localStorage.clear();
-
-    // 🔥 Restore only what we need
-    if (savedPin && savedEmail) {
-      localStorage.setItem("user_pin", savedPin);
-      localStorage.setItem("user_email", savedEmail);
-    }
-    if (savedPinSet !== null) {
-      localStorage.setItem("pin_set", savedPinSet); 
-    }
-  }
-};
-
-
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading,showSetPinAfterLogin, setShowSetPinAfterLogin }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, showSetPinAfterLogin, setShowSetPinAfterLogin }}>
       {children}
     </AuthContext.Provider>
   );
