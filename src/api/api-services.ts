@@ -3,7 +3,7 @@ import type { AIrecommendedDTO, ConversationDTO } from '../routes/models/request
 import type { ChatInputRM } from '../routes/models/request/Child';
 import type { TrackEventParams } from '../routes/models/request/Analytics';
 import type { APIResponse, AuthUser, LoginResponseDTO, StaffDetails } from '../routes/models/response/Auth';
-import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO, FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO, NotificationDto } from '../routes/models/response/Response';
+import type { AreaOfInterestDTO, ChildInputDTO, ConcernDTO, CreateNurseryDTO, NurseryDTO, staffDTO, UserDTO, FAQItem, UpdateFAQ, UpdateNursery, StaffNurseryStatusDTO, NotificationDto, GenerateFAQResponse } from '../routes/models/response/Response';
 import axiosInstance from './axios-instance-creator';
 import type { HolidayItem } from "../routes/models/response/Response";
 // import axios from 'axios';
@@ -1384,9 +1384,11 @@ export const updateAliceAnswer = async (
   }
 };
 
-export const generateFAQ = async (): Promise<APIResponse<FAQItem[]>> => {
+export const generateFAQ = async (): Promise<
+  APIResponse<GenerateFAQResponse>
+> => {
   try {
-    const res = await axiosInstance.get("/faq");
+    const res = await axiosInstance.get("/faq/");
     return res.data;
   } catch (error: any) {
     throw (
