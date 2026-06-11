@@ -189,13 +189,98 @@
       text-decoration: underline;
     }
 
+    /* ── SERVICES TABLE ── */
+    .services-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      color: #64748b;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+
+    .services-table th,
+    .services-table td {
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    .services-table th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .services-table td a {
+      color: #0d9488;
+      text-decoration: none;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .services-table td a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 576px) {
+      .services-table, 
+      .services-table thead, 
+      .services-table tbody, 
+      .services-table th, 
+      .services-table td, 
+      .services-table tr {
+        display: block;
+      }
+
+      .services-table thead {
+        display: none;
+      }
+
+      .services-table tr {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: #f8fafc;
+        margin-bottom: 12px;
+      }
+
+      .services-table td {
+        border: none;
+        padding: 6px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .services-table td:not(:last-child) {
+        border-bottom: 1px dashed #e2e8f0;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+      }
+
+      .services-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
     @media (max-width: 480px) {
       .hero {
         padding: 36px 20px 32px;
       }
 
       .container {
-        padding: 28px 16px 56px;
+        padding: 20px 12px 48px;
+      }
+
+      .section-inner {
+        padding: 16px 12px;
+        gap: 12px;
       }
 
       header .effective {
@@ -397,19 +482,19 @@
         <div class="section-content">
           <h2>Third-Party Services</h2>
           <p>The app uses the following key third-party service provider for AI processing:</p>
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.83rem; color: #64748b; margin-top: 10px; margin-bottom: 10px;">
+          <table class="services-table">
             <thead>
-              <tr style="background: #f8fafc;">
-                <th style="text-align: left; padding: 8px 12px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 700;">Provider</th>
-                <th style="text-align: left; padding: 8px 12px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 700;">Purpose</th>
-                <th style="text-align: left; padding: 8px 12px; border: 1px solid #e2e8f0; color: #0f172a; font-weight: 700;">Privacy Policy</th>
+              <tr>
+                <th>Provider</th>
+                <th>Purpose</th>
+                <th>Privacy Policy</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;"><strong>OpenAI, Inc.</strong></td>
-                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">AI response generation (GPT-4o mini)</td>
-                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;"><a href="https://openai.com/policies/privacy-policy" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">openai.com/policies/privacy-policy</a></td>
+                <td data-label="Provider"><strong>OpenAI, Inc.</strong></td>
+                <td data-label="Purpose">AI response generation (GPT-4o mini)</td>
+                <td data-label="Privacy Policy"><a href="https://openai.com/policies/privacy-policy" target="_blank">openai.com/policies/privacy-policy</a></td>
               </tr>
             </tbody>
           </table>
