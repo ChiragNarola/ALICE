@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
-import { verifyPin } from "../api/api-services";
 
 export default function PinLogin() {
   const [pin, setPin] = useState("");
@@ -30,34 +29,23 @@ export default function PinLogin() {
 
     setLoading(true);
     try {
-      // ✅ FIX 1: Send JSON instead of FormData
-      const res = await verifyPin({
-        email: savedEmail,
-        pin: pin,
-      });
+      const response = await login(
+        {
+          username: savedEmail,
+          password: pin,
+          login_type: "pin",
+        },
+        true
+      );
 
-      if (res?.IsSuccess) {
-        // ✅ FIX 2: Send JSON for login as well
-        const response = await login(
-          {
-            username: savedEmail,
-            password: pin,
-            login_type: "pin",
-          },
-          true
-        );
-
-        if (response?.IsSuccess) {
-          toast.success("Logged in via PIN");
-          navigate("/");
-        } else {
-          toast.error("Login failed");
-        }
+      if (response?.IsSuccess) {
+        toast.success("Logged in via PIN");
+        navigate("/");
       } else {
-        toast.error("Invalid PIN");
+        toast.error(response?.Message || "Invalid PIN");
       }
-    } catch {
-      toast.error("Something went wrong");
+    } catch (error: any) {
+      toast.error(error?.Message || "Something went wrong");
     } finally {
       setLoading(false);
     }
