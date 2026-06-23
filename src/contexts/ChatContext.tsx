@@ -58,7 +58,7 @@ export const ChatProvider = ({ children }: { children: any }) => {
             from: "alice",
             u_question: "",           // No question for intro
             ai_answer: text,          // Intro text goes to ai_answer
-            actions: true,
+            actions: false,
             user_response: null,
             ts: new Date().toISOString(),
         };
