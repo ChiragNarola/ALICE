@@ -283,7 +283,7 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
         )}
 
         {/* Like / Dislike */}
-        {isAlice && (
+        {isAlice && id!== undefined && id>0 &&(
           <>
             <Tippy content="Like" placement="bottom">
               <button
