@@ -30,6 +30,7 @@ import CollaborationContainer from "../components/admin/collaboration/Collaborat
 import UserDetails from "../pages/admin/UserDetails";
 import NotificationContainer from "../components/admin/notification/NotificatoinContainer";
 import UserNotification from "../pages/UserNotification";
+import AppVersionPage from "../components/admin/AppVersion";
 
 
 export default function AppRouter() {
@@ -80,6 +81,7 @@ export default function AppRouter() {
                         <Route path="waitlist" element={<WaitlistPage />} />
                         <Route path="collaboration" element={<CollaborationContainer />} />
                         <Route path="notification" element={<NotificationContainer />} />
+                        <Route path="appVersion" element={<AppVersionPage/>}/>
                         <Route path="user/:id" element={<UserDetails />} />
                     </Route>
                 </Route>

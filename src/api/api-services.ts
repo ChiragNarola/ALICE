@@ -1852,3 +1852,29 @@ export const getUserNotifications = async (): Promise<APIResponse<NotificationDt
     };
   }
 };
+
+export const getAppVersions = async () => {
+  try {
+    const response = await axiosInstance.get("admin/app-version");
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch app versions",
+    };
+  }
+};
+
+export const createAppVersion = async (app_version: string) => {
+  try {
+    const response = await axiosInstance.post("admin/app-version", { app_version });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to create app version",
+    };
+  }
+};

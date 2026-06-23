@@ -17,6 +17,8 @@ export default function NotificationContainer() {
     targetGroup: "",
     question: "",
     is_auto: false,
+    is_scheduled: false,
+    scheduled_at: "", // datetime-local string interpreted directly as UTC, e.g. "2026-06-25T10:00"
   });
 
   const fetchPastNotifications = useCallback(async () => {
@@ -49,6 +51,10 @@ export default function NotificationContainer() {
       toast.error("Title and message are required");
       return;
     }
+    if (form.is_scheduled && !form.scheduled_at) {
+      toast.error("Please pick a date and time to schedule the notification");
+      return;
+    }
 
     setSubmitLoading(true);
     try {
@@ -58,20 +64,41 @@ export default function NotificationContainer() {
           ? ["parent", "staff"]
           : [form.targetGroup];
 
+      // The picker's value is treated as UTC directly — no timezone
+      // conversion. "2026-06-25T10:00" becomes "2026-06-25T10:00:00" and is
+      // sent as-is, matching the backend's naive DateTime column and
+      // datetime.utcnow() comparisons exactly.
+      const scheduledAtIso = form.is_scheduled && form.scheduled_at
+        ? `${form.scheduled_at}:00`
+        : null;
+
       const payload = {
         title: form.title,
         body: form.body,
         targets,
         question: form.question,
         is_editable: !form.is_auto,
+        scheduled_at: scheduledAtIso,
       };
 
       console.log("Sending payload:", payload);
 
       const res = await sendNotification(payload);
       if (res.IsSuccess) {
-        toast.success("Notification sent successfully");
-        setForm({ title: "", body: "", targetGroup: "" , question: "", is_auto: false });
+        toast.success(
+          form.is_scheduled
+            ? "Notification scheduled successfully"
+            : "Notification sent successfully"
+        );
+        setForm({
+          title: "",
+          body: "",
+          targetGroup: "",
+          question: "",
+          is_auto: false,
+          is_scheduled: false,
+          scheduled_at: "",
+        });
         await fetchPastNotifications();
       } else {
         toast.error(res?.Message || "Failed to send notification");
