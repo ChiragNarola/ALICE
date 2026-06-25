@@ -330,7 +330,7 @@ const ChatPage: React.FC = () => {
         )
       );
     } finally {
-      refreshChatList();
+      // refreshChatList();
       IsSearching(false);
     }
   };

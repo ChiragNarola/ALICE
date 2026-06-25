@@ -92,11 +92,11 @@ export const useSidebarItems = (): SidebarItem[] => {
       icon: Bell,
       href: "/admin/notification",
     },
-    {
-      title: "App Versions",
-      icon: BadgeInfo,
-      href: "/admin/appVersion"
-    },
+    // {
+    //   title: "App Versions",
+    //   icon: BadgeInfo,
+    //   href: "/admin/appVersion"
+    // },
     {
       title: "FAQ",
       icon: BadgeQuestionMark,
