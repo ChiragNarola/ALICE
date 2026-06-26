@@ -242,7 +242,7 @@ const LoginForm = () => {
           />
         </a>
         <a
-          href=""
+          href="https://apps.apple.com/us/app/ask-alice/id6764851307"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-transform hover:scale-105 active:scale-95"
