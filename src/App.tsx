@@ -7,7 +7,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ChildrenProvider } from "./contexts/ChildrenContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { ChatActivityProvider } from "./contexts/ChatActivityContext";
-import { useAutoLogout } from "./hooks/autoLogout";
 import { useState, useEffect } from "react";
 import { ChatVisibilityProvider } from "./contexts/ChatVisibilityContext";
 import useFCM from "./hooks/useFCM";
@@ -79,7 +78,6 @@ function AppContent() {
     };
   }, [parsedUser]);
 
-  useAutoLogout(parsedUser);
   useFCM(user); // ← uses AuthContext user
 
   return (

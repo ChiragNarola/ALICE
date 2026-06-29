@@ -20,6 +20,7 @@ interface ChatMessageProps {
     chatBordUniqueId: string;
     onReact?: (id: number, reaction: "like" | "dislike" | null) => void; // NEW
     count?:number;
+    isLoading?: boolean;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -32,7 +33,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     user_response,
     chatBordUniqueId,
     onReact,
-    count
+    count,
+    isLoading
 }) => {
     // console.log("user q is:", u_question);
     // console.log("ai answer is:", ai_answer);
@@ -206,7 +208,13 @@ const exportAsPDF = (text: string, isAlice: boolean, timestamp?: string) => {
                             ${text === "Something went wrong. Please try again." ? "bg-red-50" : ""}
                         `}
                     >
-                        <div className="whitespace-pre-line text-sm font-normal flex flex-col gap-2">
+                        <div
+                            className={`whitespace-pre-line flex flex-col gap-2 ${
+                                isLoading
+                                    ? "text-xs text-gray-400 italic"
+                                    : "text-sm text-gray-900"
+                            }`}
+                        >
                             {text === "..." ? (
                                 <TypingIndicator />
                             ) : (

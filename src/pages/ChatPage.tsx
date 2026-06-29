@@ -20,7 +20,31 @@ type Message = {
   ai_answer: string;
   actions?: any;
   user_response?: string | null;
+  isLoading?: boolean;
 };
+
+const thinkingMessages = [
+  "Thinking…",
+  "Reviewing your question…",
+  "Understanding the child's situation…",
+  "Looking at the details…",
+  "Considering the best guidance…",
+  "Exploring helpful approaches…",
+  "Organizing the information…",
+  "Checking for age-appropriate recommendations…",
+  "Preparing a thoughtful response…",
+  "Putting everything together…",
+  "Finding practical suggestions…",
+  "Looking for the most relevant advice…",
+  "Reviewing trusted guidance…",
+  "Tailoring the response to your question…",
+  "Almost ready…",
+  "Adding a few final details…",
+  "Double-checking the response…",
+  "Making sure the guidance is clear…",
+  "Finalizing the response…",
+  "Just a moment longer…",
+];
 
 const ChatPage: React.FC = () => {
 
@@ -47,6 +71,8 @@ const ChatPage: React.FC = () => {
 
   const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
   const [showRecommended, setShowRecommended] = useState(false);
+  const [thinkingText, setThinkingText] = useState("Thinking...");
+  const [isLoading, setIsLoading] = useState(false);
 
   const sessionUUID =
     user?.sessionUUID ||
@@ -92,6 +118,34 @@ const ChatPage: React.FC = () => {
   const hasFetchedQuestions = useRef(false);
   const notificationHandled = useRef(false); // ← prevents double-fire
   const isStreaming = useRef(false);          // ← blocks messages overwrite during stream
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    let index = 0;
+
+    const interval = setInterval(() => {
+      index = (index + 1) % thinkingMessages.length;
+
+      setChatMessages(prev => {
+        const copy = [...prev];
+
+        for (let i = copy.length - 1; i >= 0; i--) {
+          if (copy[i].from === "alice" && copy[i].actions === false) {
+            copy[i] = {
+              ...copy[i],
+              ai_answer: thinkingMessages[index],
+            };
+            break;
+          }
+        }
+
+        return copy;
+      });
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   useEffect(() => {
     if (location.pathname !== "/chat" || !user || hasFetchedQuestions.current) return;
@@ -237,6 +291,8 @@ const ChatPage: React.FC = () => {
 
     isStreaming.current = true; // ← lock
     IsSearching(true);
+    setThinkingText(thinkingMessages[0]);
+    setIsLoading(true);
 
     const userMessageText = file ? `${message} [File: ${file.name}]` : message;
     const tempId = Date.now();
@@ -245,7 +301,7 @@ const ChatPage: React.FC = () => {
     setChatMessages(prev => [
       ...prev,
       { id: tempId, from: "user", u_question: userMessageText, ai_answer: "", actions: true, user_response: null },
-      { id: tempId, from: "alice", u_question: "", ai_answer: "...", actions: false, user_response: null },
+      { id: tempId, from: "alice", u_question: "", ai_answer: thinkingMessages[0], actions: false, user_response: null, isLoading: true },
     ]);
 
     setMessage("");
@@ -284,6 +340,7 @@ const ChatPage: React.FC = () => {
                   : m
               )
             );
+            setIsLoading(false);
             return;
           }
         }
@@ -305,17 +362,22 @@ const ChatPage: React.FC = () => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
+      let firstChunkReceived = false;
 
       while (true) {
         const { value, done } = await reader!.read();
         if (done) break;
 
+        if (!firstChunkReceived) {
+          firstChunkReceived = true;
+          setIsLoading(false);
+        }
         accumulated += decoder.decode(value, { stream: true });
 
         setChatMessages(prev =>
           prev.map(m =>
             m.id === dbId && m.from === "alice"
-              ? { ...m, ai_answer: accumulated }
+              ? { ...m, ai_answer: accumulated, isLoading: false }
               : m
           )
         );
@@ -338,9 +400,11 @@ const ChatPage: React.FC = () => {
             : m
         )
       );
+      setIsLoading(false);
     } finally {
       isStreaming.current = false; // ← unlock
       IsSearching(false);
+      setIsLoading(false);
     }
   };
 
@@ -350,13 +414,15 @@ const ChatPage: React.FC = () => {
 
     isStreaming.current = true; // ← lock
     IsSearching(true);
+    setThinkingText(thinkingMessages[0]);
+    setIsLoading(true);
 
     const tempId = Date.now();
 
     setChatMessages(prev => [
       ...prev,
       { id: tempId, from: "user", u_question: AImessage, ai_answer: "", actions: true, user_response: null },
-      { id: tempId, from: "alice", u_question: "", ai_answer: "...", actions: false, user_response: null },
+      { id: tempId, from: "alice", u_question: "", ai_answer: thinkingMessages[0], actions: false, user_response: null, isLoading:true },
     ]);
 
     setHasAskedQuestion(true);
@@ -394,6 +460,7 @@ const ChatPage: React.FC = () => {
                   : m
               )
             );
+            setIsLoading(false);
             return;
           }
         }
@@ -415,17 +482,23 @@ const ChatPage: React.FC = () => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
+      let firstChunkReceived = false;
 
       while (true) {
         const { value, done } = await reader!.read();
         if (done) break;
+
+        if (!firstChunkReceived) {
+          firstChunkReceived = true;
+          setIsLoading(false);
+        }
 
         accumulated += decoder.decode(value, { stream: true });
 
         setChatMessages(prev =>
           prev.map(m =>
             m.id === dbId && m.from === "alice"
-              ? { ...m, ai_answer: accumulated }
+              ? { ...m, ai_answer: accumulated, isLoading:false }
               : m
           )
         );
@@ -448,10 +521,12 @@ const ChatPage: React.FC = () => {
             : m
         )
       );
+      setIsLoading(false);
     } finally {
       isStreaming.current = false; // ← unlock
       refreshChatList();
       IsSearching(false);
+      setIsLoading(false);
     }
   };
 
