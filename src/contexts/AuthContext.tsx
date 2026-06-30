@@ -90,8 +90,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const sessionUUID: string | null =
         getStoredItem("session_uuid") || user?.sessionUUID || null;
 
+      const fcmToken = localStorage.getItem("fcm_token");
+
       if (sessionUUID) {
-        await logoutUser(sessionUUID);
+        await logoutUser(sessionUUID,fcmToken ?? undefined);
       }
     } catch (error) {
       console.error("Logout API call failed", error);

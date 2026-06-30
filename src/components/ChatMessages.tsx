@@ -9,6 +9,7 @@ type Message = {
   ai_answer: string;
   actions?: any;
   user_response?: string | null;
+  isLoading?: boolean;
 };
 
 interface ChatMessagesProps {
@@ -41,6 +42,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, chatBordUniqueId,
             chatBordUniqueId={chatBordUniqueId || ""}
             onReact={onReact}
             count={count}
+            isLoading={msg.isLoading}
           />
         ))}
 

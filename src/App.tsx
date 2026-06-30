@@ -7,7 +7,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ChildrenProvider } from "./contexts/ChildrenContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import { ChatActivityProvider } from "./contexts/ChatActivityContext";
-import { useAutoLogout } from "./hooks/autoLogout";
 import { useState, useEffect } from "react";
 import { ChatVisibilityProvider } from "./contexts/ChatVisibilityContext";
 import useFCM from "./hooks/useFCM";
@@ -79,30 +78,7 @@ function AppContent() {
     };
   }, [parsedUser]);
 
-  useAutoLogout(parsedUser);
   useFCM(user); // ← uses AuthContext user
-
-  useEffect(() => {
-    const checkUser = () => {
-      const storedUser =
-        sessionStorage.getItem("auth_user") || localStorage.getItem("auth_user");
-      if (storedUser) {
-        const newUser = JSON.parse(storedUser);
-        if (JSON.stringify(newUser) !== JSON.stringify(parsedUser)) {
-          setParsedUser(newUser);
-        }
-      } else if (parsedUser) {
-        setParsedUser(null);
-      }
-    };
-
-    window.addEventListener("storage", checkUser);
-    const interval = setInterval(checkUser, 1000);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("storage", checkUser);
-    };
-  }, [parsedUser]);
 
   return (
     <>

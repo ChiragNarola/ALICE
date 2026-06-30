@@ -8,6 +8,8 @@ export interface NotificationDto {
     created_at: string;
     question?: string;
     is_editable: boolean;
+    is_scheduled?: boolean;
+    scheduled_at?: string;
 }
 export interface UserDTO {
     id: number;
@@ -139,4 +141,10 @@ export interface StaffNurseryStatusDTO {
   nurseries: StaffNurseryAssignmentDTO[];
   created_at: string;
   bonus_credits?: number;
+}
+
+export interface AppVersionItem {
+  id: number;
+  app_version: string;
+  created_at: string;
 }

@@ -1,12 +1,20 @@
 import { type NotificationDto } from "../../../routes/models/response/Response";
 import { Table, Td, Th } from "../../ui/Table";
 import Pagination from "../../ui/Pagination";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, Clock } from "lucide-react";
 import { useState } from "react";
 interface Prop {
     notifications: NotificationDto[];
     loading: boolean;
 }
+
+
+const parseNaiveUtc = (value: string): Date => {
+    const normalized = value.includes("T") ? value : value.replace(" ", "T");
+    const withZ = normalized.endsWith("Z") ? normalized : `${normalized}Z`;
+    return new Date(withZ);
+};
+
 export const NotificationList = ({ loading, notifications }: Prop) => {
 
     const [pageSize, setPageSize] = useState(5);
@@ -35,8 +43,8 @@ export const NotificationList = ({ loading, notifications }: Prop) => {
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Target Group</Th>
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Question</Th>
                             <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Auto-ask</Th>
-                            <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sent</Th>
-                            <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sent Date</Th>
+                            <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</Th>
+                            <Th className="py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</Th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,17 +80,39 @@ export const NotificationList = ({ loading, notifications }: Prop) => {
                                             {notification.target_type}
                                         </span>
                                     </Td>
-                                    <Td>{notification.question ?? <span className="text-gray-300">—</span>}</Td>
+                                    <Td>{notification.question || <span className="text-gray-300">—</span>}</Td>
                                     <Td>
                                     {!notification.is_editable
                                         ? <span className="px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700">Yes</span>
                                         : <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400">No</span>
                                     }
                                     </Td>
-                                    <Td>{notification.is_sent && <BadgeCheck />}</Td>
                                     <Td>
-                                    {notification.sent_at
-                                        ? new Date(notification.sent_at).toLocaleDateString("en-GB", {
+                                        {notification.is_sent ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700">
+                                                <BadgeCheck className="w-3.5 h-3.5" /> Sent
+                                            </span>
+                                        ) : notification.is_scheduled ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                                <Clock className="w-3.5 h-3.5" /> Scheduled
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400">Pending</span>
+                                        )}
+                                    </Td>
+                                    <Td>
+                                    {notification.is_scheduled && notification.scheduled_at
+                                        ? parseNaiveUtc(notification.scheduled_at).toLocaleString("en-GB", {
+                                            timeZone: "UTC",
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })
+                                        : notification.sent_at
+                                        ? parseNaiveUtc(notification.sent_at).toLocaleDateString("en-GB", {
+                                            timeZone: "UTC",
                                             day: "2-digit",
                                             month: "short",
                                             year: "numeric",

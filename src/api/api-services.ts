@@ -37,14 +37,15 @@ export const loginUser = async (data: {
 
 
 
-export const logoutUser = async (sessionUUID: string): Promise<APIResponse<null>> => {
+export const logoutUser = async (sessionUUID: string, fcmToken?: string): Promise<APIResponse<null>> => {
   try {
     const response = await axiosInstance.post<APIResponse<null>>(
       `/users/logout?session_uuid=${encodeURIComponent(sessionUUID)}`,
-      {}, // Empty body since session_uuid goes in query
+      {},
       {
         headers: {
           "Content-Type": "application/json",
+          ...(fcmToken && { "fcm-token": fcmToken }),
         },
       }
     );
@@ -1849,6 +1850,32 @@ export const getUserNotifications = async (): Promise<APIResponse<NotificationDt
       IsSuccess: false,
       Data: null,
       Message: "Failed to fetch notifications",
+    };
+  }
+};
+
+export const getAppVersions = async () => {
+  try {
+    const response = await axiosInstance.get("admin/app-version");
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to fetch app versions",
+    };
+  }
+};
+
+export const createAppVersion = async (app_version: string) => {
+  try {
+    const response = await axiosInstance.post("admin/app-version", { app_version });
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data ?? {
+      IsSuccess: false,
+      Data: null,
+      Message: "Failed to create app version",
     };
   }
 };

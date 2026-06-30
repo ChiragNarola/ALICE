@@ -47,6 +47,22 @@ const getGroupLabel = (dateStr?: string): string => {
   return "Earlier";
 };
 
+const handleNotificationClick = (n: NotificationDto) => {
+  if (!n.question) return;
+
+  const isEditable = n.is_editable;
+
+  sessionStorage.setItem(
+    "pending_notification",
+    JSON.stringify({
+      question: n.question,
+      is_editable: String(isEditable),
+    })
+  );
+
+  window.location.href = "/chat";
+};
+
 export default function UserNotificationList() {
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,25 +108,42 @@ export default function UserNotificationList() {
 
   const allTodayCount = notifications.filter((n) => n.sent_at && isToday(n.sent_at)).length;
 
-  const NotifCard = ({ n }: { n: NotificationDto }) => (
-    <div className="flex gap-3 px-3 py-3 bg-white rounded-xl hover:bg-gray-50 transition-colors duration-150 cursor-default mb-3">
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-alice-teal/10 flex items-center justify-center mt-0.5">
-        <Bell className="w-3.5 h-3.5 text-alice-teal" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-alice-black leading-snug">{n.title}</p>
-        <p className="text-sm text-alice-darkgray leading-snug mt-0.5 mb-2">{n.body}</p>
-        <div className="flex items-center gap-2.5">
-          {n.sent_at && (
-            <span className="inline-flex items-center gap-1 text-[11px] text-alice-darkgray">
-              <Clock className="w-3 h-3" />
-              {formatTime(n.sent_at)} · {formatDate(n.sent_at)}
-            </span>
-          )}
+  const NotifCard = ({ n }: { n: NotificationDto }) => {
+    const isClickable = !!n.question;
+
+    return (
+      <div
+        onClick={() => isClickable && handleNotificationClick(n)}
+        className={`flex gap-3 px-3 py-3 bg-white rounded-xl transition-colors duration-150 mb-3 ${
+          isClickable
+            ? "hover:bg-alice-teal/5 cursor-pointer"
+            : "hover:bg-gray-50 cursor-default"
+        }`}
+      >
+        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-alice-teal/10 flex items-center justify-center mt-0.5">
+          <Bell className="w-3.5 h-3.5 text-alice-teal" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-alice-black leading-snug">{n.title}</p>
+          <p className="text-sm text-alice-darkgray leading-snug mt-0.5 mb-2">{n.body}</p>
+          <div className="flex items-center gap-2.5">
+            {n.sent_at && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-alice-darkgray">
+                <Clock className="w-3 h-3" />
+                {formatTime(n.sent_at)} · {formatDate(n.sent_at)}
+              </span>
+            )}
+            {/* Hint only shown when there's a question */}
+            {isClickable && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-alice-teal font-medium">
+                {n.is_editable ? "Tap to ask →" : "Tap to open chat →"}
+              </span>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (

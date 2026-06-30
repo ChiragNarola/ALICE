@@ -58,6 +58,7 @@ const useFCM = (user: AuthUser | null): void => {
       }
       await saveDeviceToken(fcmToken, user.token!);
       localStorage.setItem("fcm_token", fcmToken);
+      console.log(fcmToken);
     };
 
     init();
