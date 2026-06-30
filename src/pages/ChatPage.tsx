@@ -71,7 +71,6 @@ const ChatPage: React.FC = () => {
 
   const [recommendedQuestions, setRecommendedQuestions] = useState<any | null>(null);
   const [showRecommended, setShowRecommended] = useState(false);
-  const [thinkingText, setThinkingText] = useState("Thinking...");
   const [isLoading, setIsLoading] = useState(false);
 
   const sessionUUID =
@@ -291,7 +290,6 @@ const ChatPage: React.FC = () => {
 
     isStreaming.current = true; // ← lock
     IsSearching(true);
-    setThinkingText(thinkingMessages[0]);
     setIsLoading(true);
 
     const userMessageText = file ? `${message} [File: ${file.name}]` : message;
@@ -414,7 +412,6 @@ const ChatPage: React.FC = () => {
 
     isStreaming.current = true; // ← lock
     IsSearching(true);
-    setThinkingText(thinkingMessages[0]);
     setIsLoading(true);
 
     const tempId = Date.now();
