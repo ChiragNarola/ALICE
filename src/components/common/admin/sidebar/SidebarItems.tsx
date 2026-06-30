@@ -10,7 +10,6 @@ import {
   Handshake,
   Clock,
   Bell,
-  BadgeInfo
 } from "lucide-react";
 
 export interface SidebarItemBadge {
