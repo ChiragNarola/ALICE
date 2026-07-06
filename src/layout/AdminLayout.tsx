@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { Sidebar } from "../components/common/admin/AdminSidebar";
 import { Header } from "../components/common/admin/adminHeader";
+import { AdminChatbot } from "../components/common/admin/AdminChatbot";
 import { useAuth } from "../contexts/AuthContext";
 import Footer from "../components/common/Footer";
 import { useEffect, useState } from "react";
@@ -30,6 +31,8 @@ const AdminLayout: React.FC<DashboardLayoutProps> = ({ requireAuth = true }) => 
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // Chatbot open state, lifted here so the main content can shift when it opens
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const [authMeta, setAuthMeta] = useState<AuthMeta | null>(() => {
     const stored = sessionStorage.getItem("authMeta");
@@ -122,13 +125,24 @@ const AdminLayout: React.FC<DashboardLayoutProps> = ({ requireAuth = true }) => 
   return (
     <div className="flex h-screen overflow-hidden overflow-y-auto">
       <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div
+        className={`flex flex-col flex-1 overflow-hidden transition-[margin] duration-300 ease-in-out ${
+          isChatOpen ? "mr-[420px]" : "mr-0"
+        }`}
+      >
         <Header />
         <main className="flex-1  overflow-auto p-6">
           <Outlet />
         </main>
         <Footer />
       </div>
+
+      {/* Floats above every admin page rendered through this layout.
+          Keeps its own in-memory chat state only - no session/local storage.
+          isOpen is owned here so the main content column can shift, rather
+          than the panel overlapping page content underneath it. */}
+      <AdminChatbot isOpen={isChatOpen} onOpenChange={setIsChatOpen} />
+
       {showChangePassword && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">

@@ -148,3 +148,8 @@ export interface AppVersionItem {
   app_version: string;
   created_at: string;
 }
+
+export interface AdminChatbotResponse {
+  answer: string;
+  [key: string]: any;
+}

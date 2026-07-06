@@ -1879,3 +1879,27 @@ export const createAppVersion = async (app_version: string) => {
     };
   }
 };
+
+export const streamAdminChatbotMessage = async (
+  message: string,
+  onChunk: (text: string) => void
+): Promise<void> => {
+  const response = await fetch(`${axiosInstance.defaults.baseURL}/admin-chatbot/message`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ message }).toString(),
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error("Failed to get chatbot response");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    onChunk(decoder.decode(value, { stream: true }));
+  }
+};
