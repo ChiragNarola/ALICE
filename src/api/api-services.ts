@@ -1003,24 +1003,27 @@ export const uploadDocuments = async (
 };
 
 
-export const deleteDocument = async (documentIds: number[], namespace: string): Promise<any> => {
+export const deleteDocument = async (
+  documentIds: number[],
+  namespace: string
+): Promise<any> => {
   try {
-    const response = await axiosInstance.delete(`upload`, {
+    const response = await axiosInstance.delete("/upload/", {
       data: {
         namespace,
         document_ids: documentIds,
       },
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
     return response.data;
   } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Failed to delete document(s)",
-    };
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Failed to delete document(s)",
+      }
+    );
   }
 };
 
