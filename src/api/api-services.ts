@@ -975,29 +975,32 @@ export const listDocuments = async (namespaceId: number): Promise<APIResponse<Do
 };
 
 
-export const uploadDocuments = async (files: File[], namespace: string): Promise<any> => {
+export const uploadDocuments = async (
+  files: File[],
+  namespace: string
+): Promise<any> => {
   try {
     const formData = new FormData();
+
     formData.append("namespace", namespace);
+
     files.forEach((file) => {
       formData.append("files", file);
     });
-    const response = await axiosInstance.post(`upload`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+
+    const response = await axiosInstance.post("/upload/", formData);
+
     return response.data;
   } catch (error: any) {
-    throw error?.response?.data ?? {
-      IsSuccess: false,
-      Data: null,
-      Message: "Failed to upload documents",
-    };
+    throw (
+      error?.response?.data ?? {
+        IsSuccess: false,
+        Data: null,
+        Message: "Failed to upload documents",
+      }
+    );
   }
 };
-
-
 
 
 export const deleteDocument = async (documentIds: number[], namespace: string): Promise<any> => {
